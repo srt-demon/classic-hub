@@ -147,12 +147,16 @@ Development by slowdown
             letter-spacing: 1px;
             margin-left: 8px;
         }
-        .rank-novice      { background: #4a4a4a; color: #fff; }
+        .rank-novice      { background: #3a3a3a; color: #aaa; }
         .rank-adept       { background: #2d6a4f; color: #95d5b2; }
         .rank-expert      { background: #7b2d8b; color: #e0aaff; }
-        .rank-master      { background: #0077ff; color: #fff; }
+        .rank-master      { background: #0055cc; color: #9ecbff; }
         .rank-grandmaster { background: linear-gradient(90deg, #c0392b, #8e44ad); color: #fff; }
-        .rank-legend      { background: linear-gradient(90deg, #ffcc00, #ff6600); color: #000; }
+        .rank-legend      { background: linear-gradient(90deg, #c0392b, #e74c3c); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+        .rank-architect   { background: linear-gradient(90deg, #00b4d8, #0077b6); color: #fff; }
+        .rank-creator     { background: linear-gradient(90deg, #f72585, #7209b7); color: #fff; }
+        .rank-absolute    { background: linear-gradient(90deg, #ff6b00, #ffd60a); color: #000; }
+        .rank-demiurg     { background: linear-gradient(90deg, #0a0a0a, #1e1e1e); color: #D4AF37; border: 1px solid #D4AF3788 !important; box-shadow: 0 0 8px rgba(212,175,55,0.4); }
 
         .ach-card {
             background: #252525;
@@ -203,6 +207,9 @@ Development by slowdown
         #modal-overlay.is-open {
             display: flex;
         }
+        .line-clamp-2 { display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+        .ach-card { background:#252525; border-radius:0; border:none; }
+        .ach-card:hover { background:#2a2a2a; }
     </style>
 </head>
 <body>
@@ -590,7 +597,6 @@ function showEmpty() {
     container.innerHTML = '<div class="col-span-full text-center py-24 text-gray-600 text-sm">Постройки не найдены</div>';
 }
 
-// Загружаем варпы из Firebase
 function loadBuildsFromDB() {
     showLoader();
 
@@ -627,6 +633,17 @@ function loadBuildsFromDB() {
     }, err => {
         console.error('Firebase builds error:', err);
         container.innerHTML = '<div class="col-span-full text-center py-24 text-red-500 text-sm">Ошибка загрузки данных</div>';
+    });
+}
+
+function loadSeasonConfigFromDB() {
+    if (!window._fbReady) return;
+    const dbRef = window._fbRef(window._fbDb, 'config/season');
+    window._fbOnValue(dbRef, snap => {
+        if (snap.exists()) {
+            applySeasonConfig(snap.val());
+            if (_dataLoaded) renderBuilds();
+        }
     });
 }
 
@@ -670,12 +687,48 @@ const ACH_ICONS = {
     mega_builder:    'https://ccvaults.com/assets/50.%20Icons/Shadow_Surge.png',
     millionaire:     'https://ccvaults.com/assets/50.%20Icons/Jungle_Poison_Melee.png',
     classic_keeper:  'https://ccvaults.com/assets/50.%20Icons/Explorer.png',
+    //новыеТ1
+    samurai_path:    'https://ccvaults.com/assets/50.%20Icons/Thrive_Under_Pressure.png',
+    void_engineer:   'https://ccvaults.com/assets/50.%20Icons/Void_Strike.png',
+    urbanist:        'https://ccvaults.com/assets/50.%20Icons/Swiftfooted.png',
+    dark_reaper:     'https://ccvaults.com/assets/50.%20Icons/Ricochet.png',
+    order_master:    'https://ccvaults.com/assets/50.%20Icons/Poison_Focus.png',
+    future_arch:     'https://ccvaults.com/assets/50.%20Icons/Guarding_Strike.png',
+    eclectic:        'https://ccvaults.com/assets/50.%20Icons/Burst_Bowstring.png',
+    cultural_swap:   'https://ccvaults.com/assets/50.%20Icons/Critical_Hit.png',
+    genplan:         'https://ccvaults.com/assets/50.%20Icons/Artifact_Synergy.png',
+    //новыеТ2
+    night_builder:   'https://ccvaults.com/assets/50.%20Icons/Gravity_Pulse.png',
+    stable_quality:  'https://ccvaults.com/assets/50.%20Icons/Tumble_Bee.png',
+    last_chance:     'https://ccvaults.com/assets/50.%20Icons/Luck_Of_The_Sea.png',
+    hype_train:      'https://ccvaults.com/assets/50.%20Icons/Growing.png',
+    season_marathon: 'https://ccvaults.com/assets/50.%20Icons/Multi_Dodge.png',
+    past_flash:      'https://ccvaults.com/assets/50.%20Icons/Lucky_Explorer.png',
+    //новыеТ3
+    eye_magnet:      'https://ccvaults.com/assets/50.%20Icons/Radiance_Ranged.png',
+    local_guide:     'https://ccvaults.com/assets/50.%20Icons/Cowardice.png',
+    beyond:          'https://ccvaults.com/assets/50.%20Icons/Food_Reserves.png',
+    trendsetter:     'https://ccvaults.com/assets/50.%20Icons/Death_Barter.png',
+    archive_ghost:   'https://ccvaults.com/assets/50.%20Icons/Levitation_Shot_Shine.png',
+    monopolist:      'https://ccvaults.com/assets/50.%20Icons/Gravity.png',
+    city_plan:       'https://ccvaults.com/assets/50.%20Icons/Leeching.png',
+    legend_return:   'https://ccvaults.com/assets/50.%20Icons/Dynamo_Ranged.png',
+    season_archivist:'https://ccvaults.com/assets/50.%20Icons/Looting.png',
+    immortal:        'https://ccvaults.com/assets/50.%20Icons/Regeneration.png',
 };
 
-const CURRENT_SEASON        = 'Сезон 1';
-const CURRENT_SEASON_START  = '2026-02-28';
-const CURRENT_SEASON_END    = '2026-06-01';
-const SEASON_TREND_STYLE    = 'GOTHIC';
+let CURRENT_SEASON        = 'Сезон 1';
+let CURRENT_SEASON_START  = '2026-01-13';
+let CURRENT_SEASON_END    = '2026-06-28';
+let SEASON_TREND_STYLE    = 'GOTHIC';
+
+function applySeasonConfig(raw) {
+    if (!raw) return;
+    CURRENT_SEASON       = raw.current    || raw.name       || CURRENT_SEASON;
+    CURRENT_SEASON_START = raw.start                        || CURRENT_SEASON_START;
+    CURRENT_SEASON_END   = raw.end                          || CURRENT_SEASON_END;
+    SEASON_TREND_STYLE   = raw.trendStyle || raw.trend      || SEASON_TREND_STYLE;
+}
 
 let _sessionViewedOthers = new Set();
 
@@ -739,32 +792,37 @@ const RANKS = [
     { name: 'Новичок',     class: 'rank-novice',      minExp: 0     },
     { name: 'Адепт',       class: 'rank-adept',        minExp: 3000  },
     { name: 'Эксперт',     class: 'rank-expert',       minExp: 6000  },
-    { name: 'Мастер',      class: 'rank-master',       minExp: 9000  },
-    { name: 'Грандмастер', class: 'rank-grandmaster',  minExp: 12000 },
+    { name: 'Мастер',      class: 'rank-master',       minExp: 9200  },
+    { name: 'Грандмастер', class: 'rank-grandmaster',  minExp: 12500 },
     { name: 'Легенда',     class: 'rank-legend',       minExp: 16000 },
+    { name: 'Архитектор',  class: 'rank-architect',    minExp: 18000 },
+    { name: 'Творец',      class: 'rank-creator',      minExp: 20500 },
+    { name: 'Абсолют',     class: 'rank-absolute',     minExp: 23000 },
+    { name: '?',  class: 'rank-demiurg',      minExp: 52000 },
 ];
-
+//⬛ Демиург по достижению поменять
 function getAuthorExp(authorName) {
     const authorBuilds = builds.filter(b => b.author === authorName);
     const buildExp = authorBuilds.length * EXP_PER_BUILD;
-    const achExp = ACHIEVEMENTS.reduce((sum, ach) => {
-        return sum + (ach.check(authorName, authorBuilds) ? ach.exp : 0);
-    }, 0);
-    return buildExp + achExp;
+    const unlockedAchs = getAuthorAchievements(authorName);
+    const achExp = unlockedAchs.reduce((sum, ach) => sum + ach.exp, 0);
+    const profile  = authorProfiles[authorName] || {};
+    const bonusExp = profile.bonusExp || 0;
+    return buildExp + achExp + bonusExp;
 }
 const ACHIEVEMENTS = [
     { id: 'first_stone', tier: 'I', name: 'Первый камень', desc: 'Загрузил свою первую постройку в архив', exp: 50, check: (a, ab) => ab.length >= 1 },
     { id: 'brick_by_brick', tier: 'I', name: 'Кирпич к кирпичу', desc: 'Опубликовать первый объект в архиве', exp: 50, check: (a, ab) => ab.length >= 1 },
     { id: 'own_style', tier: 'I', name: 'Свой стиль', desc: 'Опубликовать 3 объекта в одном стиле', exp: 150, check: (a, ab) => { const cnt = {}; ab.forEach(b => { cnt[b.style] = (cnt[b.style]||0) + 1; }); return Object.values(cnt).some(v => v >= 3); } },
     { id: 'universal', tier: 'I', name: 'Автор-универсал', desc: 'Иметь постройки в 3 разных стилях', exp: 300, check: (a, ab) => new Set(ab.map(b => b.style)).size >= 3 },
-    { id: 'citybuilder', tier: 'I', name: 'Градостроитель', desc: 'Опубликовать объект с тегом «Город» или «Поселение»', exp: 500, check: (a, ab) => ab.some(b => ['CITY','SETTLEMENT'].includes(b.style) || b.desc.toLowerCase().includes('город') || b.desc.toLowerCase().includes('поселение')) },
+    { id: 'citybuilder', tier: 'I', name: 'Градостроитель', desc: 'Опубликовать объект с тегом «Город» или «Поселение»', exp: 500, check: (a, ab) => ab.some(b => ['CITY','SETTLEMENT', 'FUTURISTIC'].includes(b.style) || b.desc.toLowerCase().includes('город') || b.desc.toLowerCase().includes('поселение')) },
     { id: 'detalist', tier: 'I', name: 'Деталист', desc: 'Заполнить галерею объекта (минимум 5 фото)', exp: 100, check: (a, ab) => ab.some(b => b.images.length >= 5) },
     { id: 'lore_master', tier: 'I', name: 'Лор-мастер', desc: 'Написать описание объёмом более 300 символов', exp: 100, check: (a, ab) => ab.some(b => b.desc.length > 300) },
     { id: 'popular_author', tier: 'I', name: 'У всех на слуху', desc: 'Суммарно 500 просмотров на всех работах', exp: 200, check: (a, ab) => ab.reduce((s, b) => s + getViews(b.id), 0) >= 500 },
-    { id: 'real_estate', tier: 'I', name: 'Магнат недвижимости', desc: 'Иметь 10 опубликованных варпов', exp: 500, check: (a, ab) => ab.length >= 10 },
+    { id: 'real_estate', tier: 'I', name: 'Магнат недвижимости', desc: 'Иметь 10 опубликованных построек', exp: 500, check: (a, ab) => ab.length >= 10 },
     { id: 'pioneer', tier: 'II', name: 'Первопроходец', desc: 'Опубликовать объект в первую неделю сезона', exp: 200, check: (a, ab) => { const start = new Date(CURRENT_SEASON_START); return ab.some(b => { if (b.season !== CURRENT_SEASON) return false; const diff = (new Date(b.date) - start) / 86400000; return diff >= 0 && diff <= 7; }); } },
     { id: 'season_hero', tier: 'II', name: 'Герой сезона', desc: 'Опубликовать 5 разных объектов в текущем сезоне', exp: 400, check: (a, ab) => ab.filter(b => b.season === CURRENT_SEASON).length >= 5 },
-    { id: 'popular_warp', tier: 'II', name: 'Популярный варп', desc: 'Набрать 200 просмотров на одном объекте текущего сезона', exp: 250, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && getViews(b.id) >= 200) },
+    { id: 'popular_warp', tier: 'II', name: 'Популярный постройка', desc: 'Набрать 200 просмотров на одном объекте текущего сезона', exp: 250, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && getViews(b.id) >= 200) },
     { id: 'season_style', tier: 'II', name: 'Стиль сезона', desc: `Построить объект в стиле-тренде сезона (${SEASON_TREND_STYLE})`, exp: 150, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && b.style === SEASON_TREND_STYLE) },
     { id: 'season_closing', tier: 'II', name: 'Закрытие сезона', desc: 'Опубликовать объект за неделю до планируемого вайпа', exp: 200, check: (a, ab) => { const end = new Date(CURRENT_SEASON_END); return ab.some(b => { if (b.season !== CURRENT_SEASON) return false; const diff = (end - new Date(b.date)) / 86400000; return diff >= 0 && diff <= 7; }); } },
     { id: 'active_viewer', tier: 'II', name: 'Активный зритель', desc: 'Открыть 20 чужих работ текущего сезона за одну сессию', exp: 50, check: (a, ab) => _sessionViewedOthers.size >= 20 },
@@ -778,13 +836,53 @@ const ACHIEVEMENTS = [
     { id: 'face_of_server', tier: 'III', name: 'Лицо сервера', desc: 'Занять 1-е место в топе авторов', exp: 2000, hidden: true, check: (a, ab) => { const allAuthors = [...new Set(builds.map(b => b.author))]; const scores = allAuthors.map(n => ({ name: n, score: builds.filter(b => b.author === n).length })); scores.sort((x, y) => y.score - x.score); return scores.length > 0 && scores[0].name === a; } },
     { id: 'mega_builder', tier: 'III', name: 'Мега-проектировщик', desc: 'Опубликовать 3 объекта с тегом «Мега-постройка»', exp: 1000, hidden: true, check: (a, ab) => ab.filter(b => b.desc.toLowerCase().includes('мега') || (b.tags && b.tags.includes('mega'))).length >= 3 },
     { id: 'millionaire', tier: 'III', name: 'Миллионер Classic HUBHUB', desc: 'Суммарно 10 000 просмотров на всех работах', exp: 2500, hidden: true, check: (a, ab) => ab.reduce((s, b) => s + getViews(b.id), 0) >= 10000 },
-    { id: 'classic_keeper', tier: 'III', name: 'Хранитель классики', desc: 'Найти и опубликовать варп из самого первого сезона', exp: 1000, hidden: true, check: (a, ab) => ab.some(b => b.season === 'Сезон 1') },
+    { id: 'classic_keeper', tier: 'III', name: 'Хранитель классики', desc: 'Найти и опубликовать постройка из самого первого сезона', exp: 1000, hidden: true, check: (a, ab) => ab.some(b => b.season === 'Сезон 1') },
     { id: 'shadow_magnate', tier: 'III', name: 'Теневой магнат', desc: 'Построил Gothic-объект в подземном биоме', exp: 150, hidden: true, check: (a, ab) => ab.some(b => b.style === 'GOTHIC' && (b.desc.toLowerCase().includes('подзем') || b.desc.toLowerCase().includes('катакомб') || b.desc.toLowerCase().includes('пещер'))) },
+
+    // те шо добавил в 1.4-1т
+    { id: 'samurai_path',  tier: 'I',   name: 'Путь Самурая',         desc: 'Опубликовать 3 объекта в стиле JAPANESE',                                                            exp: 300,  check: (a, ab) => ab.filter(b => b.style === 'JAPANESE').length >= 3 },
+    { id: 'void_engineer', tier: 'I',   name: 'Инженер пустоты',      desc: 'Опубликовать объект в стиле STEAMPUNK',                                                              exp: 150,  check: (a, ab) => ab.some(b => b.style === 'STEAMPUNK') },
+    { id: 'urbanist',      tier: 'I',   name: 'Урбанист',             desc: 'Иметь в профиле одновременно постройки CITY и SETTLEMENT',                                           exp: 250,  check: (a, ab) => ab.some(b => b.style === 'CITY') && ab.some(b => b.style === 'SETTLEMENT') },
+    { id: 'dark_reaper',   tier: 'I',   name: 'Мрачный жнец',         desc: 'Опубликовать 5 объектов в стиле GOTHIC',                                                             exp: 400,  check: (a, ab) => ab.filter(b => b.style === 'GOTHIC').length >= 5 },
+    { id: 'order_master',  tier: 'I',   name: 'Магистр ордена',       desc: 'Иметь по одной постройке в стилях MEDIEVAL и FANTASY',                                              exp: 200,  check: (a, ab) => ab.some(b => b.style === 'MEDIEVAL') && ab.some(b => b.style === 'FANTASY') },
+    { id: 'future_arch',   tier: 'I',   name: 'Архитектор будущего',  desc: 'Набрать суммарно 1000 просмотров только на объектах стиля MODERN',                                   exp: 350,  check: (a, ab) => ab.filter(b => b.style === 'MODERN').reduce((s,b) => s + getViews(b.id), 0) >= 1000 },
+    { id: 'eclectic',      tier: 'I',   name: 'Эклектик',             desc: 'Иметь в профиле постройки 5 разных стилей одновременно',                                            exp: 300,  check: (a, ab) => new Set(ab.map(b => b.style)).size >= 5 },
+    { id: 'cultural_swap', tier: 'I',   name: 'Культурный обмен',     desc: 'Обновить стиль уже созданного объекта (реновация — поле renovated: true в постройке)',              exp: 100,  check: (a, ab) => ab.some(b => b.renovated === true) },
+    { id: 'genplan',       tier: 'I',   name: 'Генплан',              desc: 'Опубликовать объект стиля CITY с более чем 5 скриншотами в галерее',                                exp: 250,  check: (a, ab) => ab.some(b => b.style === 'CITY' && b.images.length > 5) },
+
+    // 1.4-2т
+    { id: 'night_builder',   tier: 'II',  name: 'Ночной строитель',     desc: 'Опубликовать объект в промежуток с 00:00 до 05:00 (ночные шедевры)',                              exp: 150,  check: (a, ab) => ab.some(b => b.nightPublish === true) },
+    { id: 'stable_quality',  tier: 'II',  name: 'Стабильное качество',  desc: 'Опубликовать по одному объекту в течение 3 недель подряд',                                        exp: 300,  check: (a, ab) => { if (ab.length < 3) return false; const dates = ab.map(b => new Date(b.date)).sort((x,y)=>x-y); for (let i=0;i<dates.length-2;i++){const d1=(dates[i+1]-dates[i])/86400000,d2=(dates[i+2]-dates[i+1])/86400000;if(d1>=5&&d1<=14&&d2>=5&&d2<=14)return true;}return false; } },
+    { id: 'last_chance',     tier: 'II',  name: 'Последний шанс',       desc: 'Опубликовать объект в последние 24 часа перед закрытием сезона',                                  exp: 200,  check: (a, ab) => { const end = new Date(CURRENT_SEASON_END); return ab.some(b => { if (b.season !== CURRENT_SEASON) return false; const diff = (end - new Date(b.date)) / 3600000; return diff >= 0 && diff <= 24; }); } },
+    { id: 'hype_train',      tier: 'II',  name: 'Хайп-трейн',          desc: 'Новый объект набрал 100 просмотров в первый час после публикации',                                 exp: 250,  check: (a, ab) => ab.some(b => b.firstHourViews >= 100) },
+    { id: 'season_marathon', tier: 'II',  name: 'Сезонный марафон',     desc: 'Опубликовать по одному объекту в каждом из 8 доступных стилей за один сезон',                    exp: 600,  check: (a, ab) => { const styles=['GOTHIC','MODERN','MEDIEVAL','FANTASY','JAPANESE','STEAMPUNK','CITY','SETTLEMENT', 'FUTURISTIC']; const seasonBuilds=ab.filter(b=>b.season===CURRENT_SEASON); const s=new Set(seasonBuilds.map(b=>b.style)); return styles.every(st=>s.has(st)); } },
+    { id: 'past_flash',      tier: 'II',  name: 'Вспышка прошлого',     desc: 'Обновить описание или галерею у объекта, который был построен 2 сезона назад',                   exp: 150,  check: (a, ab) => ab.some(b => b.renovated === true && b.renovatedOldSeason === true) },
+
+    // 1.4-3т
+    { id: 'eye_magnet',    tier: 'III', name: 'Магнит для глаз',      desc: 'Одна постройка набрала суммарно 5 000 просмотров',                                                   exp: 1500, hidden: true, check: (a, ab) => ab.some(b => getViews(b.id) >= 5000) },
+    { id: 'local_guide',   tier: 'III', name: 'Местный гид',          desc: 'Твои постройки суммарно посмотрели чаще, чем у любого другого архитектора',                         exp: 1000, hidden: true, check: (a, ab) => { const myViews=ab.reduce((s,b)=>s+getViews(b.id),0); const others=[...new Set(builds.map(b=>b.author))].filter(n=>n!==a); return others.every(n=>{ const ov=builds.filter(b=>b.author===n).reduce((s,b)=>s+getViews(b.id),0); return myViews>ov; }); } },
+    { id: 'beyond',        tier: 'III', name: 'За гранью',            desc: 'Набрать 500 просмотров на объекте без указанного стиля (поле style: "")',                           exp: 800,  hidden: true, check: (a, ab) => ab.some(b => (!b.style || b.style === '') && getViews(b.id) >= 500) },
+    { id: 'trendsetter',   tier: 'III', name: 'Законодатель моды',     desc: 'После твоей JAPANESE-постройки на сайте появилось ещё 5 объектов этого стиля от других',           exp: 1200, hidden: true, check: (a, ab) => { const myFirst=ab.filter(b=>b.style==='JAPANESE').map(b=>new Date(b.date)).sort((x,y)=>x-y)[0]; if(!myFirst)return false; const after=builds.filter(b=>b.author!==a&&b.style==='JAPANESE'&&new Date(b.date)>myFirst); return after.length>=5; } },
+    { id: 'archive_ghost', tier: 'III', name: 'Архивный призрак',      desc: 'Иметь объект с пометкой стабильных просмотров на протяжении месяца (флаг dailyViews)',            exp: 1000, hidden: true, check: (a, ab) => ab.some(b => b.dailyViewsStreak >= 30) },
+    { id: 'monopolist',    tier: 'III', name: 'Монополист',            desc: 'Занять все 3 первых места в списке самых просматриваемых объектов за всё время',                  exp: 2000, hidden: true, check: (a, ab) => { const sorted=[...builds].sort((x,y)=>getViews(y.id)-getViews(x.id)).slice(0,3); return sorted.length===3&&sorted.every(b=>b.author===a); } },
+    // ═══ Tier I — Строительные (продолжение) ═══
+    { id: 'city_plan',       tier: 'I',   name: 'Градостроительный план', desc: 'Иметь в профиле одновременно 1 объект типа CITY и 3 объекта SETTLEMENT',                        exp: 400,  check: (a, ab) => ab.filter(b => b.style === 'CITY').length >= 1 && ab.filter(b => b.style === 'SETTLEMENT').length >= 3 },
+    // ═══ Tier II — Сезонные (продолжение) ═══
+    { id: 'legend_return',   tier: 'II',  name: 'Возвращение легенды',    desc: 'Опубликовать постройку в новом сезоне после пропуска предыдущего',                               exp: 350,  check: (a, ab) => { const seasons = [...new Set(builds.map(b => b.season))].sort((x,y) => parseInt(x.replace(/\D/g,'')) - parseInt(y.replace(/\D/g,''))); if (seasons.length < 2) return false; const authorSeasons = new Set(ab.map(b => b.season)); for (let i = 1; i < seasons.length; i++) { if (authorSeasons.has(seasons[i]) && !authorSeasons.has(seasons[i-1])) return true; } return false; } },
+    // ═══ Tier I — Архивариус сезона ═══
+    { id: 'season_archivist', tier: 'I', name: 'Архивариус сезона', desc: 'Опубликовать 15 построек в текущем сезоне', exp: 800, check: (a, ab) => ab.filter(b => b.season === CURRENT_SEASON).length >= 15 },
+    // ═══ Tier III — Бессмертный ═══
+    { id: 'immortal', tier: 'III', name: 'Бессмертный', desc: 'Твои постройки присутствуют в Архиве уже более года', exp: 1500, hidden: true, check: (a, ab) => { if (!ab.length) return false; const oldest = ab.map(b => new Date(b.date)).sort((x,y)=>x-y)[0]; return (Date.now() - oldest) >= 365*24*3600*1000; } },
 ];
 
 function getAuthorAchievements(authorName) {
     const authorBuilds = builds.filter(b => b.author === authorName);
-    return ACHIEVEMENTS.filter(ach => ach.check(authorName, authorBuilds));
+    const autoUnlocked = new Set(
+        ACHIEVEMENTS.filter(ach => ach.check(authorName, authorBuilds)).map(a => a.id)
+    );
+    const profile = authorProfiles[authorName] || {};
+    const manualUnlocked = new Set(Object.keys(profile.unlockedAchievements || {}));
+    return ACHIEVEMENTS.filter(ach => autoUnlocked.has(ach.id) || manualUnlocked.has(ach.id));
 }
 
 function getAuthorRank(authorName) {
@@ -951,7 +1049,9 @@ function openAuthorProfile(nameOverride) {
         } else {
             achContainer.innerHTML = unlockedAch.map(a => {
                 const src = ACH_ICONS[a.id] || 'https://placehold.co/32x32/252525/555?text=?';
-                return `<img src="${src}" title="${a.name}: ${a.desc}" class="w-8 h-8 rounded-lg border border-white/10 cursor-default object-cover" onerror="this.src='https://placehold.co/32x32/252525/555?text=?'">`;
+                const tierGlow = a.tier === 'I' ? '0 0 6px #4ade8077' : a.tier === 'II' ? '0 0 6px #60a5fa77' : '0 0 8px #f59e0b99';
+                const tierBorder = a.tier === 'I' ? '#4ade8055' : a.tier === 'II' ? '#60a5fa55' : '#f59e0b88';
+                return `<img src="${src}" title="${a.name}: ${a.desc}" class="w-8 h-8 rounded-lg cursor-default object-cover transition-transform hover:scale-110" style="border:1px solid ${tierBorder};box-shadow:${tierGlow};" onerror="this.src='https://placehold.co/32x32/252525/555?text=?'">`;
             }).join('');
         }
     }
@@ -1150,7 +1250,9 @@ function renderTopAuthors() {
         const medalColor = index === 0 ? '#D4AF37' : index === 1 ? '#aaa' : index === 2 ? '#cd7f32' : '#555';
         const achIcons = author.achs.slice(0, 4).map(a => {
             const src = ACH_ICONS[a.id] || 'https://placehold.co/24x24/252525/555?text=?';
-            return `<img src="${src}" title="${a.name}" class="w-6 h-6 rounded object-cover border border-white/10" onerror="this.src='https://placehold.co/24x24/252525/555?text=?'">`;
+            const tg = a.tier === 'I' ? '0 0 5px #4ade8077' : a.tier === 'II' ? '0 0 5px #60a5fa77' : '0 0 7px #f59e0b99';
+            const tb = a.tier === 'I' ? '#4ade8055' : a.tier === 'II' ? '#60a5fa55' : '#f59e0b88';
+            return `<img src="${src}" title="${a.name}" class="w-6 h-6 rounded object-cover" style="border:1px solid ${tb};box-shadow:${tg};" onerror="this.src='https://placehold.co/24x24/252525/555?text=?'">`;
         }).join('');
         container.innerHTML += `
             <div class="col-span-full bg-[#252525] p-5 rounded-xl flex items-center justify-between border border-white/5 hover:border-[#D4AF37]/30 transition-all">
@@ -1184,81 +1286,139 @@ function renderTopAuthors() {
     });
 }
 
-function renderAchievements() {
+function renderAchievements(filterTier, searchStr) {
     document.getElementById('page-title').innerText = 'Достижения';
+    filterTier = filterTier || 'all';
+    searchStr  = (searchStr || '').toLowerCase();
 
     const tiers = [
-        { id: 'I',   label: 'Строительные',         color: '#4ade80', bg: '#1c2a1c', desc: 'За мастерство в строительстве' },
-        { id: 'II',  label: 'Сезонные',              color: '#60a5fa', bg: '#1a1f2e', desc: 'За активность в сезонах'       },
-        { id: 'III', label: 'Скрытые / Легендарные', color: '#f59e0b', bg: '#2a1f0e', desc: 'Секретные достижения'          },
+        { id: 'I',   label: 'Строительные',  color: '#4ade80', bg: '#1c2a1c', desc: 'За мастерство и стиль' },
+        { id: 'II',  label: 'Сезонные',      color: '#60a5fa', bg: '#1a1f2e', desc: 'За активность в сезоне' },
+        { id: 'III', label: 'Легендарные',   color: '#f59e0b', bg: '#2a1f0e', desc: 'Тайные и сложнейшие' },
     ];
 
-    const tierRoman = { 'I': 'I', 'II': 'II', 'III': 'III' };
+    const totalExp  = ACHIEVEMENTS.reduce((s,a) => s+a.exp, 0);
+    const openCount = ACHIEVEMENTS.filter(a => !a.hidden).length;
+    const hidCount  = ACHIEVEMENTS.filter(a => a.hidden).length;
+
+    function achCard(ach, tier) {
+        const isHidden = ach.hidden;
+        const imgSrc   = ACH_ICONS[ach.id] || 'https://placehold.co/64x64/252525/555?text=?';
+        const matchSearch = !searchStr
+            || (isHidden ? false : ach.name.toLowerCase().includes(searchStr))
+            || (isHidden ? false : ach.desc.toLowerCase().includes(searchStr));
+        if (!matchSearch && searchStr) return '';
+        return `
+        <div class="ach-card ach-tier-${tier.id} flex items-start gap-3 p-4 hover:bg-[#2e2e2e] transition-all duration-200 cursor-default"
+             style="border-bottom:1px solid ${tier.color}0f;border-right:1px solid ${tier.color}0f;">
+            <div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-white/10 flex items-center justify-center" style="background:${tier.bg}">
+                <img src="${imgSrc}" alt="${isHidden ? '???' : ach.name}"
+                     class="w-full h-full object-cover ${(isHidden || tier.id === 'III') ? 'blur-sm grayscale opacity-50' : ''}"
+                     onerror="this.src='https://placehold.co/64x64/252525/555?text=?'">
+            </div>
+            <div class="flex-grow min-w-0 pt-0.5">
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                    <span class="font-black text-xs text-white leading-tight">${isHidden ? '??? — Скрытое' : ach.name}</span>
+                    ${isHidden ? '<span class="text-[9px] text-amber-500 flex-shrink-0">🔒</span>' : ''}
+                </div>
+                <p class="text-[10px] text-gray-500 leading-snug mb-2">
+                    ${isHidden ? 'Скрытое достижение — разгадай условие самостоятельно.' : ach.desc}
+                </p>
+                <span class="text-[9px] font-black px-2 py-0.5 rounded inline-block"
+                      style="background:${tier.color}18;color:${tier.color};border:1px solid ${tier.color}33">+${ach.exp} EXP</span>
+            </div>
+        </div>`;
+    }
+
+    const visibleTiers = filterTier === 'all' ? tiers : tiers.filter(t => t.id === filterTier);
 
     container.innerHTML = `
-        <div class="col-span-full w-full space-y-12">
-            <div class="grid grid-cols-3 gap-4">
-                <div class="bg-[#252525] rounded-2xl p-5 border border-white/5 text-center">
-                    <div class="text-2xl font-black gold-accent">${ACHIEVEMENTS.filter(a=>!a.hidden).length}</div>
-                    <div class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Всего достижений</div>
+    <div class="col-span-full w-full">
+
+        <!-- Шапка -->
+        <div class="relative rounded-3xl overflow-hidden mb-8 border border-white/5 px-8 py-10" style="background:linear-gradient(135deg,#0d0d0d 0%,#0e1a0e 50%,#0d0d0d 100%)">
+            <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at 20% 50%,rgba(74,222,128,0.08) 0%,transparent 60%)"></div>
+            <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
+                <div class="flex-grow">
+                    <div class="text-[10px] font-black tracking-[0.3em] uppercase mb-2" style="color:#4ade80">Система наград</div>
+                    <h2 class="text-2xl font-black uppercase tracking-tighter mb-2">Достижения</h2>
+                    <p class="text-gray-400 text-sm max-w-xl">Выполняй условия, зарабатывай опыт и открывай скрытые легендарные награды.</p>
                 </div>
-                <div class="bg-[#252525] rounded-2xl p-5 border border-white/5 text-center">
-                    <div class="text-2xl font-black text-[#f59e0b]">${ACHIEVEMENTS.filter(a=>a.hidden).length}</div>
-                    <div class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Скрытых</div>
-                </div>
-                <div class="bg-[#252525] rounded-2xl p-5 border border-white/5 text-center">
-                    <div class="text-2xl font-black text-white">${ACHIEVEMENTS.reduce((s,a)=>s+a.exp,0).toLocaleString()}</div>
-                    <div class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Всего EXP</div>
+                <div class="grid grid-cols-3 gap-3 flex-shrink-0">
+                    <div class="bg-black/40 rounded-2xl p-4 border border-white/5 text-center min-w-[80px]">
+                        <div class="text-xl font-black gold-accent">${ACHIEVEMENTS.length}</div>
+                        <div class="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Всего</div>
+                    </div>
+                    <div class="bg-black/40 rounded-2xl p-4 border border-white/5 text-center min-w-[80px]">
+                        <div class="text-xl font-black text-amber-400">${hidCount}</div>
+                        <div class="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Скрытых</div>
+                    </div>
+                    <div class="bg-black/40 rounded-2xl p-4 border border-white/5 text-center min-w-[80px]">
+                        <div class="text-xl font-black text-white">${totalExp.toLocaleString()}</div>
+                        <div class="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Макс. EXP</div>
+                    </div>
                 </div>
             </div>
-            ${tiers.map(tier => {
-                const tierAchs = ACHIEVEMENTS.filter(a => a.tier === tier.id);
-                return `
-                <div>
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm" style="background:${tier.bg};color:${tier.color};border:1px solid ${tier.color}44">
-                            ${tierRoman[tier.id]}
+        </div>
+
+        <!-- Поиск + фильтр -->
+        <div class="flex flex-wrap gap-3 mb-8 items-center">
+            <input id="ach-search" type="text" placeholder="Поиск достижения..."
+                   value="${searchStr}"
+                   oninput="renderAchievements(document.getElementById('ach-filter').value, this.value)"
+                   class="flex-grow bg-[#252525] border border-white/10 rounded-xl py-3 px-5 text-sm focus:ring-1 focus:ring-[#D4AF37] outline-none min-w-[180px]">
+            <div class="flex gap-2 flex-wrap">
+                ${['all','I','II','III'].map(v => {
+                    const labels = {all:'Все',I:'I · Строительные',II:'II · Сезонные',III:'III · Легендарные'};
+                    const colors = {all:'#ffffff22',I:'#4ade8033',II:'#60a5fa33',III:'#f59e0b33'};
+                    const active = filterTier === v;
+                    return `<button onclick="renderAchievements('${v}', document.getElementById('ach-search')?document.getElementById('ach-search').value:'')"
+                        class="text-[11px] font-black uppercase tracking-wider px-4 py-2 rounded-xl border transition-all"
+                        style="${active ? `background:${colors[v]};color:#fff;border-color:${colors[v].replace('33','88')}` : 'background:transparent;color:#666;border-color:#333'}">
+                        ${labels[v]}
+                    </button>`;
+                }).join('')}
+            </div>
+        </div>
+
+        <!-- Тиры -->
+        <div class="space-y-6">
+        ${visibleTiers.map(tier => {
+            const tierAchs = ACHIEVEMENTS.filter(a => a.tier === tier.id);
+            const cards = tierAchs.map(a => achCard(a, tier)).join('');
+            const visibleCount = tierAchs.filter(a => !searchStr || (!a.hidden && (a.name.toLowerCase().includes(searchStr) || a.desc.toLowerCase().includes(searchStr)))).length;
+            if (searchStr && visibleCount === 0) return '';
+            const tierTotalExp = tierAchs.reduce((s,a) => s+a.exp, 0);
+            return `
+            <div class="rounded-2xl border overflow-hidden" style="border-color:${tier.color}22;background:#1a1a1a">
+                <!-- Заголовок тира -->
+                <div class="flex items-center justify-between px-6 py-5"
+                     style="background:linear-gradient(90deg,${tier.bg}cc 0%,${tier.bg}44 50%,transparent 100%);border-bottom:1px solid ${tier.color}22">
+                    <div class="flex items-center gap-4">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
+                             style="background:${tier.bg};color:${tier.color};border:1px solid ${tier.color}55">
+                            ${tier.id}
                         </div>
                         <div>
-                            <div class="font-black uppercase tracking-wider text-base" style="color:${tier.color}">${tier.label}</div>
-                            <div class="text-[10px] text-gray-600">${tier.desc}</div>
+                            <div class="font-black uppercase tracking-wider text-sm" style="color:${tier.color}">${tier.label}</div>
+                            <div class="text-[10px] text-gray-600 mt-0.5">${tier.desc}</div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        ${tierAchs.map(ach => {
-                            const isHidden = ach.hidden;
-                            const imgSrc = ACH_ICONS[ach.id] || 'https://placehold.co/64x64/252525/555?text=?';
-                            return `
-                            <div class="ach-card ach-tier-${tier.id} p-5 flex flex-col gap-4 hover:border-opacity-60 transition-all">
-                                <div class="flex items-start gap-4">
-                                    <div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-white/10" style="background:${tier.bg}">
-                                        <img src="${imgSrc}" alt="${isHidden ? '???' : ach.name}"
-                                             class="w-full h-full object-cover ${isHidden ? 'blur-sm grayscale' : ''}"
-                                             onerror="this.src='https://placehold.co/64x64/252525/555?text=?'">
-                                    </div>
-                                    <div class="flex-grow min-w-0">
-                                        <div class="font-black text-sm text-white mb-0.5 truncate">${isHidden ? '???' : ach.name}</div>
-                                        <span class="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded"
-                                              style="background:${tier.color}22; color:${tier.color}">
-                                            +${ach.exp} EXP
-                                        </span>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-gray-500 leading-relaxed">
-                                    ${isHidden ? 'Скрытое достижение. Попробуй разгадать условие самостоятельно.' : ach.desc}
-                                </p>
-                                <div class="mt-auto pt-3 border-t border-white/5 flex items-center justify-between">
-                                    <span class="text-[9px] text-gray-600 uppercase tracking-widest">Tier ${tier.id}</span>
-                                    ${isHidden ? `<span class="text-[9px] text-[#f59e0b] font-bold">🔒 Скрыто</span>` : `<span class="text-[9px] text-gray-600">${tier.label}</span>`}
-                                </div>
-                            </div>`;
-                        }).join('')}
+                    <div class="text-right hidden sm:block">
+                        <div class="text-sm font-black" style="color:${tier.color}">${tierAchs.length} достижений</div>
+                        <div class="text-[9px] text-gray-600">до +${tierTotalExp.toLocaleString()} EXP</div>
                     </div>
-                </div>`;
-            }).join('')}
+                </div>
+                <!-- Сетка карточек -->
+                <div class="grid grid-cols-1 md:grid-cols-2" style="border-top:1px solid ${tier.color}11">
+                    ${cards || '<div class="col-span-2 p-8 text-center text-gray-600 text-sm">Ничего не найдено</div>'}
+                </div>
+            </div>`;
+        }).join('')}
         </div>
-    `;
+    </div>`;
 }
+
 
 function openImgInTab() {
     const src = document.getElementById('modal-img').src;
@@ -1318,16 +1478,35 @@ function goHome() {
 
 function renderInfo() {
     document.getElementById('page-title').innerText = 'Информация';
-    var ranksHtml = '<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">' +
+    var ranksHtml = '<div class="contents">' +
         RANKS.map(function(r, i) {
             var nextR = RANKS[i + 1] || null;
             var fromLabel = r.minExp > 0 ? r.minExp.toLocaleString() + ' EXP' : 'Старт';
             var toLabel   = nextR ? 'до ' + nextR.minExp.toLocaleString() + ' EXP' : 'Максимальный уровень';
             var arrow     = nextR
-                ? '<div class="text-[9px] text-gray-600 flex items-center gap-1 mt-2">→ след: <span class=\"text-gray-500\">' + nextR.name + '</span></div>'
-                : '<div class="text-[9px] gold-accent mt-2">★ Высший ранг</div>';
+                ? '<div class="text-[9px] text-gray-600 mt-1">→ ' + nextR.name + '</div>'
+                : '<div class="text-[9px] gold-accent mt-1">★ Высший ранг</div>';
+            // дем+7
+            var isDemiurg = r.minExp === 52000;
+            var allAuthorNames = [...new Set(builds.map(function(b){return b.author;}))];
+            var demiurgUnlocked = isDemiurg && allAuthorNames.some(function(n){return getAuthorExp(n) >= 52000;});
+            if (isDemiurg && !demiurgUnlocked) {
+                return '<div class="col-span-2 sm:col-span-3 bg-black/30 rounded-xl p-3 border border-white/5 relative overflow-hidden flex flex-col">' +
+                    '<div class="absolute inset-0 backdrop-blur-sm bg-black/55 z-10 flex items-center justify-center gap-3 rounded-xl">' +
+                        '<span class="text-lg">🔒</span>' +
+                        '<div>' +
+                            '<div class="text-[10px] font-black uppercase tracking-widest text-gray-300">Тайный ранг</div>' +
+                            '<div class="text-[9px] text-gray-500">Откроется при достижении скрытого порога опыта</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<span class="rank-badge rank-demiurg self-start mb-1.5 filter blur-sm select-none" style="margin-left:0;font-size:8px;padding:2px 10px;">⬛ ???</span>' +
+                    '<div class="text-[10px] text-white font-bold filter blur-sm">??? EXP</div>' +
+                    '<div class="text-[9px] text-gray-500 filter blur-sm">— скрытый порог</div>' +
+                    '<div class="text-[9px] text-gray-600 mt-1 filter blur-sm">→ ???</div>' +
+                '</div>';
+            }
             return '<div class="bg-black/30 rounded-xl p-3 border border-white/5 flex flex-col">' +
-                '<span class="rank-badge ' + r.class + ' self-start mb-2" style="margin-left:0;font-size:8px;padding:2px 10px;">' + r.name + '</span>' +
+                '<span class="rank-badge ' + r.class + ' self-start mb-1.5" style="margin-left:0;font-size:8px;padding:2px 10px;">' + r.name + '</span>' +
                 '<div class="text-[10px] text-white font-bold">' + fromLabel + '</div>' +
                 '<div class="text-[9px] text-gray-500">' + toLabel + '</div>' +
                 arrow +
@@ -1361,8 +1540,8 @@ function renderInfo() {
             '<div class="relative z-10 px-10 py-12 flex flex-col md:flex-row items-center gap-8">' +
                 '<div class="flex-grow">' +
                     '<div class="text-[10px] gold-accent font-black tracking-[0.3em] uppercase mb-3">О проекте</div>' +
-                    '<h2 class="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4 leading-none">Архив <span class="gold-accent">Classic HUB</span></h2>' +
-                    '<p class="text-gray-300 text-sm leading-relaxed max-w-xl mb-3">Цифровой музей построек сервера. Вайпы уничтожают миры - но не память о них. Каждая постройка, прошедшая модерацию, живёт здесь вечно: с фотоальбомом, описанием и счётчиком просмотров.</p>' +
+                    '<h2 class="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4 leading-none">Classic  <span class="gold-accent">HUB</span></h2>' +
+                    '<p class="text-gray-300 text-sm leading-relaxed max-w-xl mb-3">Наш сервис является архивом. Цифровой музей построек сервера. Вайпы уничтожают миры - но не память о них. Каждая постройка, прошедшая модерацию, живёт здесь вечно: с фотоальбомом, описанием и счётчиком просмотров.</p>' +
                     '<p class="text-gray-500 text-xs leading-relaxed max-w-xl">Авторы зарабатывают опыт, получают достижения и поднимаются в рейтинге авторов.</p>' +
                 '</div>' +
                 '<div class="flex-shrink-0 hidden md:block"><div style="font-size:110px;line-height:1;opacity:0.08;" class="gold-accent font-black select-none">⛩</div></div>' +
@@ -1396,9 +1575,9 @@ function renderInfo() {
                     '<li class="flex gap-2"><span class="gold-accent font-black flex-shrink-0">2.</span> Заполни форму: название, стиль, координаты, описание</li>' +
                     '<li class="flex gap-2"><span class="gold-accent font-black flex-shrink-0">3.</span> Приложи ссылку на фотоальбом</li>' +
                     '<li class="flex gap-2"><span class="gold-accent font-black flex-shrink-0">4.</span> Оставь контакт для связи</li>' +
-                    '<li class="flex gap-2"><span class="gold-accent font-black flex-shrink-0">5.</span> Жди проверки до 48 часов</li>' +
+                    '<li class="flex gap-2"><span class="gold-accent font-black flex-shrink-0">5.</span> Жди проверки от 12 до 48 часов</li>' +
                 '</ol>' +
-                '<button onclick="toggleForm(true)" class="mt-4 w-full bg-[#D4AF37] text-black font-black py-2 rounded-xl text-xs uppercase tracking-widest hover:brightness-110 transition active:scale-95">+ Заявить о постройке</button>' +
+                '<button onclick="toggleForm(true)" class="mt-4 w-full bg-[#D4AF37] text-black font-black py-2 rounded-xl text-xs uppercase tracking-widest hover:brightness-110 transition active:scale-95"> Заявить о постройке</button>' +
             '</div>' +
 
             // инфа по просмотрам
@@ -1435,42 +1614,136 @@ function renderInfo() {
                     '<div class="flex gap-2.5 items-start opacity-40"><span class="w-5 h-5 rounded-full bg-red-900/50 border border-red-500/30 flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px]">✗</span><span class="text-xs text-gray-400">Чужие постройки или копии</span></div>' +
                     '<div class="flex gap-2.5 items-start opacity-40"><span class="w-5 h-5 rounded-full bg-red-900/50 border border-red-500/30 flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px]">✗</span><span class="text-xs text-gray-400">Незавершённые объекты</span></div>' +
                 '</div>' +
-                '<div class="mt-5 pt-4 border-t border-white/5"><div class="text-[9px] text-gray-500 uppercase tracking-widest mb-1">Срок проверки</div><div class="text-sm font-black text-white">от <span class="gold-accent">12</span> до <span class="gold-accent">48 часов</span></div></div>' +
+                '<div class="mt-5 pt-4 border-t border-white/5"><div class="text-[9px] text-gray-500 uppercase tracking-widest mb-1">Срок проверки</div><div class="text-sm font-black text-white">от <span class="gold-accent">12</span> до <span class="gold-accent">48 </span>часов</div></div>' +
             '</div>' +
         '</div>' +
 
-        // инфа по рангу
-        '<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">' +
-            '<div class="bg-[#252525] rounded-2xl p-6 border border-white/5">' +
+        // инфа по рангу + ачивки
+        '<div class="bg-[#1a1a1a] rounded-2xl border border-white/5 overflow-hidden mb-6">' +
+            '<div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-white/5" style="align-items:stretch">' +
+
+            // ранги
+            '<div class="p-6">' +
                 '<div class="text-[9px] gold-accent font-black tracking-[0.25em] uppercase mb-1">Прогресс</div>' +
                 '<h3 class="text-base font-black uppercase mb-1">Путь архитектора</h3>' +
-                '<p class="text-gray-500 text-[10px] mb-4">1 постройка = <span class=\"gold-accent font-bold\">1 000 EXP</span> | Достижения дают бонус к опыту</p>' +
-                '<div class="space-y-2">' + ranksHtml + '</div>' +
+                '<p class="text-gray-500 text-[10px] mb-5">1 постройка = <span class=\"gold-accent font-bold\">1 000 EXP</span> · Достижения дают бонус EXP · Тайный ранг  - <span class=\"gold-accent font-bold\">?? ??? EXP</span>.</p>' +
+                '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">' + ranksHtml + '</div>' +
             '</div>' +
-            // ачивки
-            '<div class="bg-[#252525] rounded-2xl p-6 border border-white/5">' +
+
+            // достижения
+            '<div class="p-6 flex flex-col h-full">' +
                 '<div class="text-[9px] gold-accent font-black tracking-[0.25em] uppercase mb-1">Система</div>' +
-                '<h3 class="text-base font-black uppercase mb-4">Достижения</h3>' +
-                '<div class="space-y-3">' +
-                    '<div class="flex items-center gap-4 rounded-xl p-3 border" style="background:#1a2e1a44;border-color:#4ade8033"><div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0" style="background:#1c2a1c;color:#4ade80;border:1px solid #4ade8044">I</div><div><div class="text-xs font-black" style="color:#4ade80">Строительные — Tier I</div><div class="text-[10px] text-gray-500">9 достижений · до +1 800 EXP</div></div></div>' +
-                    '<div class="flex items-center gap-4 rounded-xl p-3 border" style="background:#1a1f3544;border-color:#60a5fa33"><div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0" style="background:#1a1f35;color:#60a5fa;border:1px solid #60a5fa44">II</div><div><div class="text-xs font-black" style="color:#60a5fa">Сезонные — Tier II</div><div class="text-[10px] text-gray-500">9 достижений · до +2 200 EXP</div></div></div>' +
-                    '<div class="flex items-center gap-4 rounded-xl p-3 border" style="background:#2e1f0a44;border-color:#f59e0b33"><div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0" style="background:#2a1f0e;color:#f59e0b;border:1px solid #f59e0b44">III</div><div><div class="text-xs font-black" style="color:#f59e0b">Легендарные — Tier III</div><div class="text-[10px] text-gray-500">9 скрытых · до +11 175 EXP</div></div></div>' +
+                '<h3 class="text-base font-black uppercase mb-1">Достижения</h3>' +
+                '<p class="text-gray-500 text-[10px] mb-3">Выполняй условия - получай EXP. Tier III скрыты, условия раскроются сами.</p>' +
+                '<div class="flex flex-col gap-2 flex-grow">' +
+
+                '<div class="rounded-xl border overflow-hidden flex-1" style="border-color:#4ade8033">' +
+                    '<div class="flex items-center gap-3 px-4 py-3 h-full" style="background:#1c2a1c">' +
+                        '<div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0" style="background:#152215;color:#4ade80;border:1px solid #4ade8055">I</div>' +
+                        '<div class="flex-grow">' +
+                            '<div class="text-xs font-black" style="color:#4ade80">Строительные</div>' +
+                            '<div class="text-[9px] text-gray-500">Стили, фото, описание, количество построек</div>' +
+                            '<div class="text-[9px] mt-0.5" style="color:#4ade8077">+50 - +800 EXP</div>' +
+                        '</div>' +
+                        '<div class="text-right flex-shrink-0"><div class="text-sm font-black" style="color:#4ade80">' + ACHIEVEMENTS.filter(a=>a.tier==='I').length + '</div><div class="text-[9px] text-gray-600">ачивок</div></div>' +
+                    '</div>' +
                 '</div>' +
-                '<a href="#" onclick="document.querySelectorAll(\'.nav-tab\')[2].click()" class="mt-4 inline-flex items-center gap-2 text-xs gold-accent font-bold hover:underline">→ Полный список достижений</a>' +
+
+                '<div class="rounded-xl border overflow-hidden flex-1" style="border-color:#60a5fa33">' +
+                    '<div class="flex items-center gap-3 px-4 py-3 h-full" style="background:#1a1f2e">' +
+                        '<div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0" style="background:#141828;color:#60a5fa;border:1px solid #60a5fa55">II</div>' +
+                        '<div class="flex-grow">' +
+                            '<div class="text-xs font-black" style="color:#60a5fa">Сезонные</div>' +
+                            '<div class="text-[9px] text-gray-500">Активность в текущем сезоне, даты публикаций</div>' +
+                            '<div class="text-[9px] mt-0.5" style="color:#60a5fa77">+150 — +600 EXP</div>' +
+                        '</div>' +
+                        '<div class="text-right flex-shrink-0"><div class="text-sm font-black" style="color:#60a5fa">' + ACHIEVEMENTS.filter(a=>a.tier==='II').length + '</div><div class="text-[9px] text-gray-600">ачивок</div></div>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="rounded-xl border overflow-hidden flex-1" style="border-color:#f59e0b33">' +
+                    '<div class="flex items-center gap-3 px-4 py-3 h-full" style="background:#2a1f0e">' +
+                        '<div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0" style="background:#1f1508;color:#f59e0b;border:1px solid #f59e0b55">III</div>' +
+                        '<div class="flex-grow">' +
+                            '<div class="text-xs font-black" style="color:#f59e0b">Легендарные 🔒</div>' +
+                            '<div class="text-[9px] text-gray-500">Секретные - условия не раскрываются</div>' +
+                            '<div class="text-[9px] mt-0.5" style="color:#f59e0b77">+500 — +2 500 EXP</div>' +
+                        '</div>' +
+                        '<div class="text-right flex-shrink-0"><div class="text-sm font-black" style="color:#f59e0b">' + ACHIEVEMENTS.filter(a=>a.tier==='III').length + '</div><div class="text-[9px] text-gray-600">ачивок</div></div>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="rounded-xl flex-1 flex items-center gap-3 px-4 py-3" style="background:#111;border:1px solid #D4AF3722">' +
+                    '<div class="text-xl flex-shrink-0">⭐</div>' +
+                    '<div class="flex-grow">' +
+                        '<div class="text-[10px] font-black" style="color:#D4AF37">Бонусный EXP</div>' +
+                        '<div class="text-[9px] text-gray-500">Выдаётся за конкурсы и события сервера</div>' +
+                    '</div>' +
+                '</div>' +
+
+                '</div>' +
+                '<a href="#" onclick="document.querySelectorAll(\'.nav-tab\')[2].click()" class="mt-3 inline-flex items-center gap-2 text-xs gold-accent font-bold flex-shrink-0 border border-[#D4AF3733] rounded-lg px-4 py-2 hover:bg-[#D4AF3710] transition">→ Все достижения</a>' +
+            '</div>' +
+
             '</div>' +
         '</div>' +
 
-        // вопросответ
-        '<div class="bg-[#252525] rounded-2xl p-6 border border-white/5">' +
-            '<div class="text-[9px] gold-accent font-black tracking-[0.25em] uppercase mb-1">Помощь</div>' +
-            '<h3 class="text-base font-black uppercase mb-5">Частые вопросы</h3>' +
-            '<div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-5">' +
-                '<div><div class="text-white font-bold text-sm mb-1 flex items-center gap-2"><span class="gold-accent">Q</span> Сколько построек можно добавить?</div><p class="text-gray-400 text-xs leading-relaxed pl-5">Нет ограничений. Каждая даёт +1 000 EXP.</p></div>' +
-                '<div><div class="text-white font-bold text-sm mb-1 flex items-center gap-2"><span class="gold-accent">Q</span> Как быстро повысить ранг?</div><p class="text-gray-400 text-xs leading-relaxed pl-5">Публикуй постройки и выполняй достижения — Tier III дают до +2 500 EXP.</p></div>' +
-                '<div><div class="text-white font-bold text-sm mb-1 flex items-center gap-2"><span class="gold-accent">Q</span> Что будет с постройкой после вайпа?</div><p class="text-gray-400 text-xs leading-relaxed pl-5">Запись сохраняется навсегда. Скриншоты, описание и счётчик просмотров остаются, найти любую из них можно будет в специальном разделе - <a href="#" onclick="document.querySelectorAll(\'.nav-tab\')[4].click()" class="gold-accent hover:underline font-bold">Архив</a>.</p></div>' +
-                '<div><div class="text-white font-bold text-sm mb-1 flex items-center gap-2"><span class="gold-accent">Q</span> Как узнать результат модерации?</div><p class="text-gray-400 text-xs leading-relaxed pl-5">Постройка появится в галерее на сайте в течении 48 часов. Если же она будет отклонена - администратор свяжется с вами и укажет причину отказа.</p></div>' +
-                '<div><div class="text-white font-bold text-sm mb-1 flex items-center gap-2"><span class="gold-accent">Q</span> Можно ли изменить описание или фото?</div><p class="text-gray-400 text-xs leading-relaxed pl-5">Да, свяжитесь с администратором через любой удобный мессенджер.</p></div>' +
-                '<div><div class="text-white font-bold text-sm mb-1 flex items-center gap-2"><span class="gold-accent">Q</span> Где найти постройки прошлых сезонов?</div><p class="text-gray-400 text-xs leading-relaxed pl-5">В разделе <a href="#" onclick="document.querySelectorAll(\'.nav-tab\')[4].click()" class="gold-accent hover:underline font-bold">Архив</a> — все постройки сгруппированы по сезонам.</p></div>' +
+        // FAQ расширенный
+        '<div class="bg-[#1e1e1e] rounded-2xl border border-white/5 overflow-hidden mb-6">' +
+            '<div class="p-6 border-b border-white/5">' +
+                '<div class="text-[9px] gold-accent font-black tracking-[0.25em] uppercase mb-1">Помощь</div>' +
+                '<h3 class="text-base font-black uppercase">Частые вопросы</h3>' +
+            '</div>' +
+            '<div class="grid grid-cols-1 md:grid-cols-2">' +
+
+            // перва
+            '<div class="p-6 border-b md:border-b-0 md:border-r border-white/5 flex flex-col gap-5">' +
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Как добавить свою постройку?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Нажми кнопку <span class="text-white font-bold">«Заявить о постройке»</span> в правом углу шапки - заполни форму и отправь. Постройка появится после проверки администратором (от 12 до 48 часов).</p>' +
+                '</div>' +
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Как считается мой опыт?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Каждая постройка даёт <span class="text-white font-bold">+1 000 EXP</span>. Сверху добавляются бонусы за выполненные достижения и дополнительный EXP от администратора за конкурсы.</p>' +
+                '</div>' +
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Откуда берутся просмотры?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Каждый раз когда кто-то открывает карточку постройки - счётчик прибавляет +1. Просмотры суммируются в твоём профиле и влияют на ряд достижений.</p>' +
+                '</div>' +
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое стиль-тренд сезона?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Каждый сезон игроки выбирают один архитектурный стиль как приоритетный. Постройка в этом стиле даёт достижение <span class="text-white font-bold">«Стиль сезона»</span> и дополнительный EXP.</p>' +
+                '</div>' +
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что будет с постройками после вайпа?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Ничего - записи хранятся навсегда. Скриншоты, описание и просмотры сохраняются в разделе <a href="#" onclick="document.querySelectorAll(\'.nav-tab\')[4].click()" class="gold-accent hover:underline font-bold">Архив</a>, сгруппированном по сезонам.</p>' +
+                '</div>' +
+            '</div>' +
+
+            // друга
+            '<div class="p-6 flex flex-col gap-5">' +
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Как работают ранги?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Ранги присваиваются автоматически по набранному EXP. Публикуй постройки, выполняй достижения — и ранг повысится сам. Посмотреть все пороги можно в блоке <span class="text-white font-bold">«Путь архитектора»</span> выше.</p>' +
+                '</div>' +
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Как получить достижения?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Большинство засчитываются автоматически - стоит только выполнить условие. Tier III скрыты и раскрываются сами когда выполнены. Перейди во вкладку <a href="#" onclick="document.querySelectorAll(\'.nav-tab\')[2].click()" class="gold-accent hover:underline font-bold">Достижения</a>, чтобы увидеть все условия.</p>' +
+                '</div>' +
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Где посмотреть свой профиль?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Открой вкладку <span class="text-white font-bold">«Топ авторов»</span> и нажми на своё имя - откроется карточка с рангом, EXP, постройками и достижениями.</p>' +
+                '</div>' +
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Можно ли исправить ошибку в постройке?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Да. Обратись к администратору через кнопку <span class="text-white font-bold">«Тех. Поддержка»</span> - он поправит название, описание, фото или координаты.</p>' +
+                '</div>' +
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое тайный ранг?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Это скрытый высший ранг с определенным порогом EXP. Он появится в таблице рангов только когда хоть один игрок его достигнет. Пока что - это загадка.</p>' +
+                '</div>' +
+            '</div>' +
+
             '</div>' +
         '</div>' +
 
@@ -1488,12 +1761,25 @@ function renderUpdates() {
     //       'upcoming' = синий (в планах типо)
     const UPDATES = [
         {
+            date:    '2026-03-06', 
+            version: 'v1.3',       
+            title:   'Система достижений и CMS-панель',
+            type:    'new', 
+            items: [
+                'Масштабное обновление достижений: общее количество увеличено до 52',
+                'Введён новый «Тайный ранг», открывающийся при достижении 52 000 очков',
+                'База данных адаптирована под CMS-панель для ускорения работы',
+                'Оптимизирован процесс добавления новых авторов и построек',
+                'Улучшена структура хранения данных для будущих расширений',
+            ]
+        },
+        {
             date:    '2026-03-05',
             version: 'v1.2',
             title:   'Вкладка Обновления и остальное',
             type:    'fix',
             items: [
-                'Фикс варпов и авторов (была проблема с отображением классов)',
+                'Фикс построек и авторов (была проблема с отображением классов)',
                 'Добавлена вкладка «Обновления сайта»',
                 'Добавлено поле «Стиль постройки» в форму заявки',
                 'Координаты постройки теперь отображаются в модальном окне',
@@ -1508,7 +1794,7 @@ function renderUpdates() {
             items: [
                 'Добавлена вкладка «Архив» - постройки сгруппированы по сезонам',
                 'Страница «Информация» полностью переработана',
-                'Карточки варпов: новый порядок - стиль → название → автор',
+                'Карточки построек: новый порядок - стиль → название → автор',
                 'Плашка текущего сезона перенесена в строку навигации',
                 'Переименование: «Архитектор» → «Автор» по всему сайту',
             ]
@@ -1528,14 +1814,18 @@ function renderUpdates() {
             ]
         },
         {
-            date:    '—',
-            version: 'v1.3',
-            title:   'Планируется в следующем обновлении',
+            date:    '-',
+            version: 'v2.0',
+            title:   'Планируется в следующем крупном обновлении',
             type:    'upcoming',
             items: [
-                'Панель администратора для добавления варпов без взаимодействия с интерфейсом консоли',
+                'Панель администратора для добавления построек без взаимодействия с интерфейсом консоли',
                 'Фильтрация по стилю прямо в галерее',
                 'Уведомления о новых постройках',
+                'Новая система счисления опыта',
+                'Новый UI мини-профиля автора',
+                'Измененное модальное окно постройки',
+                'Dynmap (???)',
             ]
         },
     ];
@@ -1671,9 +1961,9 @@ if (window._fbReady) {
 }
 </script>
 
-<!-- ═══════════════════════════════════════
+<!-- ============================================
      баннер тут +- пока пусть живет, потом delete
-════════════════════════════════════════ -->
+================================== -->
 <style>
 
   #disc-overlay {
