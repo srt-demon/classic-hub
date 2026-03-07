@@ -273,7 +273,6 @@ Development by slowdown
         .ach-card { background:#252525; border-radius:0; border:none; }
         .ach-card:hover { background:#2a2a2a; }
 
-        /* Hover-карточка автора */
         #author-hover-card {
             position: fixed;
             z-index: 99998;
@@ -617,7 +616,6 @@ Development by slowdown
     </div>
 
     <div id="author-hover-card">
-        <!-- Hero фон -->
         <div id="ahc-hero" style="position:relative;height:110px;overflow:hidden;">
             <div id="ahc-bg" style="position:absolute;inset:0;background:linear-gradient(120deg,#0e0e0e,#1a1500 60%,#111);background-size:cover;background-position:center;"></div>
             <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,0.88) 0%,rgba(0,0,0,0.55) 50%,rgba(0,0,0,0.12) 100%);"></div>
@@ -778,13 +776,10 @@ Development by slowdown
                     </div>
 
                     <div>
-                        <label style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#555;display:block;margin-bottom:8px;">Выбери артефакт *</label>
-                        <div id="prime-item-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;"></div>
-                        <input type="hidden" id="prime-selected-item">
+                        <label id="prime-art-label" style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#555;display:block;margin-bottom:8px;">Выбери артефакт *</label>
+                        <div id="prime-slots-wrap" style="display:flex;flex-direction:column;gap:10px;"></div>
                         <div id="prime-item-err" style="display:none;font-size:10px;color:#f87171;margin-top:4px;"></div>
                     </div>
-
-                    <div id="prime-art-cfg" style="display:none;background:#0c0c0c;border:1px solid #252525;border-radius:12px;padding:14px;"></div>
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                         <div>
@@ -822,7 +817,7 @@ Development by slowdown
             <button onclick="_closeShopModal()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:#1f1f1f;border:1px solid #333;color:#666;cursor:pointer;font-size:12px;z-index:1;">✕</button>
             <div style="padding:24px;">
                 <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
-                    <div style="width:56px;height:56px;border-radius:14px;background:#1f1f1f;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0;" id="sm-icon"></div>
+                    <div style="width:56px;height:56px;border-radius:14px;background:#1f1f1f;display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0;" id="sm-icon"></div>
                     <div>
                         <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;margin-bottom:3px;" id="sm-tag"></div>
                         <div style="font-size:18px;font-weight:900;color:#fff;line-height:1.2;" id="sm-name"></div>
@@ -1789,7 +1784,7 @@ function openAuthorProfile(nameOverride) {
                 daysLeft = d <= 7 ? ` <span style="font-size:7px;color:#f87171;font-weight:900;position:absolute;bottom:2px;right:3px;">${d}д</span>` : '';
             }
             const innerContent = iconUrl
-                ? `<img src="${iconUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:9px;" onerror="this.style.display='none'">`
+                ? `<img src="${iconUrl}" style="width:85%;height:85%;object-fit:contain;" onerror="this.style.display='none'">`
                 : `<span style="font-size:20px;">${icon}</span>`;
             slotsHtml += `<div
                 style="aspect-ratio:1;border-radius:10px;background:${color}12;border:1px solid ${color}35;display:flex;align-items:center;justify-content:center;cursor:default;position:relative;transition:all .2s;overflow:hidden;"
@@ -1826,7 +1821,7 @@ function openAuthorProfile(nameOverride) {
                 const color  = artDef ? (artDef.color || '#555') : '#555';
                 const tag    = artDef ? (artDef.tag || '') : '';
                 const innerEl = iconUrl
-                    ? `<img src="${iconUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;filter:grayscale(1);opacity:.5;" onerror="this.style.display='none'">`
+                    ? `<img src="${iconUrl}" style="width:80%;height:80%;object-fit:contain;filter:grayscale(1);opacity:.5;" onerror="this.style.display='none'">`
                     : `<span style="font-size:16px;">${icon}</span>`;
                 return `<div
                     style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;cursor:default;filter:grayscale(1);opacity:0.45;position:relative;overflow:hidden;flex-shrink:0;"
@@ -3697,10 +3692,10 @@ function renderShop() {
                         <span style="font-size:10px;font-weight:700;padding:4px 11px;border-radius:20px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);color:#D4AF37;"> Витрина снаряжения</span>
                         <span style="font-size:10px;font-weight:700;padding:4px 11px;border-radius:20px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);color:#D4AF37;"> Возможность накапливать</span>
                     </div>
-                    <!-- Price block -->
+                   
                     <div style="display:inline-flex;align-items:stretch;gap:0;margin-bottom:20px;background:#0a0a0a;border:1px solid rgba(212,175,55,0.25);border-radius:18px;overflow:hidden;animation:price-glow-pulse 3s ease-in-out infinite;">
 
-                        <!-- Main price ($) -->
+                        
                         <div style="position:relative;padding:16px 24px;background:linear-gradient(135deg,#0f0f0f,#0a0a0a);">
                             <div style="position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(212,175,55,0.06) 50%,transparent 60%);background-size:200% 100%;animation:price-shine 3.5s linear infinite;pointer-events:none;border-radius:inherit;"></div>
                             <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.22em;color:#555;margin-bottom:6px;">Стоимость · 30 дней</div>
@@ -3714,14 +3709,14 @@ function renderShop() {
                             </div>
                         </div>
 
-                        <!-- OR divider -->
+                        
                         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px;gap:4px;">
                             <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,#2a2a2a,transparent);"></div>
                             <span style="font-size:9px;font-weight:900;color:#333;text-transform:uppercase;letter-spacing:.1em;">или</span>
                             <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,#2a2a2a,transparent);"></div>
                         </div>
 
-                        <!-- Alt currencies -->
+                        
                         <div style="padding:16px 20px;display:flex;flex-direction:column;justify-content:center;gap:10px;">
                             <div style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(90deg,#7f1d1d,#991b1b);border:1px solid #c0392b44;border-radius:8px;padding:4px 10px;width:fit-content;animation:badge-pop .5s .1s ease both;">
                                 <span style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#fca5a5;">🔥 −50% от 5 подписок</span>
@@ -3751,7 +3746,7 @@ function renderShop() {
                         Нажав кнопку, ты выберешь предмет и оставишь контакт. Мы свяжемся в Telegram/Discord для уточнения деталей. Это исключительно добровольная поддержка - никаких обязательств.
                     </div>
                 </div>
-                <!-- Right side decorative -->
+               
                 <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0.85;">
                     <div style="font-size:64px;line-height:1;filter:drop-shadow(0 0 20px rgba(212,175,55,0.5));">✦</div>
                     <div style="font-size:10px;font-weight:900;letter-spacing:.3em;text-transform:uppercase;color:#D4AF37;">PRIME</div>
@@ -3877,23 +3872,23 @@ function _renderShopGrid(tag) {
         return `<div data-artifact-id="${a.id}" style="background:#141414;border-radius:18px;border:1px solid ${a.color}20;padding:0;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:all .25s;"
              onmouseover="this.style.borderColor='${a.color}55';this.style.transform='translateY(-5px)';this.style.boxShadow='0 16px 40px rgba(0,0,0,.6),0 0 20px ${a.color}15'"
              onmouseout="this.style.borderColor='${a.color}20';this.style.transform='';this.style.boxShadow=''">
-            <!-- Top accent bar -->
+            
             <div style="height:3px;background:linear-gradient(90deg,${a.color},${a.color}33);"></div>
-            <!-- Glow bg -->
+           
             <div style="position:absolute;top:0;left:0;right:0;height:100px;background:radial-gradient(ellipse at 50% 0%,${a.color}10 0%,transparent 70%);pointer-events:none;"></div>
             
             <div style="padding:20px;display:flex;flex-direction:column;gap:14px;flex:1;">
-                <!-- Header row -->
+                
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
-                    <div style="width:52px;height:52px;border-radius:14px;background:${a.color}12;border:1px solid ${a.color}30;display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;overflow:hidden;">${a.iconUrl ? `<img src="${a.iconUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : a.icon}</div>
+                    <div style="width:52px;height:52px;border-radius:14px;background:${a.color}12;border:1px solid ${a.color}30;display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;">${a.iconUrl ? `<img src="${a.iconUrl}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'">` : a.icon}</div>
                     <span style="font-size:9px;font-weight:900;padding:3px 9px;border-radius:20px;background:${tc}12;color:${tc};border:1px solid ${tc}30;text-transform:uppercase;letter-spacing:.06em;margin-top:4px;">${a.tag}</span>
                 </div>
-                <!-- Name & desc -->
+                
                 <div style="flex:1;">
                     <div style="font-weight:900;font-size:15px;color:#fff;margin-bottom:6px;letter-spacing:-.01em;">${a.name}</div>
                     <div style="font-size:11px;color:#555;line-height:1.6;">${a.desc}</div>
                 </div>
-                <!-- Effect pill -->
+                
                 <div style="display:flex;align-items:center;padding-top:12px;border-top:1px solid #ffffff08;">
                     <span style="font-size:9px;color:${a.color};font-weight:800;text-transform:uppercase;letter-spacing:.08em;">⚙ ${a.effect}</span>
                 </div>
@@ -3907,7 +3902,7 @@ function _openShopModal(id) {
     if (!a) return;
     const m = document.getElementById('shop-modal');
     if (a.iconUrl) {
-        document.getElementById('sm-icon').innerHTML = `<img src="${a.iconUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'"><span style="display:none">${a.icon}</span>`;
+        document.getElementById('sm-icon').innerHTML = `<img src="${a.iconUrl}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'"><span style="display:none">${a.icon}</span>`;
     } else {
         document.getElementById('sm-icon').textContent = a.icon;
     }
@@ -3927,30 +3922,133 @@ function _openShopModal(id) {
     document.getElementById('sm-btn').style.background = a.color;
     m.style.display = 'flex';
 }
-function _openPrimeModal() {
-    const grid = document.getElementById('prime-item-grid');
-    if (grid) {
-        grid.innerHTML = (typeof ARTIFACTS !== 'undefined' ? ARTIFACTS : []).map(a => {
-            const iconContent = a.iconUrl
-                ? `<img src="${a.iconUrl}" style="width:32px;height:32px;border-radius:8px;object-fit:cover;margin-bottom:4px;" onerror="this.style.display='none'">`
-                : `<span style="font-size:24px;line-height:1;margin-bottom:4px;display:block;">${a.icon}</span>`;
-            return `<div class="prime-item-opt" onclick="_primSelectItem('${a.id}','${a.color}')" data-id="${a.id}"
-                style="border-radius:10px;background:#0e0e0e;border:1px solid #222;padding:8px 6px;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:all .18s;text-align:center;"
-                onmouseover="if(!this.classList.contains('selected'))this.style.borderColor='${a.color}44'"
-                onmouseout="if(!this.classList.contains('selected'))this.style.borderColor='#222'">
-                ${iconContent}
-                <div style="font-size:8px;font-weight:900;color:#888;line-height:1.2;">${a.name}</div>
-            </div>`;
-        }).join('');
+// ── хранилище выборов: { slotIndex: { id, color } } ──
+window._primeSlotSelected = {};
+
+function _buildItemGrid(slotIdx) {
+    const arts = typeof ARTIFACTS !== 'undefined' ? ARTIFACTS : [];
+    const selectedId = (window._primeSlotSelected[slotIdx] || {}).id || '';
+    // Собрать ID уже выбранные в ДРУГИХ слотах
+    const takenIds = new Set(
+        Object.entries(window._primeSlotSelected || {})
+            .filter(([k]) => parseInt(k) !== slotIdx)
+            .map(([, v]) => v.id)
+    );
+    return arts.map(a => {
+        const sel    = a.id === selectedId;
+        const taken  = takenIds.has(a.id);
+        const iconHtml = a.iconUrl
+            ? `<img src="${a.iconUrl}" style="width:32px;height:32px;object-fit:contain;margin-bottom:3px;${taken?'opacity:.3;filter:grayscale(1)':''}" onerror="this.style.display='none'">`
+            : `<span style="font-size:22px;line-height:1;margin-bottom:3px;display:block;${taken?'opacity:.3;filter:grayscale(1)':''}">${a.icon}</span>`;
+        return `<div class="prime-item-opt" data-slot="${slotIdx}" data-id="${a.id}"
+            onclick="${taken ? '' : `_primSelectItem(${slotIdx},'${a.id}','${a.color}')`}"
+            style="border-radius:10px;background:${sel ? a.color+'18' : '#0e0e0e'};border:${sel ? '2px' : '1px'} solid ${sel ? a.color : '#222'};padding:7px 4px;display:flex;flex-direction:column;align-items:center;transition:all .18s;text-align:center;${taken ? 'cursor:not-allowed;opacity:.45;' : 'cursor:pointer;'}"
+            ${taken ? '' : `onmouseover="if(this.dataset.id!==(_primeSlotSelected[${slotIdx}]||{}).id)this.style.borderColor='${a.color}44'"
+            onmouseout="if(this.dataset.id!==(_primeSlotSelected[${slotIdx}]||{}).id)this.style.borderColor='#222'"`}>
+            ${iconHtml}
+            <div style="font-size:7px;font-weight:900;color:${taken?'#333':'#888'};line-height:1.2;">${a.name}</div>
+            ${taken ? '<div style="font-size:6px;color:#444;margin-top:1px;">занято</div>' : ''}
+        </div>`;
+    }).join('');
+}
+
+function _renderPrimeSlots() {
+    const wrap = document.getElementById('prime-slots-wrap');
+    const months = window._primeMonths || 1;
+    const count = months === 5 ? 5 : 1;
+    const label = document.getElementById('prime-art-label');
+    if (label) label.textContent = count === 5 ? 'Выбери 5 артефактов *' : 'Выбери артефакт *';
+
+    window._primeSlotSelected = {};
+
+    const artCount = (typeof ARTIFACTS !== 'undefined' ? ARTIFACTS : []).length || 6;
+    let html = '';
+    for (let i = 0; i < count; i++) {
+        const isFirst = i === 0;
+        html += `
+        <div id="prime-slot-${i}" style="${count > 1 ? 'background:#0a0a0a;border:1px solid #1a1a1a;border-radius:12px;overflow:hidden;transition:border-color .2s;' : ''}">
+            ${count > 1 ? `
+            <div onclick="_primeSlotToggle(${i})" style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;cursor:pointer;user-select:none;transition:background .15s;"
+                 onmouseover="this.style.background='#111'" onmouseout="this.style.background=''">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:9px;font-weight:900;color:#555;text-transform:uppercase;letter-spacing:.1em;">Месяц ${i+1}</span>
+                    <span id="prime-slot-summary-${i}" style="font-size:10px;color:#aaa;display:none;"></span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <span id="prime-slot-check-${i}" style="display:none;font-size:10px;color:#4ade80;font-weight:900;">✓</span>
+                    <span id="prime-slot-chevron-${i}" style="font-size:10px;color:#444;display:inline-block;transition:transform .2s;">${isFirst ? '▾' : '▸'}</span>
+                </div>
+            </div>
+            <div id="prime-slot-body-${i}" style="padding:0 10px 10px;${isFirst ? '' : 'display:none;'}">
+            ` : ''}
+                <div id="prime-item-grid-${i}" style="display:grid;grid-template-columns:repeat(${Math.min(6, artCount)},1fr);gap:4px;">
+                    ${_buildItemGrid(i)}
+                </div>
+                <div id="prime-art-cfg-${i}" style="display:none;background:#0c0c0c;border:1px solid #252525;border-radius:10px;padding:12px;margin-top:8px;"></div>
+            ${count > 1 ? '</div>' : ''}
+        </div>`;
     }
-    document.getElementById('prime-selected-item').value = '';
+    wrap.innerHTML = html;
+}
+
+function _primeSlotToggle(idx) {
+    const body    = document.getElementById('prime-slot-body-' + idx);
+    const chevron = document.getElementById('prime-slot-chevron-' + idx);
+    if (!body) return;
+    const isOpen = body.style.display !== 'none';
+    body.style.display      = isOpen ? 'none' : '';
+    chevron.style.transform = isOpen ? 'rotate(-90deg)' : '';
+}
+
+function _primeSlotCollapse(idx) {
+    const months = window._primeMonths || 1;
+    if (months < 5) return;
+    const sel = window._primeSlotSelected[idx] || {};
+    if (!sel.id) return;
+    const arts = typeof ARTIFACTS !== 'undefined' ? ARTIFACTS : [];
+    const a    = arts.find(x => x.id === sel.id);
+
+    // Обновить плашку-summary
+    const sum = document.getElementById('prime-slot-summary-' + idx);
+    const chk = document.getElementById('prime-slot-check-' + idx);
+    const box = document.getElementById('prime-slot-' + idx);
+    if (sum && a) { sum.textContent = (a.icon || '') + ' ' + a.name; sum.style.display = ''; }
+    if (chk) chk.style.display = '';
+    if (box) box.style.borderColor = '#4ade8033';
+
+    // Артефакты без конфига — автосворачиваем и открываем следующий
+    const needsCfg = ['custom_medal','profile_bg','profile_effect'].includes(sel.id);
+    if (!needsCfg) {
+        setTimeout(() => {
+            const body    = document.getElementById('prime-slot-body-' + idx);
+            const chevron = document.getElementById('prime-slot-chevron-' + idx);
+            if (body)    body.style.display    = 'none';
+            if (chevron) chevron.style.transform = 'rotate(-90deg)';
+            // Открыть следующий незаполненный
+            for (let n = idx + 1; n < 5; n++) {
+                if (!window._primeSlotSelected[n]) {
+                    const nb = document.getElementById('prime-slot-body-' + n);
+                    const nc = document.getElementById('prime-slot-chevron-' + n);
+                    if (nb) nb.style.display = '';
+                    if (nc) nc.style.transform = '';
+                    const ns = document.getElementById('prime-slot-' + n);
+                    if (ns) ns.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    break;
+                }
+            }
+        }, 250);
+    }
+}
+
+function _openPrimeModal() {
     document.getElementById('prime-nick').value = '';
     document.getElementById('prime-contact').value = '';
     document.getElementById('prime-err').style.display = 'none';
     document.getElementById('prime-success').style.display = 'none';
     document.getElementById('prime-btn').textContent = '✦ Отправить заявку на Prime';
     document.getElementById('prime-btn').disabled = false;
-    _selectPrimeMonths(1); // сбросить на 1 месяц
+    window._primeSlotSelected = {};
+    _selectPrimeMonths(1);
     document.getElementById('prime-modal').style.display = 'flex';
 }
 
@@ -3959,35 +4057,46 @@ function _selectPrimeMonths(n) {
     [1, 5].forEach(function(m) {
         const el = document.getElementById('pmonth-' + m);
         if (!el) return;
-        const isSelected = m === n;
-        el.style.borderColor = isSelected ? '#D4AF37' : '#1f1f1f';
-        el.style.background   = isSelected ? '#0f0e00' : '#0a0a0a';
-        // метка «выбрано»
+        const isSel = m === n;
+        el.style.borderColor = isSel ? '#D4AF37' : '#1f1f1f';
+        el.style.background  = isSel ? '#0f0e00' : '#0a0a0a';
         const lbl = el.querySelector('.pm-selected-lbl');
-        if (lbl) lbl.style.display = isSelected ? '' : 'none';
+        if (lbl) lbl.style.display = isSel ? '' : 'none';
     });
-    // Обновить текст кнопки
+    _renderPrimeSlots();
     const btn = document.getElementById('prime-btn');
     if (btn && !btn.disabled) {
-        btn.textContent = n === 5
-            ? '✦ Отправить заявку · 5 месяцев'
-            : '✦ Отправить заявку на Prime';
+        btn.textContent = n === 5 ? '✦ Отправить заявку · 5 месяцев' : '✦ Отправить заявку на Prime';
     }
 }
+
 function _closePrimeModal() {
     if (_pefPreviewRAF) { cancelAnimationFrame(_pefPreviewRAF); _pefPreviewRAF = null; }
+    if (window._pefRAFs) { Object.values(window._pefRAFs).forEach(function(r){ if(r) cancelAnimationFrame(r); }); window._pefRAFs = {}; }
+    if (typeof _pefTileRAFs !== 'undefined') { Object.values(_pefTileRAFs).forEach(function(r){ if(r) cancelAnimationFrame(r); }); _pefTileRAFs = {}; }
     document.getElementById('prime-modal').style.display = 'none';
 }
-function _primSelectItem(id, color) {
-    document.getElementById('prime-selected-item').value = id;
-    document.querySelectorAll('.prime-item-opt').forEach(el => {
+
+function _primSelectItem(slotIdx, id, color) {
+    window._primeSlotSelected[slotIdx] = { id, color };
+    // Обновить стиль карточек в этом слоте
+    document.querySelectorAll(`.prime-item-opt[data-slot="${slotIdx}"]`).forEach(el => {
         const isThis = el.dataset.id === id;
         el.style.borderColor = isThis ? color : '#222';
+        el.style.border      = isThis ? `2px solid ${color}` : '1px solid #222';
         el.style.background  = isThis ? color + '18' : '#0e0e0e';
-        if (isThis) el.classList.add('selected'); else el.classList.remove('selected');
     });
     document.getElementById('prime-item-err').style.display = 'none';
-    _renderPrimeArtConfig(id);
+    _renderPrimeArtConfig(slotIdx, id);
+    _primeSlotCollapse(slotIdx);
+    // Перерисовать гриды других слотов чтобы заблокировать этот артефакт
+    const months = window._primeMonths || 1;
+    const count  = months === 5 ? 5 : 1;
+    for (let i = 0; i < count; i++) {
+        if (i === slotIdx) continue;
+        const g = document.getElementById('prime-item-grid-' + i);
+        if (g) g.innerHTML = _buildItemGrid(i);
+    }
 }
 
 const _DONOR_EFFECT_OPTS = [
@@ -4001,11 +4110,12 @@ const _DONOR_EFFECT_OPTS = [
     {v:'coin',     l:'💰 Монетка'},
 ];
 
-function _renderPrimeArtConfig(id) {
-    const wrap = document.getElementById('prime-art-cfg');
+function _renderPrimeArtConfig(slotIdx, id) {
+    const wrap = document.getElementById('prime-art-cfg-' + slotIdx);
     if (!wrap) return;
     wrap.innerHTML = '';
     wrap.style.display = 'none';
+    const S = slotIdx; // suffix for unique IDs
 
     const fld = (lbl, inner) =>
         `<div style="margin-bottom:10px;">
@@ -4013,7 +4123,7 @@ function _renderPrimeArtConfig(id) {
             ${inner}
         </div>`;
     const inp = (id2, ph) =>
-        `<input id="${id2}" type="text" placeholder="${ph}"
+        `<input id="${id2}-${S}" type="text" placeholder="${ph}"
          style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 11px;color:#fff;font-size:11px;outline:none;font-family:inherit;"
          onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#2a2a2a'">`;
 
@@ -4025,57 +4135,57 @@ function _renderPrimeArtConfig(id) {
             <div style="margin-bottom:10px;">
                 <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:5px;">URL иконки медальки *</div>
                 <div style="display:flex;gap:8px;align-items:center;">
-                    <input id="prim-cfg-medal-icon" type="text" placeholder="https://... (PNG 64×64)"
+                    <input id="prim-cfg-medal-icon-${S}" type="text" placeholder="https://... (PNG 64×64)"
                      style="flex:1;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 11px;color:#fff;font-size:11px;outline:none;font-family:inherit;"
                      onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#2a2a2a'">
-                    <img id="prim-cfg-medal-prev" style="width:38px;height:38px;border-radius:7px;object-fit:cover;border:1px solid #333;flex-shrink:0;display:none;" onerror="this.style.display='none'">
+                    <img id="prim-cfg-medal-prev-${S}" style="width:38px;height:38px;border-radius:7px;object-fit:cover;border:1px solid #333;flex-shrink:0;display:none;" onerror="this.style.display='none'">
                 </div>
             </div>
             <div style="margin-bottom:10px;">
                 <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:5px;">Название (тултип)</div>
-                <input id="prim-cfg-medal-name" type="text" placeholder="Легенда сервера"
+                <input id="prim-cfg-medal-name-${S}" type="text" placeholder="Легенда сервера"
                  style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 11px;color:#fff;font-size:11px;outline:none;font-family:inherit;"
                  onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#2a2a2a'">
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
                 <div>
                     <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:5px;">Цвет свечения</div>
-                    <input type="color" id="prim-cfg-medal-glow" value="#fb923c"
+                    <input type="color" id="prim-cfg-medal-glow-${S}" value="#fb923c"
                         style="width:100%;height:34px;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;cursor:pointer;padding:2px;">
                 </div>
                 <div>
                     <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:5px;">Анимация</div>
-                    <select id="prim-cfg-medal-effect" style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;padding:8px;color:#fff;font-size:10px;font-family:inherit;">${effOpts}</select>
+                    <select id="prim-cfg-medal-effect-${S}" style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;padding:8px;color:#fff;font-size:10px;font-family:inherit;">${effOpts}</select>
                 </div>
             </div>
             <div style="background:#0e0e0e;border:1px solid #fb923c33;border-radius:10px;padding:12px;">
                 <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#fb923c;margin-bottom:8px;">Превью</div>
                 <div style="display:flex;align-items:center;gap:8px;min-height:30px;">
-                    <div id="prim-medal-live-wrap" style="display:none;position:relative;flex-shrink:0;">
-                        <img id="prim-medal-live-img" class="donor-img" src="" style="width:24px;height:24px;border-radius:5px;object-fit:cover;display:block;" onerror="this.parentElement.style.display='none'">
+                    <div id="prim-medal-live-wrap-${S}" style="display:none;position:relative;flex-shrink:0;">
+                        <img id="prim-medal-live-img-${S}" class="donor-img" src="" style="width:24px;height:24px;border-radius:5px;object-fit:cover;display:block;" onerror="this.parentElement.style.display='none'">
                     </div>
-                    <span id="prim-medal-placeholder" style="font-size:9px;color:#444;font-style:italic;">← введи URL иконки выше</span>
+                    <span id="prim-medal-placeholder-${S}" style="font-size:9px;color:#444;font-style:italic;">← введи URL иконки выше</span>
                     <span style="font-size:13px;font-weight:900;color:#fff;">Ваш_Ник</span>
                     <span style="font-size:9px;color:#D4AF37;font-weight:700;">✦ Prime</span>
                 </div>
                 <div style="font-size:9px;color:#555;margin-top:6px;">Медалька появится слева от ника, отдельно от донатерской 🪙</div>
             </div>`;
         setTimeout(function() {
-            var iconEl   = document.getElementById('prim-cfg-medal-icon');
-            var glowEl   = document.getElementById('prim-cfg-medal-glow');
-            var effectEl = document.getElementById('prim-cfg-medal-effect');
+            var iconEl   = document.getElementById('prim-cfg-medal-icon-'+S);
+            var glowEl   = document.getElementById('prim-cfg-medal-glow-'+S);
+            var effectEl = document.getElementById('prim-cfg-medal-effect-'+S);
             function updateMedalPreview() {
                 var v    = iconEl ? iconEl.value.trim() : '';
-                var prev = document.getElementById('prim-cfg-medal-prev');
-                var lw   = document.getElementById('prim-medal-live-wrap');
-                var li   = document.getElementById('prim-medal-live-img');
-                var ph   = document.getElementById('prim-medal-placeholder');
+                var prev = document.getElementById('prim-cfg-medal-prev-'+S);
+                var lw   = document.getElementById('prim-medal-live-wrap-'+S);
+                var li   = document.getElementById('prim-medal-live-img-'+S);
+                var ph   = document.getElementById('prim-medal-placeholder-'+S);
                 if (!prev || !lw || !li) return;
                 if (v) {
                     prev.src = v; prev.style.display = 'block';
                     li.dataset.glow      = glowEl   ? glowEl.value   : '#fb923c';
                     li.dataset.effect    = effectEl ? effectEl.value : '';
-                    li.dataset.medalName = document.getElementById('prim-cfg-medal-name') ? (document.getElementById('prim-cfg-medal-name').value || '') : '';
+                    li.dataset.medalName = document.getElementById('prim-cfg-medal-name-'+S) ? (document.getElementById('prim-cfg-medal-name-'+S).value || '') : '';
                     li.src = v; lw.style.display = 'block';
                     if (ph) ph.style.display = 'none';
                     li.onload = function() { if (typeof _applyDonorStyleEl === 'function') _applyDonorStyleEl(li); };
@@ -4154,42 +4264,51 @@ function _renderPrimeArtConfig(id) {
             {id:'blaze',     name:'Блейз',        color:'#fb923c', emoji:'🔥'},
         ];
         const efGrid = efs.map(e =>
-            `<div id="pef-opt-${e.id}" onclick="_selPrimEffect('${e.id}','${e.color}')"
-                  style="padding:8px 4px;border-radius:10px;border:1px solid #2a2a2a;background:#0a0a0a;cursor:pointer;text-align:center;transition:all .15s;">
-                <div style="font-size:20px;margin-bottom:3px;filter:drop-shadow(0 0 6px ${e.color});">${e.emoji}</div>
-                <div style="font-size:8px;font-weight:900;color:#888;line-height:1.2;">${e.name}</div>
+            `<div id="pef-opt-${S}-${e.id}" onclick="_selPrimEffect(${S},'${e.id}','${e.color}')"
+                  style="padding:8px 4px;border-radius:10px;border:1px solid #2a2a2a;background:#0a0a0a;cursor:pointer;text-align:center;transition:all .15s;position:relative;overflow:hidden;">
+                <canvas id="pef-tile-canvas-${S}-${e.id}" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity .3s;border-radius:10px;"></canvas>
+                <div style="position:relative;z-index:1;">
+                    <div style="font-size:20px;margin-bottom:3px;filter:drop-shadow(0 0 6px ${e.color});">${e.emoji}</div>
+                    <div style="font-size:8px;font-weight:900;color:#aaa;line-height:1.2;">${e.name}</div>
+                </div>
              </div>`
         ).join('');
         wrap.innerHTML =
             `<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#c084fc;margin-bottom:10px;">⚙ Выбери эффект профиля</div>
             <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px;">${efGrid}</div>
-            <input type="hidden" id="prim-cfg-effect-id">
-            <div id="pef-preview-wrap" style="display:none;background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;position:relative;height:72px;margin-bottom:10px;">
-                <canvas id="pef-preview-canvas" style="position:absolute;top:-20px;left:-20px;pointer-events:none;"></canvas>
-                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
-                    <span id="pef-preview-label" style="font-size:11px;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.9);z-index:2;"></span>
+            <input type="hidden" id="prim-cfg-effect-id-${S}">
+            <div id="pef-preview-wrap-${S}" style="display:none;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:14px;overflow:hidden;position:relative;height:100px;margin-bottom:10px;">
+                <canvas id="pef-preview-canvas-${S}" style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:4px;">
+                    <span id="pef-preview-label-${S}" style="font-size:13px;font-weight:900;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,1);z-index:2;letter-spacing:.05em;"></span>
+                    <span style="font-size:9px;color:#555;z-index:2;">— предпросмотр эффекта —</span>
                 </div>
             </div>
             <div style="font-size:9px;color:#555;">Эффект виден в профиле, hover-карточке и Топе авторов.</div>`;
+        // Запустить мини-анимации на плитках сразу после рендера
+        requestAnimationFrame(function() { _startPefTileAnimations(S, null); });
     }
 }
 
 var _pefPreviewRAF = null;
-function _selPrimEffect(id, color) {
+function _selPrimEffect(slotIdx, id, color) {
     var allIds = ['enderman','sand','enchant','creeper','nether','snow','dragon','lava','lightning','blaze'];
-    var hidEl = document.getElementById('prim-cfg-effect-id');
+    var hidEl = document.getElementById('prim-cfg-effect-id-' + slotIdx);
     if (hidEl) hidEl.value = id;
     allIds.forEach(function(e) {
-        var el = document.getElementById('pef-opt-' + e);
+        var el = document.getElementById('pef-opt-' + slotIdx + '-' + e);
         if (!el) return;
         el.style.borderColor = (e === id) ? color : '#2a2a2a';
         el.style.background  = (e === id) ? color + '18' : '#0a0a0a';
     });
-    // Live preview
+    // Каждый слот имеет свой RAF — останавливаем предыдущий для этого слота
+    if (!window._pefRAFs) window._pefRAFs = {};
+    if (window._pefRAFs[slotIdx]) { cancelAnimationFrame(window._pefRAFs[slotIdx]); window._pefRAFs[slotIdx] = null; }
+    // Глобальный тоже для обратной совместимости
     if (_pefPreviewRAF) { cancelAnimationFrame(_pefPreviewRAF); _pefPreviewRAF = null; }
-    var wrap   = document.getElementById('pef-preview-wrap');
-    var canvas = document.getElementById('pef-preview-canvas');
-    var lbl    = document.getElementById('pef-preview-label');
+    var wrap   = document.getElementById('pef-preview-wrap-' + slotIdx);
+    var canvas = document.getElementById('pef-preview-canvas-' + slotIdx);
+    var lbl    = document.getElementById('pef-preview-label-' + slotIdx);
     if (!wrap || !canvas) return;
     var efLabels = {
         enderman:'Эндермен', sand:'Песчаная буря', enchant:'Зачарование',
@@ -4200,100 +4319,183 @@ function _selPrimEffect(id, color) {
     wrap.style.display = '';
     var ef = _PEF_DEFS[id];
     if (!ef) return;
-    var W = wrap.offsetWidth + 40;
-    var H = wrap.offsetHeight + 40;
-    canvas.width  = W;
-    canvas.height = H;
-    canvas.style.width  = W + 'px';
-    canvas.style.height = H + 'px';
-    var cnt = Math.min(ef.count, 25);
-    var ps = Array.from({length: cnt}, function() {
-        return {
-            x: Math.random() * W,
-            y: Math.random() * H,
-            vx: (Math.random() - 0.5) * ef.speed * 0.9,
-            vy: -(0.3 + Math.random() * ef.speed),
-            life: Math.random(),
-            maxLife: 0.5 + Math.random() * 0.5,
-            size: 7 + Math.random() * 8,
-            char: ef.chars[Math.floor(Math.random() * ef.chars.length)],
-            col: Math.random() > 0.5 ? ef.color : ef.color2,
-        };
-    });
-    var ctx = canvas.getContext('2d');
-    function draw() {
-        ctx.clearRect(0, 0, W, H);
-        ps.forEach(function(p) {
-            p.x += p.vx; p.y += p.vy; p.life -= 0.005;
-            if (p.life <= 0 || p.y < -20 || p.x < -20 || p.x > W + 20) {
-                p.x = Math.random() * W; p.y = H + 5;
-                p.life = p.maxLife = 0.5 + Math.random() * 0.5;
-                p.col  = Math.random() > 0.5 ? ef.color : ef.color2;
-                p.char = ef.chars[Math.floor(Math.random() * ef.chars.length)];
-                p.vx   = (Math.random() - 0.5) * ef.speed * 0.9;
-                p.vy   = -(0.3 + Math.random() * ef.speed);
-            }
-            ctx.save();
-            ctx.globalAlpha = (p.life / p.maxLife) * 0.92;
-            ctx.fillStyle   = p.col;
-            ctx.shadowColor = p.col;
-            ctx.shadowBlur  = ef.glow;
-            ctx.font        = 'bold ' + p.size + 'px monospace';
-            ctx.fillText(p.char, p.x, p.y);
-            ctx.restore();
+
+    // Откладываем — чтобы браузер успел посчитать размеры враппера
+    requestAnimationFrame(function() {
+        var W = wrap.offsetWidth  || 340;
+        var H = wrap.offsetHeight || 100;
+        canvas.width  = W;
+        canvas.height = H;
+        canvas.style.width  = W + 'px';
+        canvas.style.height = H + 'px';
+
+        var cnt = Math.min(ef.count, 30);
+        var ps = Array.from({length: cnt}, function() {
+            return _makePefParticle(W, H, ef, true);
         });
-        _pefPreviewRAF = requestAnimationFrame(draw);
-    }
-    draw();
+        var ctx = canvas.getContext('2d');
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+            ps.forEach(function(p) {
+                p.x += p.vx; p.y += p.vy; p.life -= 0.006;
+                if (p.life <= 0 || p.y < -20 || p.x < -20 || p.x > W + 20) {
+                    var np = _makePefParticle(W, H, ef, false);
+                    Object.assign(p, np);
+                }
+                ctx.save();
+                ctx.globalAlpha = (p.life / p.maxLife) * 0.95;
+                ctx.fillStyle   = p.col;
+                ctx.shadowColor = p.col;
+                ctx.shadowBlur  = ef.glow;
+                ctx.font = 'bold ' + p.size + 'px monospace';
+                ctx.fillText(p.char, p.x, p.y);
+                ctx.restore();
+            });
+            window._pefRAFs[slotIdx] = _pefPreviewRAF = requestAnimationFrame(draw);
+        }
+        draw();
+    });
+
+    // Запустить мини-анимации на всех плитках этого слота
+    _startPefTileAnimations(slotIdx, id);
+}
+
+// Хелпер — создать одну частицу
+function _makePefParticle(W, H, ef, randomY) {
+    return {
+        x: Math.random() * W,
+        y: randomY ? Math.random() * H : H + 5,
+        vx: (Math.random() - 0.5) * ef.speed * 0.8,
+        vy: -(0.25 + Math.random() * ef.speed),
+        life: randomY ? Math.random() * 0.8 + 0.2 : (0.5 + Math.random() * 0.5),
+        maxLife: 0.5 + Math.random() * 0.5,
+        size: 6 + Math.random() * 7,
+        char: ef.chars[Math.floor(Math.random() * ef.chars.length)],
+        col: Math.random() > 0.5 ? ef.color : ef.color2,
+    };
+}
+
+// Мини-анимации на плитках выбора
+var _pefTileRAFs = {};
+function _startPefTileAnimations(slotIdx, selectedId) {
+    var allIds = Object.keys(_PEF_DEFS);
+    allIds.forEach(function(eid) {
+        var key = slotIdx + '-' + eid;
+        if (_pefTileRAFs[key]) { cancelAnimationFrame(_pefTileRAFs[key]); _pefTileRAFs[key] = null; }
+        var tCanvas = document.getElementById('pef-tile-canvas-' + slotIdx + '-' + eid);
+        if (!tCanvas) return;
+        var ef = _PEF_DEFS[eid];
+        if (!ef) return;
+        tCanvas.style.opacity = eid === selectedId ? '1' : '0.45';
+        var W = tCanvas.offsetWidth  || tCanvas.parentElement.offsetWidth  || 60;
+        var H = tCanvas.offsetHeight || tCanvas.parentElement.offsetHeight || 60;
+        tCanvas.width  = W;
+        tCanvas.height = H;
+        var ps = Array.from({length: Math.min(8, ef.count)}, function() {
+            return _makePefParticle(W, H, ef, true);
+        });
+        var ctx = tCanvas.getContext('2d');
+        function drawTile() {
+            ctx.clearRect(0, 0, W, H);
+            ps.forEach(function(p) {
+                p.x += p.vx * 0.6; p.y += p.vy * 0.6; p.life -= 0.008;
+                if (p.life <= 0 || p.y < -10) {
+                    var np = _makePefParticle(W, H, ef, false);
+                    Object.assign(p, np);
+                }
+                ctx.save();
+                ctx.globalAlpha = (p.life / p.maxLife) * 0.8;
+                ctx.fillStyle   = p.col;
+                ctx.shadowColor = p.col;
+                ctx.shadowBlur  = ef.glow * 0.6;
+                ctx.font = 'bold ' + (p.size * 0.7) + 'px monospace';
+                ctx.fillText(p.char, p.x, p.y);
+                ctx.restore();
+            });
+            _pefTileRAFs[key] = requestAnimationFrame(drawTile);
+        }
+        drawTile();
+    });
 }
 
 function _submitPrimeRequest() {
     const btn     = document.getElementById('prime-btn');
-    const itemId  = document.getElementById('prime-selected-item').value;
     const nick    = (document.getElementById('prime-nick').value || '').trim();
     const contact = (document.getElementById('prime-contact').value || '').trim();
     const errEl   = document.getElementById('prime-err');
     const itemErrEl = document.getElementById('prime-item-err');
+    const months  = window._primeMonths || 1;
+    const slotCount = months === 5 ? 5 : 1;
     errEl.style.display = 'none';
     itemErrEl.style.display = 'none';
-    if (!itemId) { itemErrEl.textContent = 'Выбери артефакт'; itemErrEl.style.display = ''; return; }
-    if (!nick)   { errEl.textContent = 'Введи свой ник'; errEl.style.display = ''; return; }
-    if (!contact){ errEl.textContent = 'Укажи Discord или Telegram'; errEl.style.display = ''; return; }
 
-    const a = (typeof ARTIFACTS !== 'undefined') ? ARTIFACTS.find(x => x.id === itemId) : null;
-    const months = window._primeMonths || 1;
-    const isMulti = months === 5;
-    // Собрать конфиг
-    const cfg = [];
-    if (itemId === 'custom_medal') {
-        const icon = (document.getElementById('prim-cfg-medal-icon')?.value||'').trim();
-        const name2 = (document.getElementById('prim-cfg-medal-name')?.value||'').trim();
-        const glow = document.getElementById('prim-cfg-medal-glow')?.value||'#fb923c';
-        const eff  = document.getElementById('prim-cfg-medal-effect')?.value||'';
-        if (!icon) { document.getElementById('prime-err').textContent='Укажи URL иконки медальки'; document.getElementById('prime-err').style.display=''; btn.disabled=false; btn.textContent='✦ Отправить заявку на Prime'; return; }
-        cfg.push(`🏅 Иконка: ${icon}`, `📝 Название: ${name2||'—'}`, `🎨 Свечение: ${glow}`, `✨ Эффект: ${eff||'нет'}`);
-    } else if (itemId === 'profile_bg') {
-        const b1=(document.getElementById('prim-cfg-bg-main')?.value||'').trim();
-        const b2=(document.getElementById('prim-cfg-bg-hover')?.value||'').trim();
-        const b3=(document.getElementById('prim-cfg-bg-top')?.value||'').trim();
-        if(b1) cfg.push(`🖼 Профиль: ${b1}`);
-        if(b2) cfg.push(`🖼 Hover: ${b2}`);
-        if(b3) cfg.push(`🖼 Топ: ${b3}`);
-    } else if (itemId === 'profile_effect') {
-        const eid = document.getElementById('prim-cfg-effect-id')?.value||'';
-        if (!eid) { document.getElementById('prime-err').textContent='Выбери эффект для профиля'; document.getElementById('prime-err').style.display=''; btn.disabled=false; btn.textContent='✦ Отправить заявку на Prime'; return; }
-        cfg.push(`🌀 Эффект: ${eid}`);
+    // Проверить что все слоты заполнены
+    const slots = window._primeSlotSelected || {};
+    for (let i = 0; i < slotCount; i++) {
+        if (!slots[i] || !slots[i].id) {
+            itemErrEl.textContent = slotCount > 1
+                ? `Выбери артефакт для месяца ${i + 1}`
+                : 'Выбери артефакт';
+            itemErrEl.style.display = '';
+            return;
+        }
     }
+    if (!nick)    { errEl.textContent = 'Введи свой ник';              errEl.style.display = ''; return; }
+    if (!contact) { errEl.textContent = 'Укажи Discord или Telegram';  errEl.style.display = ''; return; }
+
+    // Собрать строки по каждому слоту
+    const arts = typeof ARTIFACTS !== 'undefined' ? ARTIFACTS : [];
+    const slotLines = [];
+    for (let i = 0; i < slotCount; i++) {
+        const itemId = slots[i].id;
+        const a = arts.find(x => x.id === itemId);
+        const cfg = [];
+
+        if (itemId === 'custom_medal') {
+            const icon  = (document.getElementById(`prim-cfg-medal-icon-${i}`)?.value||'').trim();
+            const name2 = (document.getElementById(`prim-cfg-medal-name-${i}`)?.value||'').trim();
+            const glow  = document.getElementById(`prim-cfg-medal-glow-${i}`)?.value||'#fb923c';
+            const eff   = document.getElementById(`prim-cfg-medal-effect-${i}`)?.value||'';
+            if (!icon) {
+                errEl.textContent = slotCount > 1
+                    ? `Укажи URL иконки медальки для месяца ${i+1}`
+                    : 'Укажи URL иконки медальки';
+                errEl.style.display = ''; return;
+            }
+            cfg.push(`Иконка: ${icon}`, `Название: ${name2||'—'}`, `Свечение: ${glow}`, `Эффект: ${eff||'нет'}`);
+        } else if (itemId === 'profile_bg') {
+            const b1=(document.getElementById(`prim-cfg-bg-main-${i}`)?.value||'').trim();
+            const b2=(document.getElementById(`prim-cfg-bg-hover-${i}`)?.value||'').trim();
+            const b3=(document.getElementById(`prim-cfg-bg-top-${i}`)?.value||'').trim();
+            if(b1) cfg.push(`Профиль: ${b1}`);
+            if(b2) cfg.push(`Hover: ${b2}`);
+            if(b3) cfg.push(`Топ: ${b3}`);
+        } else if (itemId === 'profile_effect') {
+            const eid = document.getElementById(`prim-cfg-effect-id-${i}`)?.value||'';
+            if (!eid) {
+                errEl.textContent = slotCount > 1
+                    ? `Выбери эффект профиля для месяца ${i+1}`
+                    : 'Выбери эффект для профиля';
+                errEl.style.display = ''; return;
+            }
+            cfg.push(`Эффект: ${eid}`);
+        }
+
+        const prefix = slotCount > 1 ? `  Месяц ${i+1}: ` : '  ';
+        slotLines.push(`${prefix}${a ? a.icon + ' ' + a.name : itemId}`);
+        cfg.forEach(c => slotLines.push(`    ↳ ${c}`));
+    }
+
+    const isMulti = months === 5;
     const text = [
-        `✦ <b>Заявка на подписку Prime - Classic HUB</b>`,
+        `✦ <b>Заявка на подписку Prime — Classic HUB</b>`,
         ``,
-        `📦 <b>Месяцев:</b> ${months} ${isMulti ? '(×5 — скидка 50%)' : ''}`,
-        `⚗️ <b>Выбранный артефакт:</b> ${a ? a.icon + ' ' + a.name : itemId}`,
-        `🏷 <b>Категория:</b> ${a ? a.tag : '—'}`,
-        `👤 <b>Ник игрока:</b> ${nick}`,
+        `📦 <b>Месяцев:</b> ${months}${isMulti ? ' (×5 — скидка 50%)' : ''}`,
+        `⚗️ <b>Артефакты:</b>`,
+        ...slotLines,
+        ``,
+        `👤 <b>Ник:</b> ${nick}`,
         `💬 <b>Контакт:</b> ${contact}`,
-        `🆔 <b>ID предмета:</b> <code>${itemId}</code>`,
-        ...(cfg.length ? ['','⚙️ <b>Конфиг:</b>',...cfg] : []),
     ].join('\n');
 
     btn.disabled = true;
