@@ -73,6 +73,7 @@ Development by slowdown
         document.dispatchEvent(new Event('firebase-ready'));
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         body {
             background-color: #1a1a1a;
@@ -340,7 +341,7 @@ Development by slowdown
                 <a href="#" class="nav-tab">Информация</a>
                 <a href="#" class="nav-tab">Архив</a>
                 <a href="#" class="nav-tab" id="tab-updates-link">Обновления<span id="updates-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px #4ade80;animation:pulse-dot 1.4s infinite;" title="Новое обновление"></span></a>
-                <a href="#" class="nav-tab">Магазин</a>
+                <a href="#" class="nav-tab" id="nav-tab-shop">Магазин</a>
                 <div class="ml-auto flex items-center gap-2 flex-shrink-0">
                     <span id="header-trend-badge" class="hidden md:inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full whitespace-nowrap" style="background:#D4AF3712;border:1px solid #D4AF3730;color:#D4AF37;">
                         <span class="w-2 h-2 rounded-full inline-block flex-shrink-0" style="background:#D4AF37;animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;"></span>
@@ -471,9 +472,9 @@ Development by slowdown
     </div>
 
     <div id="author-overlay" onclick="closeAuthorProfile()"
-         class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md hidden justify-center items-center p-4" style="overflow-y:auto;">
-        <div class="w-full max-w-5xl my-auto rounded-2xl overflow-hidden shadow-2xl"
-             style="background:#0f0f0f;border:1px solid rgba(255,255,255,0.07);"
+         class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md hidden justify-center items-start" style="overflow-y:auto;padding:12px 8px;">
+        <div class="w-full max-w-5xl rounded-2xl overflow-hidden shadow-2xl"
+             style="background:#0f0f0f;border:1px solid rgba(255,255,255,0.07);margin:auto;"
              onclick="event.stopPropagation()">
 
             <div id="profile-hero" class="relative" style="height:160px;overflow:visible;">
@@ -522,6 +523,10 @@ Development by slowdown
                     </div>
                 </div>
 
+                
+                <div id="profile-pet-wrap" style="position:absolute;top:8px;right:50px;width:110px;height:110px;display:none;z-index:5;filter:drop-shadow(0 4px 16px rgba(0,0,0,0.7));">
+                    <canvas id="profile-pet-canvas" style="width:110px;height:110px;display:block;border-radius:12px;cursor:grab;"></canvas>
+                </div>
                 <button onclick="closeAuthorProfile()" class="absolute top-3 right-3 z-10 bg-black/60 text-white w-8 h-8 rounded-full hover:bg-[#D4AF37] hover:text-black transition flex items-center justify-center border border-white/10 text-xs">✕</button>
             </div>
 
@@ -545,7 +550,7 @@ Development by slowdown
                     </div>
                 </div>
 
-                <div class="grid gap-4" style="grid-template-columns:1fr 1.1fr;">
+                <div class="profile-two-col grid gap-4" style="grid-template-columns:1fr 1.1fr;">
 
                     <div class="flex flex-col gap-3">
 
@@ -563,6 +568,7 @@ Development by slowdown
                                     <div id="profile-joined" class="font-black text-white" style="font-size:11px;"></div>
                                 </div>
                             </div>
+                            <div id="profile-contacts" style="display:none;border-top:1px solid rgba(255,255,255,0.05);padding:8px 12px;flex-wrap:wrap;gap:6px;width:100%;box-sizing:border-box;"></div>
                         </div>
 
                         <div class="rounded-xl border p-3" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);">
@@ -629,6 +635,7 @@ Development by slowdown
 
             <div style="position:absolute;bottom:12px;left:100px;right:14px;">
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                    <span id="ahc-custom-medal" style="display:none;position:relative;cursor:default;flex-shrink:0;" onmouseenter="_donorTipShow(this)" onmouseleave="_donorTipHide()"><img id="ahc-custom-medal-img" class="donor-img" src="" style="width:18px;height:18px;border-radius:4px;object-fit:cover;display:block;"></span>
                     <span id="ahc-donor" style="display:none;position:relative;cursor:default;flex-shrink:0;" onmouseenter="_donorTipShow(this)" onmouseleave="_donorTipHide()"><img id="ahc-donor-img" class="donor-img" src="" style="width:18px;height:18px;border-radius:4px;object-fit:cover;display:block;"></span>
                     <div id="ahc-name" style="font-size:15px;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
                 </div>
@@ -650,47 +657,95 @@ Development by slowdown
     </div>
 
     <div id="question-overlay" onclick="toggleQuestion(false)"
-         class="fixed inset-0 bg-black/80 z-[115] backdrop-blur-md hidden justify-center items-center p-4">
-        <div class="bg-[#1a1a1a] w-full max-w-sm rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
+         class="fixed inset-0 bg-black/80 z-[115] backdrop-blur-md hidden justify-center items-start" style="overflow-y:auto;padding:16px;">
+        <div style="background:#111;width:100%;max-width:420px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);overflow:hidden;margin:auto;"
              onclick="event.stopPropagation()">
-
             <div class="h-1 w-full bg-gradient-to-r from-[#D4AF37] via-[#f5d77e] to-[#B8860B]"></div>
-
-            <div class="p-6">
+            <div style="padding:20px;position:relative;">
                 <button onclick="toggleQuestion(false)"
-                        class="absolute mt-[-8px] right-5 bg-black/60 text-gray-400 hover:text-white w-8 h-8 rounded-full flex items-center justify-center border border-white/10 transition text-xs">✕</button>
+                        style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);color:#888;cursor:pointer;font-size:12px;line-height:1;">✕</button>
 
-                <div class="text-[10px] gold-accent font-black tracking-widest uppercase mb-2">техническая поддержка</div>
-                <h3 class="text-lg font-black uppercase mb-4">Возник вопрос или предложение?</h3>
+                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.2em;color:#D4AF37;margin-bottom:4px;">Тех. поддержка</div>
+                <h3 style="font-size:15px;font-weight:900;text-transform:uppercase;margin-bottom:16px;padding-right:36px;color:#fff;">Нашли баг? Есть идея?</h3>
 
-                <p class="text-gray-400 text-sm leading-relaxed mb-6">
-                    Если у вас есть вопрос по поводу сайта, механики или критериев одобрения — загляните в раздел
-                    <a href="#" onclick="toggleQuestion(false); goToInfo();"
-                       class="text-[#D4AF37] font-bold hover:underline">Информация</a>.
-                    <br><br>
-                    Если там нет ответа или возник критический баг, ну или вы может обнаружили уязвимость или же просто хотите что-нибудь предложить, то тогда - свяжитесь со мной в удобной для вас социальной сети:
-                </p>
+                <div style="background:#0a0a0a;border:1px solid #1f1f1f;border-radius:14px;padding:14px;margin-bottom:12px;">
+                    <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:10px;">Написать администратору</div>
 
-                <div class="flex flex-col gap-3">
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px;">
+                        <div onclick="_supportType('bug')" id="stype-bug"
+                             style="border-radius:9px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:7px 4px;text-align:center;cursor:pointer;transition:all .15s;">
+                            <div style="font-size:16px;margin-bottom:2px;">🐛</div>
+                            <div style="font-size:8px;font-weight:900;color:#777;">Баг</div>
+                        </div>
+                        <div onclick="_supportType('idea')" id="stype-idea"
+                             style="border-radius:9px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:7px 4px;text-align:center;cursor:pointer;transition:all .15s;">
+                            <div style="font-size:16px;margin-bottom:2px;">💡</div>
+                            <div style="font-size:8px;font-weight:900;color:#777;">Идея</div>
+                        </div>
+                        <div onclick="_supportType('question')" id="stype-question"
+                             style="border-radius:9px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:7px 4px;text-align:center;cursor:pointer;transition:all .15s;">
+                            <div style="font-size:16px;margin-bottom:2px;">❓</div>
+                            <div style="font-size:8px;font-weight:900;color:#777;">Вопрос</div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                        <div>
+                            <div style="font-size:9px;color:#444;margin-bottom:4px;font-weight:700;">Ник (необязательно)</div>
+                            <input id="support-nick" type="text" placeholder="NikName"
+                                   style="width:100%;background:#161616;border:1px solid #252525;border-radius:8px;padding:7px 9px;color:#fff;font-size:11px;outline:none;font-family:inherit;box-sizing:border-box;"
+                                   onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#252525'">
+                        </div>
+                        <div>
+                            <div style="font-size:9px;color:#444;margin-bottom:4px;font-weight:700;">Контакт (TG / DC)</div>
+                            <input id="support-contact" type="text" placeholder="@username"
+                                   style="width:100%;background:#161616;border:1px solid #252525;border-radius:8px;padding:7px 9px;color:#fff;font-size:11px;outline:none;font-family:inherit;box-sizing:border-box;"
+                                   onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#252525'">
+                        </div>
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <div style="font-size:9px;color:#444;margin-bottom:4px;font-weight:700;">Сообщение *</div>
+                        <textarea id="support-msg" placeholder="Опишите проблему или идею подробно..." rows="3"
+                               style="width:100%;background:#161616;border:1px solid #252525;border-radius:8px;padding:7px 9px;color:#fff;font-size:11px;outline:none;font-family:inherit;resize:vertical;box-sizing:border-box;"
+                               onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#252525'"></textarea>
+                    </div>
+
+                    <div id="support-err" style="display:none;font-size:10px;color:#f87171;margin-bottom:8px;"></div>
+                    <div id="support-ok"  style="display:none;font-size:10px;color:#4ade80;font-weight:700;margin-bottom:8px;text-align:center;padding:8px;background:#0a1a0a;border-radius:8px;border:1px solid rgba(74,222,128,.2);">✓ Отправлено! Спасибо за обращение.</div>
+
+                    <button id="support-send-btn" onclick="_submitSupportMsg()"
+                            style="width:100%;background:linear-gradient(90deg,#D4AF37,#c49b20);border:2px solid #e8c84a;color:#000;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;padding:9px;border-radius:9px;cursor:pointer;font-family:inherit;box-shadow:0 0 0 1px rgba(212,175,55,0.3);"
+                            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+                        ✦ Отправить обращение
+                    </button>
+                </div>
+
+                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#333;margin-bottom:4px;">Прямая связь</div>
+                <div style="font-size:9px;color:#3a3a3a;margin-bottom:8px;line-height:1.4;">Только для критических ситуаций, требующих незамедлительного вмешательства</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
                     <a href="https://t.me/melochniy1" target="_blank"
-                       class="flex items-center gap-3 bg-[#229ED9]/10 hover:bg-[#229ED9]/20 border border-[#229ED9]/30 rounded-xl px-4 py-3 transition group">
-                        <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="#229ED9"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.5l-2.965-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.983.059z"/></svg>
-                        <span class="text-sm font-bold text-white group-hover:text-[#229ED9] transition">Telegram</span>
-                        <span class="ml-auto text-[10px] text-gray-600 group-hover:text-gray-400 transition">Написать →</span>
+                       style="display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(34,158,217,.08);border:1px solid rgba(34,158,217,.2);border-radius:10px;padding:8px 4px;text-decoration:none;"
+                       onmouseover="this.style.background='rgba(34,158,217,.18)'" onmouseout="this.style.background='rgba(34,158,217,.08)'">
+                        <span id="support-icon-tg" style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;">
+                            <svg viewBox="0 0 24 24" fill="#229ED9" style="width:18px;height:18px;"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.5l-2.965-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.983.059z"/></svg>
+                        </span>
+                        <span style="font-size:9px;font-weight:800;color:#fff;">Telegram</span>
                     </a>
-
                     <a href="https://discord.com/users/smc.slowdown" target="_blank"
-                       class="flex items-center gap-3 bg-[#5865F2]/10 hover:bg-[#5865F2]/20 border border-[#5865F2]/30 rounded-xl px-4 py-3 transition group">
-                        <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="#5865F2"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.04.034.052a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-                        <span class="text-sm font-bold text-white group-hover:text-[#5865F2] transition">Discord</span>
-                        <span class="ml-auto text-[10px] text-gray-600 group-hover:text-gray-400 transition">Написать →</span>
+                       style="display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(88,101,242,.08);border:1px solid rgba(88,101,242,.2);border-radius:10px;padding:8px 4px;text-decoration:none;"
+                       onmouseover="this.style.background='rgba(88,101,242,.18)'" onmouseout="this.style.background='rgba(88,101,242,.08)'">
+                        <span id="support-icon-dc" style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;">
+                            <svg viewBox="0 0 24 24" fill="#5865F2" style="width:18px;height:18px;"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.04.034.052a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+                        </span>
+                        <span style="font-size:9px;font-weight:800;color:#fff;">Discord</span>
                     </a>
-
                     <a href="https://f.simpleminecraft.ru/index.php?/profile/32948-slowdown/" target="_blank"
-                       class="flex items-center gap-3 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 rounded-xl px-4 py-3 transition group">
-                        <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="#D4AF37"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                        <span class="text-sm font-bold text-white group-hover:text-[#D4AF37] transition">Форум SMC</span>
-                        <span class="ml-auto text-[10px] text-gray-600 group-hover:text-gray-400 transition">Перейти →</span>
+                       style="display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:8px 4px;text-decoration:none;"
+                       onmouseover="this.style.background='rgba(212,175,55,.18)'" onmouseout="this.style.background='rgba(212,175,55,.08)'">
+                        <span id="support-icon-forum" style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;">
+                            <svg viewBox="0 0 24 24" fill="#D4AF37" style="width:18px;height:18px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        </span>
+                        <span style="font-size:9px;font-weight:800;color:#fff;">Форум SMC</span>
                     </a>
                 </div>
             </div>
@@ -704,7 +759,7 @@ Development by slowdown
             <div style="height:3px;background:linear-gradient(90deg,#D4AF37,#f5d77e,#D4AF37);"></div>
             <button onclick="_closePrimeModal()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:#1f1f1f;border:1px solid #333;color:#666;cursor:pointer;font-size:12px;z-index:10;line-height:1;">✕</button>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+            <div class="prime-modal-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
 
                 <div style="padding:28px 24px 28px 28px;border-right:1px solid rgba(255,255,255,0.05);">
 
@@ -761,17 +816,17 @@ Development by slowdown
 
                             <div onclick="_selectPrimeMonths(5)" id="pmonth-5"
                                  style="cursor:pointer;padding:10px 12px;border-radius:12px;background:#0a0a0a;border:2px solid #1f1f1f;transition:all .2s;position:relative;overflow:hidden;">
-                                <div style="position:absolute;top:0;right:0;background:linear-gradient(90deg,#7f1d1d,#991b1b);font-size:8px;font-weight:900;color:#fca5a5;padding:2px 7px;border-radius:0 0 0 8px;letter-spacing:.08em;">-50%</div>
+                                <div style="position:absolute;top:0;right:0;background:linear-gradient(90deg,#7f1d1d,#991b1b);font-size:8px;font-weight:900;color:#fca5a5;padding:2px 7px;border-radius:0 0 0 8px;letter-spacing:.08em;">-20%</div>
                                 <div style="font-size:13px;font-weight:900;color:#fff;">5 месяцев</div>
                                 <div style="font-size:10px;color:#666;margin-top:2px;">5 артефактов ·
                                     <span style="text-decoration:line-through;color:#3a3a3a;">$25</span>
-                                    <span style="color:#4ade80;font-weight:900;margin-left:3px;">$12.5</span>
+                                    <span style="color:#fff;font-weight:900;margin-left:3px;">$20</span>
                                 </div>
                             </div>
                         </div>
 
                         <div style="margin-top:8px;padding:9px 12px;background:#0a0f0a;border:1px solid #4ade8022;border-radius:10px;font-size:10px;color:#555;line-height:1.6;">
-                            👑 <span style="color:#4ade8077;">Накопил 5 подписок?</span> 6-я и каждая следующая - <span style="color:#4ade80;font-weight:900;">-65%</span>, всего <span style="color:#fff;font-weight:700;">$3.5</span>. Скидка применяется автоматически - напиши нам.
+                            👑 <span style="color:#4ade8077;">Накопил 5 подписок?</span> 6-я и каждая следующая - <span style="color:#4ade80;font-weight:900;">-40%</span>, всего <span style="color:#fff;font-weight:700;">$3</span> за подписку. Скидка применяется автоматически - напиши нам.
                         </div>
                     </div>
 
@@ -811,66 +866,42 @@ Development by slowdown
     </div>
 
     <div id="shop-modal" onclick="if(event.target===this)_closeShopModal()"
-         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);z-index:500;align-items:center;justify-content:center;padding:16px;">
-        <div onclick="event.stopPropagation()" style="background:#141414;border:1px solid #2a2a2a;border-radius:22px;width:100%;max-width:440px;position:relative;overflow:hidden;">
-            <div id="sm-bar" style="height:3px;width:100%;"></div>
-            <button onclick="_closeShopModal()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:#1f1f1f;border:1px solid #333;color:#666;cursor:pointer;font-size:12px;z-index:1;">✕</button>
-            <div style="padding:24px;">
-                <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
-                    <div style="width:56px;height:56px;border-radius:14px;background:#1f1f1f;display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0;" id="sm-icon"></div>
-                    <div>
-                        <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;margin-bottom:3px;" id="sm-tag"></div>
-                        <div style="font-size:18px;font-weight:900;color:#fff;line-height:1.2;" id="sm-name"></div>
-                    </div>
-                </div>
-                <div style="font-size:12px;color:#666;line-height:1.7;margin-bottom:6px;" id="sm-desc"></div>
-                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px;" id="sm-effect"></div>
+         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:500;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;">
+        <div onclick="event.stopPropagation()" style="background:#111;border:1px solid #222;border-radius:24px;width:100%;max-width:480px;position:relative;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.8);margin:auto;">
 
-                <div style="background:#0e0e0e;border:1px solid #1f1f1f;border-radius:12px;padding:14px;margin-bottom:18px;">
-                    <div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:10px;">Как получить?</div>
-                    <div style="display:flex;flex-direction:column;gap:7px;">
-                        <div style="display:flex;align-items:flex-start;gap:10px;font-size:11px;color:#777;">
-                            <span style="width:20px;height:20px;border-radius:50%;background:#1f1f1f;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#D4AF37;flex-shrink:0;">1</span>
-                            <span>Введи свой ник ниже</span>
-                        </div>
-                        <div style="display:flex;align-items:flex-start;gap:10px;font-size:11px;color:#777;">
-                            <span style="width:20px;height:20px;border-radius:50%;background:#1f1f1f;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#D4AF37;flex-shrink:0;">2</span>
-                            <span>Нажми «Отправить заявку» - она придёт нам в Telegram</span>
-                        </div>
-                        <div style="display:flex;align-items:flex-start;gap:10px;font-size:11px;color:#777;">
-                            <span style="width:20px;height:20px;border-radius:50%;background:#1f1f1f;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#D4AF37;flex-shrink:0;">3</span>
-                            <span>Мы свяжемся с тобой и активируем предмет</span>
-                        </div>
-                    </div>
-                </div>
+            <div id="sm-bar" style="height:3px;width:100%;flex-shrink:0;"></div>
 
-                <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">
-                    <div>
-                        <label style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#555;display:block;margin-bottom:6px;">Твой ник в Minecraft *</label>
-                        <input id="sm-nick" type="text" placeholder="NikName"
-                               style="width:100%;background:#0e0e0e;border:1px solid #2a2a2a;border-radius:10px;padding:11px 14px;color:#fff;font-size:13px;outline:none;font-family:inherit;transition:border .2s;"
-                               onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#2a2a2a'">
-                    </div>
-                    <div>
-                        <label style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#555;display:block;margin-bottom:6px;">Discord или Telegram для связи *</label>
-                        <input id="sm-contact" type="text" placeholder="@username или Discord#1234"
-                               style="width:100%;background:#0e0e0e;border:1px solid #2a2a2a;border-radius:10px;padding:11px 14px;color:#fff;font-size:13px;outline:none;font-family:inherit;transition:border .2s;"
-                               onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#2a2a2a'"
-                               onkeydown="if(event.key==='Enter')_submitShopRequest()">
+            <button onclick="_closeShopModal()" style="position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;background:#1f1f1f;border:1px solid #333;color:#555;cursor:pointer;font-size:11px;z-index:10;display:flex;align-items:center;justify-content:center;">✕</button>
+
+            <div id="sm-preview-banner" style="position:relative;height:130px;overflow:hidden;background:#0a0a0a;">
+                <canvas id="sm-effect-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+                <div id="sm-banner-bg" style="position:absolute;inset:0;pointer-events:none;"></div>
+                <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,#111 100%);z-index:2;pointer-events:none;"></div>
+                <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 20px;z-index:3;display:flex;align-items:flex-end;gap:14px;">
+                    <div id="sm-icon" style="width:52px;height:52px;border-radius:14px;background:#1a1a1a;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;box-shadow:0 4px 20px rgba(0,0,0,.6);"></div>
+                    <div style="min-width:0;">
+                        <div id="sm-tag" style="font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;margin-bottom:2px;opacity:.8;"></div>
+                        <div id="sm-name" style="font-size:18px;font-weight:900;color:#fff;line-height:1.1;letter-spacing:-.01em;"></div>
                     </div>
                 </div>
-                <div id="sm-err" style="display:none;background:#1f0000;border:1px solid #b91c1c44;border-radius:8px;padding:8px 12px;font-size:11px;color:#fca5a5;margin-bottom:10px;"></div>
-                <div id="sm-success" style="display:none;background:#0a1f0a;border:1px solid #16653444;border-radius:8px;padding:10px 12px;font-size:11px;color:#86efac;margin-bottom:10px;text-align:center;font-weight:700;">
+            </div>
+
+            <div style="padding:16px 20px 20px;">
+                <div id="sm-desc" style="font-size:12px;color:#666;line-height:1.65;margin-bottom:10px;"></div>
+                <div id="sm-effect-badge" style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;background:#ffffff08;"></div>
+
+                <div id="sm-extra" style="display:none;margin-bottom:14px;"></div>
+
+                <div id="sm-err" style="display:none;background:#1a0000;border:1px solid #b91c1c33;border-radius:8px;padding:8px 12px;font-size:11px;color:#fca5a5;margin-bottom:10px;"></div>
+                <div id="sm-success" style="display:none;background:#001a00;border:1px solid #16653433;border-radius:8px;padding:10px 12px;font-size:11px;color:#86efac;margin-bottom:10px;text-align:center;font-weight:700;">
                     ✓ Заявка отправлена! Мы скоро с тобой свяжемся.
                 </div>
-                <button id="sm-btn" onclick="_submitShopRequest()"
-                        style="width:100%;padding:12px;border-radius:11px;border:none;color:#000;font-size:12px;font-weight:900;cursor:pointer;text-transform:uppercase;letter-spacing:.1em;font-family:inherit;transition:all .2s;">
-                    📩 Отправить заявку
-                </button>
+                <div style="font-size:10px;color:#555;text-align:center;line-height:1.6;">
+                    Нажми <span style="color:#aaa;font-weight:700;">«Получить Prime»</span> ниже, чтобы выбрать этот и другие артефакты и оформить заявку.
+                </div>
             </div>
         </div>
     </div>
-
     <div id="form-overlay" class="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl hidden justify-center items-start p-4 overflow-y-auto">
         <div class="bg-[#1a1a1a] w-full max-w-2xl m-auto my-8 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
 
@@ -1025,8 +1056,9 @@ function loadSeasonConfigFromDB() {
     });
 }
 
-let customAchievements = {}; // кастомные достижения из Firebase
-let styleIcons = {};  // кастомные иконки стилей из Firebase
+let customAchievements = {}; 
+let styleIcons = {};  
+let skillIcons = {};  
 
 function loadAuthorProfilesFromDB() {
     const dbRef = window._fbRef(window._fbDb, 'authors');
@@ -1043,6 +1075,22 @@ function loadAuthorProfilesFromDB() {
 function loadStyleIconsFromDB() {
     const dbRef = window._fbRef(window._fbDb, 'config/styleIcons');
     window._fbOnValue(dbRef, snap => { styleIcons = snap.exists() ? snap.val() : {}; });
+
+    
+    const efRef = window._fbRef(window._fbDb, 'config/customEffects');
+    window._fbOnValue(efRef, snap => {
+        var custom = snap.exists() ? snap.val() : {};
+        Object.entries(custom).forEach(function([k,v]) {
+            _PEF_DEFS[k] = v;
+        });
+    });
+}
+function loadSkillIconsFromDB() {
+    const dbRef = window._fbRef(window._fbDb, 'config/skillIcons');
+    window._fbOnValue(dbRef, snap => { skillIcons = snap.exists() ? snap.val() : {}; });
+ 
+    const medalRef = window._fbRef(window._fbDb, 'config/medalCatalog');
+    window._fbOnValue(medalRef, snap => { window._medalCatalogData = snap.exists() ? snap.val() : {}; });
 }
 function loadCustomAchievementsFromDB() {
     const dbRef = window._fbRef(window._fbDb, 'config/customAchievements');
@@ -1052,7 +1100,7 @@ function loadCustomAchievementsFromDB() {
 }
 
 function loadArtifactIconsFromDB() {
-    // Загрузить кастомные иконки артефактов
+    
     const dbRef = window._fbRef(window._fbDb, 'config/artifactIcons');
     window._fbOnValue(dbRef, snap => {
         const icons = snap.exists() ? snap.val() : {};
@@ -1060,11 +1108,11 @@ function loadArtifactIconsFromDB() {
             ARTIFACTS.forEach(a => { a.iconUrl = icons[a.id] || null; });
         }
     });
-    // Загрузить дополнительные кастомные товары магазина
+ 
     const shopRef = window._fbRef(window._fbDb, 'config/shopItems');
     window._fbOnValue(shopRef, snap => {
         if (typeof ARTIFACTS === 'undefined') return;
-        // Удалить старые кастомные (флаг _custom) чтобы не дублировать
+        
         for (let i = ARTIFACTS.length - 1; i >= 0; i--) {
             if (ARTIFACTS[i]._custom) ARTIFACTS.splice(i, 1);
         }
@@ -1280,7 +1328,7 @@ function getAuthorSkillExpBonus(authorName, style) {
     const skills = getAuthorSkills(authorName);
     return (skills[style] || {}).bonus || 0;
 }
-// ═══════════════════════════════════════════════════════
+//---
 
 const RANKS = [
     { name: 'Новичок',     class: 'rank-novice',      minExp: 0     },
@@ -1297,12 +1345,12 @@ const RANKS = [
 //демиург по достижению поменять
 function getAuthorExp(authorName) {
     const authorBuilds = builds.filter(b => getBuildAuthors(b).includes(authorName));
-    // x2 EXP за постройки в текущем трендовом стиле + бонус навыка
+    // +500 EXP за постройки в текущем трендовом стиле + бонус навыка
     const _dblExp = _hasActiveArtifact(authorName, 'double_exp');
     const buildExp = authorBuilds.reduce((sum, b) => {
         const styles = getBuildStyles(b);
         const isTrend = SEASON_TREND_STYLE && styles.includes(SEASON_TREND_STYLE);
-        const base = isTrend ? EXP_PER_BUILD * 2 : EXP_PER_BUILD;
+        const base = isTrend ? EXP_PER_BUILD + 500 : EXP_PER_BUILD;
         const skillBonus = styles.reduce((sb, s) => sb + getAuthorSkillExpBonus(authorName, s), 0);
         return sum + (base + skillBonus) * (_dblExp ? 2 : 1);
     }, 0);
@@ -1334,11 +1382,11 @@ const ACHIEVEMENTS = [
     { id: 'beloved', tier: 'III', name: 'Любимец публики', desc: 'Суммарно набрал 1000+ просмотров', exp: 500, hidden: true, check: (a, ab) => ab.reduce((s, b) => s + getViews(b.id), 0) >= 1000 },
     { id: 'archive_star', tier: 'III', name: 'Звезда Архива', desc: 'Один объект набрал более 2000 просмотров', exp: 1000, hidden: true, check: (a, ab) => ab.some(b => getViews(b.id) >= 2000) },
     { id: 'style_madness', tier: 'III', name: 'Стилевое безумие', desc: 'Иметь постройки во всех доступных стилях', exp: 1000, hidden: true, check: (a, ab) => { const all = [...new Set(builds.map(b => b.style))]; const au = new Set(ab.map(b => b.style)); return all.every(s => au.has(s)); } },
-    { id: 'abs_universal', tier: 'III', name: 'Абсолютный Универсал', desc: 'Иметь постройки во всех стилях, представленных на сайте', exp: 1500, hidden: true, check: (a, ab) => { const all = [...new Set(builds.map(b => b.style))]; const au = new Set(ab.map(b => b.style)); return all.every(s => au.has(s)); } },
-    { id: 'face_of_server', tier: 'III', name: 'Лицо сервера', desc: 'Занять 1-е место в топе авторов', exp: 2000, hidden: true, check: (a, ab) => { const allAuthors = [...new Set(builds.flatMap(b => getBuildAuthors(b)))]; const scores = allAuthors.map(n => ({ name: n, score: builds.filter(b => getBuildAuthors(b).includes(n)).length })); scores.sort((x, y) => y.score - x.score); return scores.length > 0 && scores[0].name === a; } },
+    { id: 'abs_universal', tier: 'III', name: 'Абсолютный Универсал', desc: 'Иметь постройки во всех стилях, представленных на сайте', exp: 1000, hidden: true, check: (a, ab) => { const all = [...new Set(builds.map(b => b.style))]; const au = new Set(ab.map(b => b.style)); return all.every(s => au.has(s)); } },
+    { id: 'face_of_server', tier: 'III', name: 'Лицо сервера', desc: 'Занять 1-е место в топе авторов', exp: 1000, hidden: true, check: (a, ab) => { const allAuthors = [...new Set(builds.flatMap(b => getBuildAuthors(b)))]; const scores = allAuthors.map(n => ({ name: n, score: builds.filter(b => getBuildAuthors(b).includes(n)).length })); scores.sort((x, y) => y.score - x.score); return scores.length > 0 && scores[0].name === a; } },
     { id: 'mega_builder', tier: 'III', name: 'Мега-проектировщик', desc: 'Опубликовать 3 объекта с тегом «Мега-постройка»', exp: 1000, hidden: true, check: (a, ab) => ab.filter(b => b.desc.toLowerCase().includes('мега') || (b.tags && b.tags.includes('mega'))).length >= 3 },
     { id: 'millionaire', tier: 'III', name: 'Телевизор', desc: 'Суммарно 10 000 просмотров на всех работах', exp: 2500, hidden: true, check: (a, ab) => ab.reduce((s, b) => s + getViews(b.id), 0) >= 10000 },
-    { id: 'classic_keeper', tier: 'III', name: 'Хранитель классики', desc: 'Найти и опубликовать постройка из самого первого сезона', exp: 1000, hidden: true, check: (a, ab) => ab.some(b => b.season === 'Сезон 1') },
+    { id: 'classic_keeper', tier: 'III', name: 'Хранитель классики', desc: 'Найти и опубликовать постройка из самого первого сезона', exp: 500, hidden: true, check: (a, ab) => ab.some(b => b.season === 'Сезон 1') },
     { id: 'shadow_magnate', tier: 'III', name: 'Теневой магнат', desc: 'Построил Gothic-объект в подземном биоме', exp: 150, hidden: true, check: (a, ab) => ab.some(b => b.style === 'GOTHIC' && (b.desc.toLowerCase().includes('подзем') || b.desc.toLowerCase().includes('катакомб') || b.desc.toLowerCase().includes('пещер'))) },
 
     // те шо добавил в 1.4-1т
@@ -1374,7 +1422,7 @@ const ACHIEVEMENTS = [
     { id: 'week_on_site',  tier: 'II', name: 'Неделя на сайте',  desc: 'Зарегистрирован на сайте не менее 7 дней',    exp: 200,  hidden: false, check: (a, ab) => { const p = authorProfiles[a]; if (!p || !p.joined) return false; return (Date.now() - new Date(p.joined)) >= 7*24*3600*1000; } },
     { id: 'month_on_site', tier: 'II', name: 'Месяц на сайте',   desc: 'Зарегистрирован на сайте не менее 30 дней',   exp: 500,  hidden: false, check: (a, ab) => { const p = authorProfiles[a]; if (!p || !p.joined) return false; return (Date.now() - new Date(p.joined)) >= 30*24*3600*1000; } },
     { id: 'year_on_site',  tier: 'II', name: 'Год на сайте',     desc: 'Зарегистрирован на сайте не менее 365 дней',  exp: 2000, hidden: false, check: (a, ab) => { const p = authorProfiles[a]; if (!p || !p.joined) return false; return (Date.now() - new Date(p.joined)) >= 365*24*3600*1000; } },
-    { id: 'obt_member',   tier: 'II', name: 'Участник ОБТ',           desc: 'Зарегистрировался на сайте в период открытого бета-тестирования - до 1 апреля 2026', exp: 350, check: (a, ab) => { const p = authorProfiles[a]; if (!p || !p.joined) return false; return new Date(p.joined) < new Date('2026-04-01'); } },
+    { id: 'obt_member',   tier: 'II', name: 'Участник ОБТ',           desc: 'Зарегистрировался на сайте в период открытого бета-тестирования', exp: 350, check: (a, ab) => { const p = authorProfiles[a]; if (!p || !p.joined) return false; return new Date(p.joined) < new Date('2026-04-01'); } },
     { id: 'april_fool',   tier: 'II', name: 'Апрельский прикольчик',  desc: 'Опубликовал постройку 1 апреля - умеет веселиться!',                                  exp: 200, check: (a, ab) => ab.some(b => { const d = new Date(b.date); return d.getMonth() === 3 && d.getDate() === 1; }) },
     { id: 'new_year',     tier: 'II', name: 'Новогодний чудило',     desc: 'Опубликовал постройку 31 декабря - встречает Новый год со стилем!',                    exp: 350, check: (a, ab) => ab.some(b => { const d = new Date(b.date); return d.getMonth() === 11 && d.getDate() === 31; }) }
 
@@ -1577,7 +1625,7 @@ function openAuthorProfile(nameOverride) {
     const allSorted = allAuthorNames.map(n => ({ name: n, exp: getAuthorExp(n) })).sort((a, b) => b.exp - a.exp);
     const topPlace = allSorted.findIndex(a => a.name === authorName) + 1;
 
-    // Стили
+  
     const styleCount = {};
     authorBuilds.forEach(b => {
         getBuildStyles(b).forEach(s => { styleCount[s] = (styleCount[s] || 0) + 1; });
@@ -1625,8 +1673,27 @@ function openAuthorProfile(nameOverride) {
     const _phWrap = document.getElementById('profile-head-wrap');
     if (_phWrap) {
         if (_hasActiveArtifact(authorName, 'golden_frame')) {
-            _phWrap.style.border = '2px solid #D4AF37';
-            _phWrap.style.boxShadow = '0 0 14px rgba(212,175,55,0.7), 0 0 28px rgba(212,175,55,0.3), 0 8px 28px rgba(0,0,0,0.8)';
+            var _gfCfg = _getArtifactConfig(authorName, 'golden_frame') || {};
+            var _gfStyle = _gfCfg.frameStyle || 'gold';
+            var _gfW = (_gfCfg.frameWidth || 2) + 'px';
+            if (_gfStyle === 'rainbow') {
+                _phWrap.style.border = _gfW + ' solid transparent';
+                _phWrap.style.backgroundImage = 'linear-gradient(#1a1a1a,#1a1a1a),linear-gradient(var(--rba,0deg),#ff0080,#ff8c00,#ffed00,#00ff80,#00cfff,#7c3aed,#ff0080)';
+                _phWrap.style.backgroundOrigin = 'border-box';
+                _phWrap.style.backgroundClip = 'padding-box,border-box';
+                _phWrap.style.animation = '_rbFrameAnim ' + (_gfCfg.rainbowSpeed || 3) + 's linear infinite';
+                _phWrap.style.boxShadow = '0 0 14px rgba(168,85,247,0.5), 0 8px 28px rgba(0,0,0,0.8)';
+            } else if (_gfStyle === 'custom') {
+                var _gfColor = _gfCfg.frameColor || '#D4AF37';
+                var _gfGlow  = _gfCfg.frameGlow || 14;
+                _phWrap.style.border = _gfW + ' solid ' + _gfColor;
+                _phWrap.style.boxShadow = '0 0 ' + _gfGlow + 'px ' + _gfColor + '99, 0 8px 28px rgba(0,0,0,0.8)';
+                _phWrap.style.backgroundImage = '';
+            } else {
+                _phWrap.style.border = '2px solid #D4AF37';
+                _phWrap.style.boxShadow = '0 0 14px rgba(212,175,55,0.7), 0 0 28px rgba(212,175,55,0.3), 0 8px 28px rgba(0,0,0,0.8)';
+                _phWrap.style.backgroundImage = '';
+            }
         } else {
             _phWrap.style.border = '2px solid rgba(212,175,55,0.35)';
             _phWrap.style.boxShadow = '0 8px 28px rgba(0,0,0,0.8)';
@@ -1649,6 +1716,8 @@ function openAuthorProfile(nameOverride) {
             _cmEl.style.display = 'none';
         }
     }
+   
+    _renderPet(authorName);
     document.getElementById('profile-rank-badge').innerHTML = `<span class="rank-badge ${rankData.class}">${rankData.name}</span>`;
     document.getElementById('profile-rank-next').innerText = rankData.next;
     document.getElementById('profile-exp-label').innerText = progress.label;
@@ -1657,10 +1726,11 @@ function openAuthorProfile(nameOverride) {
     document.getElementById('profile-views').innerText = totalViews.toLocaleString('ru-RU');
     document.getElementById('profile-fav-style').innerText = favStyle;
     document.getElementById('profile-joined').innerText = joinedFormatted;
+    _renderProfileContacts(profile);
     document.getElementById('profile-ach-count').innerText = unlockedAch.length;
 
     const styleChart = document.getElementById('profile-styles-chart');
-    const maxCount = Math.max(...Object.values(styleCount), 1);
+    const _chartTotal = Object.values(styleCount).reduce((a,b)=>a+b,0);
     if (Object.keys(styleCount).length === 0) {
         styleChart.innerHTML = '<div class="text-[10px] text-gray-700 italic">Нет построек</div>';
     } else {
@@ -1668,13 +1738,13 @@ function openAuthorProfile(nameOverride) {
             .sort((a,b) => b[1]-a[1])
             .map(([style, cnt]) => {
                 const col = STYLE_COLORS_MAP[style] || '#D4AF37';
-                const pct = Math.round(cnt / maxCount * 100);
+                const pct = _chartTotal > 0 ? Math.round(cnt / _chartTotal * 100) : 0;
                 return `<div class="flex items-center gap-2">
                     <div class="text-[9px] font-black uppercase text-right flex-shrink-0" style="width:72px;color:${col}">${style}</div>
                     <div class="flex-grow bg-white/5 rounded-full h-2 overflow-hidden">
                         <div class="h-full rounded-full transition-all duration-700" style="width:${pct}%;background:${col};"></div>
                     </div>
-                    <div class="text-[9px] text-gray-500 flex-shrink-0 w-4 text-right">${cnt}</div>
+                    <div class="text-[9px] text-gray-500 flex-shrink-0 w-4 text-right">${pct}%</div>
                 </div>`;
             }).join('');
     }
@@ -1690,8 +1760,9 @@ function openAuthorProfile(nameOverride) {
     const _STYLE_KEY_MAP = {GOTHIC:'Gothic',MODERN:'Modern',MEDIEVAL:'Medieval',FANTASY:'Fantasy',JAPANESE:'Japanese',STEAMPUNK:'Steampunk',CITY:'City',SETTLEMENT:'Settlement',FUTURISTIC:'Futuristic'};
     function _getStyleIconHtml(style, size) {
         var titleKey = _STYLE_KEY_MAP[style] || style;
-        var url = (styleIcons || {})[titleKey] || '';
-        if (url) return '<img src="' + url + '" style="width:' + size + 'px;height:' + size + 'px;object-fit:cover;border-radius:5px;display:block;" onerror="this.style.display=\'none\'">';
+       
+        var url = (skillIcons || {})[titleKey] || '';
+        if (url) return '<img src="' + url + '" style="width:' + size + 'px;height:' + size + 'px;object-fit:contain;border-radius:5px;display:block;" onerror="this.style.display=\'none\'">';
         return SKILL_STYLE_ICONS[style] || '🔨';
     }
 
@@ -1709,9 +1780,9 @@ function openAuthorProfile(nameOverride) {
                 ? `<span style="font-size:7px;font-weight:900;padding:1px 5px;border-radius:6px;background:rgba(212,175,55,0.15);color:#D4AF37;border:1px solid rgba(212,175,55,0.25);">+${s.bonus} EXP</span>`
                 : '';
             return `<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px;display:flex;align-items:flex-start;gap:8px;">
-                <!-- Иконка стиля -->
+              
                 <div style="width:36px;height:36px;border-radius:8px;background:${col}18;border:1px solid ${col}33;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${_getStyleIconHtml(style, 24)}</div>
-                <!-- Инфо -->
+                
                 <div style="flex:1;min-width:0;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
                         <span style="font-size:10px;font-weight:900;color:#fff;">${SKILL_NAMES[style]||style}</span>
@@ -1917,8 +1988,9 @@ function openAuthorProfile(nameOverride) {
     setTimeout(() => { bar.style.width = progress.pct + '%'; }, 80);
 
     document.getElementById('author-overlay').style.display = 'flex';
-    var _topC = document.getElementById('pef-top-' + authorName);
-    if (_topC) _topC.style.display = 'none';
+ 
+    document.querySelectorAll('[id^="pef-top-"]').forEach(function(c){ c.style.display = 'none'; });
+   
     requestAnimationFrame(function() {
         _applyProfileEffect(authorName, 'profile-hero');
     });
@@ -1926,6 +1998,7 @@ function openAuthorProfile(nameOverride) {
 
 function closeAuthorProfile() {
     document.getElementById('author-overlay').style.display = 'none';
+    _destroyPet();
     document.querySelectorAll('[id^="pef-big-"],[id^="pef-sm-"]').forEach(function(c){ c.remove(); });
     Object.keys(_pefRAF).forEach(function(k){
         if (!k.startsWith('sm_') && !k.startsWith('top_')) {
@@ -1963,8 +2036,26 @@ function _showAuthorCard(event, name) {
     const _ahcHeadWrap = document.getElementById('ahc-head-wrap');
     if (_ahcHeadWrap) {
         if (_hasActiveArtifact(name, 'golden_frame')) {
-            _ahcHeadWrap.style.border = '2px solid #D4AF37';
-            _ahcHeadWrap.style.boxShadow = '0 0 12px rgba(212,175,55,0.7)';
+            var _hgfCfg = _getArtifactConfig(name, 'golden_frame') || {};
+            var _hgfStyle = _hgfCfg.frameStyle || 'gold';
+            var _hgfW = (_hgfCfg.frameWidth || 2) + 'px';
+            if (_hgfStyle === 'rainbow') {
+                _ahcHeadWrap.style.border = _hgfW + ' solid transparent';
+                _ahcHeadWrap.style.backgroundImage = 'linear-gradient(#1a1a1a,#1a1a1a),linear-gradient(var(--rba,0deg),#ff0080,#ff8c00,#ffed00,#00ff80,#00cfff,#7c3aed,#ff0080)';
+                _ahcHeadWrap.style.backgroundOrigin = 'border-box';
+                _ahcHeadWrap.style.backgroundClip = 'padding-box,border-box';
+                _ahcHeadWrap.style.animation = '_rbFrameAnim ' + (_hgfCfg.rainbowSpeed || 3) + 's linear infinite';
+                _ahcHeadWrap.style.boxShadow = '0 0 12px rgba(168,85,247,0.5)';
+            } else if (_hgfStyle === 'custom') {
+                var _hgfColor = _hgfCfg.frameColor || '#D4AF37';
+                _ahcHeadWrap.style.border = _hgfW + ' solid ' + _hgfColor;
+                _ahcHeadWrap.style.boxShadow = '0 0 12px ' + _hgfColor + '88';
+                _ahcHeadWrap.style.backgroundImage = '';
+            } else {
+                _ahcHeadWrap.style.border = '2px solid #D4AF37';
+                _ahcHeadWrap.style.boxShadow = '0 0 12px rgba(212,175,55,0.7)';
+                _ahcHeadWrap.style.backgroundImage = '';
+            }
         } else {
             _ahcHeadWrap.style.border = '';
             _ahcHeadWrap.style.boxShadow = '';
@@ -1988,6 +2079,26 @@ function _showAuthorCard(event, name) {
         }
     }
 
+    
+    const _ahcCm    = _getArtifactConfig(name, 'custom_medal');
+    const _ahcCmEl  = document.getElementById('ahc-custom-medal');
+    const _ahcCmImg = document.getElementById('ahc-custom-medal-img');
+    if (_ahcCmEl && _ahcCmImg) {
+        if (_ahcCm && _ahcCm.icon) {
+            _ahcCmEl.style.display = 'inline-block';
+            _ahcCmImg.style.cssText = 'width:18px;height:18px;border-radius:4px;object-fit:cover;display:block;';
+            _ahcCmImg.dataset.glow      = _ahcCm.glow   || '#fb923c';
+            _ahcCmImg.dataset.effect    = (_ahcCm.effect || '').replace(/^donor-effect-/, '');
+            _ahcCmImg.dataset.medalName = _ahcCm.name   || '';
+            _ahcCmImg.onload = function() { _applyDonorStyleEl(this); };
+            _ahcCmImg.src = _ahcCm.icon;
+            if (_ahcCmImg.complete && _ahcCmImg.naturalWidth) _applyDonorStyleEl(_ahcCmImg);
+        } else {
+            _ahcCmEl.style.display = 'none';
+            _ahcCmImg.src = '';
+        }
+    }
+
     const bgEl = document.getElementById('ahc-bg');
     if (bgEl) {
         const bgUrl = profile.hoverBg || profile.bgImage || '';
@@ -2002,20 +2113,19 @@ function _showAuthorCard(event, name) {
     const styleCounts = {};
     ab.forEach(b => { const s = b.style||''; if(s) styleCounts[s] = (styleCounts[s]||0)+1; });
     const styleEntries = Object.entries(styleCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
-    const maxCount = styleEntries.length ? styleEntries[0][1] : 1;
+    const styleTotal = styleEntries.reduce((sum,[,c]) => sum+c, 0) || 1;
     const stylesChartEl = document.getElementById('ahc-styles-chart');
     if (stylesChartEl) {
         stylesChartEl.innerHTML = styleEntries.length
             ? styleEntries.map(([style, cnt]) => {
                 const col = STYLE_COLORS_MAP[style] || '#D4AF37';
-                const icon = STYLE_ICONS_AHC[style] || '🔨';
-                const pct = Math.round(cnt / maxCount * 100);
+                const pct = Math.round(cnt / styleTotal * 100);
                 return `<div style="display:flex;align-items:center;gap:5px;">
-                    <span style="font-size:10px;width:16px;text-align:center;">${icon}</span>
-                    <div style="flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;">
-                        <div style="height:100%;width:${pct}%;background:${col};border-radius:3px;transition:width .4s;"></div>
+                    <div style="font-size:9px;font-weight:900;text-transform:uppercase;color:${col};text-align:right;flex-shrink:0;width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${style}</div>
+                    <div style="flex:1;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${pct}%;background:${col};border-radius:3px;transition:width .5s;"></div>
                     </div>
-                    <span style="font-size:8px;color:#666;min-width:12px;text-align:right;">${cnt}</span>
+                    <span style="font-size:8px;color:#666;min-width:26px;text-align:right;">${pct}%</span>
                 </div>`;
             }).join('')
             : '<span style="font-size:10px;color:#444;font-style:italic;">Нет построек</span>';
@@ -2091,8 +2201,104 @@ function copyWarpFromModal() {
 function toggleQuestion(show) {
     const el = document.getElementById('question-overlay');
     el.style.display = show ? 'flex' : 'none';
-    if (show) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = 'auto';
+    if (show) {
+        document.body.style.overflow = 'hidden';
+        _loadSupportIcons();
+    } else {
+        document.body.style.overflow = 'auto';
+        
+        ['support-nick','support-contact','support-msg'].forEach(function(id){
+            var f=document.getElementById(id); if(f) f.value='';
+        });
+        var e=document.getElementById('support-err'); if(e) e.style.display='none';
+        var o=document.getElementById('support-ok');  if(o) o.style.display='none';
+        var b=document.getElementById('support-send-btn');
+        if(b){b.disabled=false;b.textContent='✦ Отправить обращение';b.style.background='';b.style.color='';}
+        window._supportSelectedType=null;
+        ['bug','idea','question'].forEach(function(tp){
+            var s=document.getElementById('stype-'+tp);
+            if(s){s.style.borderColor='#2a2a2a';s.style.background='#0e0e0e';}
+        });
+    }
+}
+window._supportSelectedType = null;
+function _supportType(type) {
+    window._supportSelectedType = type;
+    var cols = {bug:'#f87171', idea:'#fbbf24', question:'#60a5fa'};
+    ['bug','idea','question'].forEach(function(tp){
+        var el=document.getElementById('stype-'+tp); if(!el) return;
+        el.style.borderColor = tp===type ? cols[tp] : '#2a2a2a';
+        el.style.background  = tp===type ? cols[tp]+'22' : '#0e0e0e';
+    });
+}
+function _submitSupportMsg() {
+    var type    = window._supportSelectedType;
+    var nick    = (document.getElementById('support-nick').value||'').trim();
+    var contact = (document.getElementById('support-contact').value||'').trim();
+    var msg     = (document.getElementById('support-msg').value||'').trim();
+    var errEl   = document.getElementById('support-err');
+    var okEl    = document.getElementById('support-ok');
+    var btn     = document.getElementById('support-send-btn');
+    errEl.style.display='none'; okEl.style.display='none';
+    if (!type) { errEl.textContent='Выберите тип обращения'; errEl.style.display=''; return; }
+    if (!msg)  { errEl.textContent='Напишите сообщение';     errEl.style.display=''; return; }
+    var typeLabels = {bug:'🐛 Баг', idea:'💡 Идея / Предложение', question:'❓ Вопрос'};
+    var lines = ['📩 <b>Тех. поддержка · Classic HUB</b>', '', '📋 <b>Тип:</b> '+typeLabels[type]];
+    if (nick)    lines.push('👤 <b>Ник:</b> '+nick);
+    if (contact) lines.push('💬 <b>Контакт:</b> '+contact);
+    lines.push('', msg);
+    btn.disabled=true; btn.textContent='Отправляем...';
+    fetch('https://d1-template.herotorch.workers.dev/sendMessage', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({text: lines.join('\n')})
+    }).then(function(r){return r.json();}).then(function(data){
+        if (data.ok) {
+            okEl.style.display='';
+            btn.textContent='✓ Отправлено!';
+            btn.style.background='#16a34a'; btn.style.color='#fff';
+        } else { throw new Error(data.description||'Ошибка'); }
+    }).catch(function(err){
+        btn.disabled=false; btn.textContent='✦ Отправить обращение';
+        btn.style.background=''; btn.style.color='';
+        errEl.textContent='Ошибка отправки: '+err.message; errEl.style.display='';
+    });
+}
+var _supportIconsLoaded = false;
+function _loadSupportIcons() {
+    if (_supportIconsLoaded || !window._fbDb) return;
+    _supportIconsLoaded = true;
+    window._fbOnValue(window._fbRef(window._fbDb,'config/supportIcons'), function(snap){
+        var d = snap.exists() ? snap.val() : {};
+        ['tg','dc','forum'].forEach(function(k){
+            var el = document.getElementById('support-icon-'+k);
+            if (!el || !d[k]) return;
+            el.innerHTML = '<img src="'+d[k]+'" style="width:20px;height:20px;object-fit:contain;" onerror="this.style.display=\'none\'">';
+        });
+    });
+}
+
+
+function _renderProfileContacts(profile) {
+    var el = document.getElementById('profile-contacts');
+    if (!el) return;
+    var discord = (profile && profile.discord) || '';
+    var forum   = (profile && profile.forum)   || '';
+    if (!discord && !forum) { el.style.display='none'; return; }
+    el.style.display = 'flex';
+    var html = '';
+    if (discord) {
+        var dUrl = discord.startsWith('http') ? discord : 'https://discord.com/users/'+discord.replace(/^@/,'');
+        html += '<a href="'+dUrl+'" target="_blank" style="flex:1;min-width:100px;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.3);border-radius:8px;padding:6px 10px;font-size:9px;font-weight:900;color:#818cf8;text-decoration:none;" onmouseover="this.style.background=\'rgba(88,101,242,.22)\'" onmouseout="this.style.background=\'rgba(88,101,242,.12)\'">'
+            +'<svg viewBox="0 0 24 24" fill="#5865F2" style="width:12px;height:12px;flex-shrink:0;"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.04.034.052a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>'
+            +'Discord</a>';
+    }
+    if (forum) {
+        var fUrl = forum.startsWith('http') ? forum : 'https://f.simpleminecraft.ru/index.php?/profile/'+forum;
+        html += '<a href="'+fUrl+'" target="_blank" style="flex:1;min-width:100px;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:6px 10px;font-size:9px;font-weight:900;color:#D4AF37;text-decoration:none;" onmouseover="this.style.background=\'rgba(212,175,55,.2)\'" onmouseout="this.style.background=\'rgba(212,175,55,.1)\'">'
+            +'<svg viewBox="0 0 24 24" fill="#D4AF37" style="width:12px;height:12px;flex-shrink:0;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>'
+            +'Форум SMC</a>';
+    }
+    el.innerHTML = html;
 }
 
 function goToInfo() {
@@ -2299,7 +2505,7 @@ function renderTopAuthors(searchQ, _fromInput) {
         </div>
     </div>
 
-    <!-- Поиск -->
+  
     <div class="mb-6">
         <input id="top-search" type="text" placeholder="🔍  Найти автора по нику..."
                value="${searchQ}"
@@ -2307,7 +2513,7 @@ function renderTopAuthors(searchQ, _fromInput) {
                class="w-full max-w-sm bg-[#252525] border border-white/10 rounded-xl py-3 px-5 text-sm focus:ring-1 focus:ring-[#D4AF37] outline-none">
     </div>
 
-    <!-- Список -->
+   
     <div id="top-authors-list" class="flex flex-col gap-3">`;
 
     container.innerHTML = html + `</div></div>`;
@@ -2375,7 +2581,7 @@ function _renderTopAuthorsList(filtered, authorsData) {
                         <img src="https://visage.surgeplay.com/head/56/${getSkin(author.name)}"
                              onerror="this.src='https://visage.surgeplay.com/head/56/Steve'"
                              class="w-14 h-14 rounded-xl hover:ring-2 hover:ring-[#D4AF37] transition-all cursor-pointer"
-                             style="image-rendering:pixelated;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.7));${_hasActiveArtifact(author.name,'golden_frame')?'box-shadow:0 0 0 2px #D4AF37,0 0 14px rgba(212,175,55,0.6);border-radius:12px;':''}"
+                             style="image-rendering:pixelated;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.7));${(function(){ if(!_hasActiveArtifact(author.name,'golden_frame')) return ''; var _c=_getArtifactConfig(author.name,'golden_frame')||{}; var _s=_c.frameStyle||'gold'; if(_s==='rainbow') return 'border:2px solid transparent;background-image:linear-gradient(#1a1a1a,#1a1a1a),linear-gradient(var(--rba,0deg),#ff0080,#ff8c00,#ffed00,#00ff80,#00cfff,#7c3aed,#ff0080);background-origin:border-box;background-clip:padding-box,border-box;animation:_rbFrameAnim '+(_c.rainbowSpeed||3)+'s linear infinite;border-radius:12px;'; if(_s==='custom'){var _col=_c.frameColor||'#D4AF37'; return 'box-shadow:0 0 0 2px '+_col+',0 0 14px '+_col+'88;border-radius:12px;';} return 'box-shadow:0 0 0 2px #D4AF37,0 0 14px rgba(212,175,55,0.6);border-radius:12px;'; })()}"
                              onclick="openAuthorProfile('${author.name}')">
                     </div>
                     <div class="flex-grow min-w-0">
@@ -2443,7 +2649,7 @@ function renderAchievements(filterTier, searchStr) {
             || (isHidden ? false : ach.name.toLowerCase().includes(searchStr))
             || (isHidden ? false : ach.desc.toLowerCase().includes(searchStr));
         if (!matchSearch && searchStr) return '';
-        // Вычисляем % владельцев
+        
         const allAuthN = [...new Set(builds.flatMap(b => getBuildAuthors(b)))];
         const totalN   = allAuthN.length || 1;
         let ownerCount = 0;
@@ -2483,7 +2689,7 @@ function renderAchievements(filterTier, searchStr) {
     container.innerHTML = `
     <div class="col-span-full w-full">
 
-        <!-- Шапка -->
+        
         <div class="relative rounded-3xl overflow-hidden mb-8 border border-white/5 px-8 py-10" style="background:linear-gradient(135deg,#0d0d0d 0%,#0e1a0e 50%,#0d0d0d 100%)">
             <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at 20% 50%,rgba(74,222,128,0.08) 0%,transparent 60%)"></div>
             <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -2509,7 +2715,7 @@ function renderAchievements(filterTier, searchStr) {
             </div>
         </div>
 
-        <!-- Поиск + фильтр -->
+       
         <div class="flex flex-wrap gap-3 mb-8 items-center">
             <input id="ach-search" type="text" placeholder="Поиск достижения..."
                    value="${searchStr}"
@@ -2529,7 +2735,7 @@ function renderAchievements(filterTier, searchStr) {
             </div>
         </div>
 
-        <!-- Тиры -->
+       
         <input type="hidden" id="ach-filter" value="${filterTier}">
         <div class="space-y-6" id="ach-cards-root">
         ${visibleTiers.map(tier => {
@@ -2540,7 +2746,7 @@ function renderAchievements(filterTier, searchStr) {
             const tierTotalExp = tierAchs.reduce((s,a) => s+a.exp, 0);
             return `
             <div class="rounded-2xl border overflow-hidden" style="border-color:${tier.color}22;background:#1a1a1a">
-                <!-- Заголовок тира -->
+              
                 <div class="flex items-center justify-between px-6 py-5"
                      style="background:linear-gradient(90deg,${tier.bg}cc 0%,${tier.bg}44 50%,transparent 100%);border-bottom:1px solid ${tier.color}22">
                     <div class="flex items-center gap-4">
@@ -2558,7 +2764,7 @@ function renderAchievements(filterTier, searchStr) {
                         <div class="text-[9px] text-gray-600">до +${tierTotalExp.toLocaleString()} EXP</div>
                     </div>
                 </div>
-                <!-- Сетка карточек -->
+                
                 <div class="grid grid-cols-1 md:grid-cols-2" style="border-top:1px solid ${tier.color}11">
                     ${cards || '<div class="col-span-2 p-8 text-center text-gray-600 text-sm">Ничего не найдено</div>'}
                 </div>
@@ -2601,7 +2807,7 @@ function _achUpdateCards(filterTier, searchStr) {
             const isHidden = !!a.hidden;
             if (searchStr && (isHidden || (!a.name.toLowerCase().includes(searchStr) && !a.desc.toLowerCase().includes(searchStr)))) return '';
             const imgSrc = ACH_ICONS[a.id] || 'https://placehold.co/64x64/252525/555?text=?';
-            // Сколько авторов имеют это достижение
+            
             let ownerCount = 0;
             allAuthNames.forEach(n => {
                 const ab = builds.filter(b => getBuildAuthors(b).includes(n));
@@ -2899,6 +3105,11 @@ function renderInfo() {
         if (url) return '<img src="' + url + '" style="width:' + size + 'px;height:' + size + 'px;object-fit:cover;border-radius:5px;display:block;" onerror="this.outerHTML=\'' + emoji + '\'">';
         return '<span style="font-size:' + size + 'px;line-height:1">' + emoji + '</span>';
     }
+    function _skillIcon(en, emoji, size) {
+        var url = (skillIcons || {})[en] || '';
+        if (url) return '<img src="' + url + '" style="width:' + size + 'px;height:' + size + 'px;object-fit:contain;border-radius:5px;display:block;" onerror="this.outerHTML=\'' + emoji + '\'">';
+        return '<span style="font-size:' + size + 'px;line-height:1">' + emoji + '</span>';
+    }
     var stylesHtml = STYLE_DEFS.map(function(s) {
         return '<div class="bg-black/30 rounded-xl p-3 border border-white/5 hover:border-yellow-500/30 transition cursor-default">' +
             '<div class="mb-1">' + _styleIcon(s.en, s.icon, 22) + '</div>' +
@@ -3027,7 +3238,7 @@ function renderInfo() {
                 '<div class="grid grid-cols-4 gap-2">' +
                     STYLE_DEFS.map(function(s) {
                         return '<div class="bg-black/30 rounded-xl p-2.5 border border-white/5 text-center hover:border-yellow-500/30 transition cursor-default">' +
-                            '<div style="margin-bottom:3px;display:flex;justify-content:center">' + _styleIcon(s.en, s.icon, 20) + '</div>' +
+                            '<div style="margin-bottom:3px;display:flex;justify-content:center">' + _skillIcon(s.en, s.icon, 20) + '</div>' +
                             '<div class="text-[8px] font-black text-white uppercase">' + s.en + '</div>' +
                             '<div class="text-[7px] text-gray-500">' + s.ru + '</div>' +
                         '</div>';
@@ -3110,7 +3321,7 @@ function renderInfo() {
         '</div>' +
 
         // FAQ расширенный
-        '<div class="relative rounded-2xl overflow-hidden mb-6" style="background:linear-gradient(135deg,#0d0d0d 0%,#130f00 50%,#0d0d0d 100%);border:1px solid rgba(212,175,55,0.2);">' +
+        '<div id="faq-prime-block" class="relative rounded-2xl overflow-hidden mb-6" style="background:linear-gradient(135deg,#0d0d0d 0%,#130f00 50%,#0d0d0d 100%);border:1px solid rgba(212,175,55,0.2);">' +
             '<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 15% 50%,rgba(212,175,55,0.09) 0%,transparent 55%);"></div>' +
             '<div style="position:relative;padding:28px 32px;">' +
                 '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;">' +
@@ -3174,7 +3385,7 @@ function renderInfo() {
                 '</div>' +
                 '<div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Как считается мой опыт?</div>' +
-                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Каждая постройка даёт <span class="text-white font-bold">+1 000 EXP</span>. Постройка в трендовом стиле сезона - <span class="text-white font-bold">+2 000 EXP</span> (x2 бонус). Сверху добавляются бонусы за достижения и дополнительный EXP.</p>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Каждая постройка даёт <span class="text-white font-bold">+1 000 EXP</span>. Постройка в трендовом стиле сезона даёт дополнительно <span class="text-white font-bold">+500 EXP</span> (итого 1 500). Сверху добавляются бонусы за достижения и навыки. Артефакт «Пузырёк опыта» удваивает весь EXP за постройки.</p>' +
                 '</div>' +
                 '<div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Откуда берутся просмотры?</div>' +
@@ -3216,13 +3427,10 @@ function renderInfo() {
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое Артефакты?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Артефакты - это особые предметы с эффектами, доступные только подписчикам <strong class="text-white">Prime</strong>. У каждого предмета есть <strong class="text-white">срок действия</strong> - обычно 30 дней. Когда срок истекает, предмет уходит в <strong class="text-white">Архив предметов</strong> в профиле и перестает действовать. Если подписка аннулируется раньше - все предметы тоже уходят в архив. В данный момент с доступными артефактами можно ознакомиться во вкладке <strong class="text-white">Магазин</strong>.</p>' +
                 '</div>' +
-                '<div>' +
-                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что за иконка у автора возле донатной?</div>' +
-                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Это кастомная медаль - уникальный артефакт Prime: своя иконка со свечением и анимацией, которая отображается <strong class="text-white">слева от ника</strong> - отдельно от донатерской медали. Видна везде: в профиле, карточках построек, ховер-карточке и Топе авторов. Название медали показывается во всплывающей подсказке.</p>' +
-                '</div>' +
+                
                 '<div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что за частицы мерцают у автора в профиле?</div>' +
-                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Это эффекты профиля - анимированные частицы вокруг аватарки. Виден в <strong class="text-white">трёх местах</strong>: в большом профиле, в ховер-карточке при наведении и у головы в Топе авторов. В данный момент доступно 10 эффектов на выбор: Эндермен, Зачарования, Крипер, Незер, Песчаная буря, Метель, Дракон Края, Лава, Молния, Блейз.</p>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Это эффекты профиля - анимированные частицы вокруг аватарки. Виден в <strong class="text-white">трёх местах</strong>: в большом профиле, в ховер-карточке при наведении и у головы в Топе авторов.</p>' +
                 '</div>' +
                 '<div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое Архив предметов?</div>' +
@@ -3283,25 +3491,35 @@ document.addEventListener('load', function(e) {
 
 var _pefRAF = {};
 var _PEF_DEFS = {
-    //5ориг
+    // оригинальные 5
     enderman: {color:'#8b5cf6', color2:'#c084fc', chars:['✦','⊹','✧','◆','▪','⋄'],     count:28, glow:18, speed:1.0},
     sand:     {color:'#d97706', color2:'#fbbf24', chars:['•','·','∙','⬧','◉','◦'],     count:35, glow:5,  speed:1.4},
     enchant:  {color:'#3b82f6', color2:'#60a5fa', chars:['ᚠ','ᚢ','ᚦ','ᚨ','ᚱ','ᚲ','ᛁ','ᛃ'], count:22, glow:16, speed:0.7},
     creeper:  {color:'#22c55e', color2:'#86efac', chars:['✸','✹','⁕','✺','⊛','✷'],     count:22, glow:14, speed:1.2},
     nether:   {color:'#ef4444', color2:'#f97316', chars:['▲','△','▴','⬆','◭','⬗'],     count:30, glow:20, speed:1.5},
-    //5новых
-    snow:     {color:'#bfdbfe', color2:'#e0f2fe', chars:['❄','❅','❆','✳','⋆','·','*'],   count:35, glow:8,  speed:0.55},  // снег/метель
-    dragon:   {color:'#a855f7', color2:'#e879f9', chars:['◈','◉','◎','⬡','⬢','◆','⬟'],  count:26, glow:24, speed:1.1},   // дракон края
-    lava:     {color:'#f97316', color2:'#fbbf24', chars:['⬤','●','◉','⊕','◎','○'],       count:22, glow:24, speed:0.85},  // лава
-    lightning:{color:'#fde047', color2:'#fbbf24', chars:['⚡','⌁','⌇','↯','⇝','╎'],      count:20, glow:28, speed:1.8},   // молния
-    blaze:    {color:'#fb923c', color2:'#fcd34d', chars:['✦','★','✧','✶','✴','✸'],       count:24, glow:22, speed:1.3},   // блейз
+    // 5 старых новых
+    snow:     {color:'#bfdbfe', color2:'#e0f2fe', chars:['❄','❅','❆','✳','⋆','·','*'],   count:35, glow:8,  speed:0.55},
+    dragon:   {color:'#a855f7', color2:'#e879f9', chars:['◈','◉','◎','⬡','⬢','◆','⬟'],  count:26, glow:24, speed:1.1},
+    lava:     {color:'#f97316', color2:'#fbbf24', chars:['⬤','●','◉','⊕','◎','○'],       count:22, glow:24, speed:0.85},
+    lightning:{color:'#fde047', color2:'#fbbf24', chars:['⚡','⌁','⌇','↯','⇝','╎'],      count:20, glow:28, speed:1.8},
+    blaze:    {color:'#fb923c', color2:'#fcd34d', chars:['✦','★','✧','✶','✴','✸'],       count:24, glow:22, speed:1.3},
+    // 9 новых
+    bubbles:  {color:'#7dd3fc', color2:'#bae6fd', chars:['○','◎','⊙','◯','◦','∘','⊚'],   count:25, glow:10, speed:0.45, vxMul:0.3, vyUp:true},  
+    thunder:  {color:'#fde047', color2:'#fff7ae', chars:['⚡','╎','⌁','↯','⇝','⌇','│'],  count:12, glow:40, speed:2.5, burst:true},              
+    pollen:   {color:'#fef08a', color2:'#d9f99d', chars:['✿','❀','✾','❁','⁕','·','∘'],   count:30, glow:8,  speed:0.5, drift:true},              
+    sparks:   {color:'#fb923c', color2:'#fcd34d', chars:['✦','✧','⁺','·','∗','⁎','✶'],   count:40, glow:16, speed:1.6, sparky:true},             
+    souls:    {color:'#5eead4', color2:'#a7f3d0', chars:['☁','❋','✥','⁜','⁛','✦','◌'],   count:20, glow:22, speed:0.6, vxMul:0.4},              
+    xp:       {color:'#4ade80', color2:'#86efac', chars:['◈','⬡','⬢','⬟','◉','○','⊙'],   count:28, glow:18, speed:0.8},                          
+    gunpowder:{color:'#9ca3af', color2:'#e5e7eb', chars:['⁕','✸','✹','⊛','✷','⁎','✺'],   count:35, glow:6,  speed:2.0, burst:true},              
+    bonemeal: {color:'#f0fdf4', color2:'#bbf7d0', chars:['✿','❀','⁕','∘','·','✾','❁'],   count:45, glow:6,  speed:1.1, vxMul:1.5},              
+    portal:   {color:'#7c3aed', color2:'#a855f7', chars:['▪','◾','◼','▫','◽','◻','▬'],   count:30, glow:28, speed:0.9, spiral:true},             
 };
 
 var _pefRAF = window._pefRAF || {};
 window._pefRAF = _pefRAF;
 
 function _applyProfileEffect(authorName, containerId) {
-    // Стоп предыдущего
+  
     if (_pefRAF[authorName]) { cancelAnimationFrame(_pefRAF[authorName]); delete _pefRAF[authorName]; }
     var old = document.getElementById('pef-big-' + authorName);
     if (old) old.remove();
@@ -3503,6 +3721,8 @@ function _stopProfileEffects(authorName) {
 
 function _applyDonorStyle(imgEl, color, effect, size) {
     if (!imgEl) return;
+  
+    var ef = (effect || '').replace(/^donor-effect-/, '');
     var c  = color  || '#D4AF37';
     var px = (size >= 20) ? 6 : 4;
     var glow = 'drop-shadow(0 0 '+px+'px '+c+') drop-shadow(0 0 '+(px*2)+'px '+c+'55)';
@@ -3517,7 +3737,6 @@ function _applyDonorStyle(imgEl, color, effect, size) {
         imgEl.style.setProperty('--dg', glow);
     }
 
-    var ef = effect || '';
     switch (ef) {
         case 'none':
         case '':
@@ -3633,12 +3852,12 @@ function _donorTipShow(el) {
     var img = el.querySelector('img');
     var tipImg = document.getElementById('donor-tip-img');
     if (img && tipImg) tipImg.src = img.src;
-    // Show medal name if custom medal
+    
     var medalName = img ? img.dataset.medalName : '';
     var tipTitle = tip.querySelector('[data-tip-title]');
     var tipSub   = tip.querySelector('[data-tip-sub]');
     if (tipTitle) tipTitle.textContent = medalName || 'Донатер';
-    if (tipSub)   tipSub.textContent   = medalName ? 'Кастомная медаль · Classic HUB' : 'Поддержал развитие проекта';
+    if (tipSub)   tipSub.textContent   = medalName ? 'Оригинальная медаль · Classic HUB' : 'Поддержал развитие проекта';
     tip.style.display = 'block';
     el.addEventListener('mousemove', _donorTipMove);
     _donorTipEl = el;
@@ -3766,7 +3985,7 @@ function renderShop() {
                 <button onclick="shopFilter('Профиль')" class="shop-filter-btn" style="font-size:10px;font-weight:900;padding:5px 12px;border-radius:8px;cursor:pointer;transition:all .2s;background:transparent;color:#D4AF37;border:1px solid #D4AF3733;text-transform:uppercase;letter-spacing:.06em;">Профиль</button>
                 <button onclick="shopFilter('Карточки')" class="shop-filter-btn" style="font-size:10px;font-weight:900;padding:5px 12px;border-radius:8px;cursor:pointer;transition:all .2s;background:transparent;color:#a78bfa;border:1px solid #a78bfa33;text-transform:uppercase;letter-spacing:.06em;">Карточки</button>
                 <button onclick="shopFilter('Буст')" class="shop-filter-btn" style="font-size:10px;font-weight:900;padding:5px 12px;border-radius:8px;cursor:pointer;transition:all .2s;background:transparent;color:#fbbf24;border:1px solid #fbbf2433;text-transform:uppercase;letter-spacing:.06em;">Бусты</button>
-                <button onclick="shopFilter('Титул')" class="shop-filter-btn" style="font-size:10px;font-weight:900;padding:5px 12px;border-radius:8px;cursor:pointer;transition:all .2s;background:transparent;color:#4ade80;border:1px solid #4ade8033;text-transform:uppercase;letter-spacing:.06em;">Титулы</button>
+
                 <button onclick="shopFilter('Медаль')" class="shop-filter-btn" style="font-size:10px;font-weight:900;padding:5px 12px;border-radius:8px;cursor:pointer;transition:all .2s;background:transparent;color:#fb923c;border:1px solid #fb923c33;text-transform:uppercase;letter-spacing:.06em;">Медали</button>
             </div>
         </div>
@@ -3783,12 +4002,12 @@ const SHOP_TAG_COLORS = { 'Профиль': '#D4AF37', 'Карточки': '#a78
 const ARTIFACTS = [
     {
         id: 'custom_medal', icon: '🏅', name: 'Бирка', tag: 'Медаль', color: '#fb923c',
-        desc: 'Уникальная медаль с твоей иконкой рядом с ником. Своё название, цвет свечения и анимация. Отображается слева от донатерской иконки.',
+        desc: 'Уникальная медаль на выбор из списка рядом с твоим ником. Можно отключить эффект если не нравится.',
         effect: 'Медаль у ника'
     },
     {
-        id: 'golden_frame', icon: '🖼️', name: 'Золотая рамка', tag: 'Профиль', color: '#D4AF37',
-        desc: 'Золотистая рамка вокруг 3D-головы в профиле и в карточке Топа авторов. Сразу выделяет тебя среди остальных.',
+        id: 'golden_frame', icon: '🖼️', name: 'Рамка', tag: 'Профиль', color: '#D4AF37',
+        desc: 'Золотистая или разноцветная рамка вокруг 3D-головы в профиле и в карточке Топа авторов. Сразу выделяет тебя среди остальных.',
         effect: 'Косметика профиля'
     },
     {
@@ -3818,6 +4037,11 @@ const ARTIFACTS = [
             { id: 'nether',   name: 'Незер',         color: '#ef4444', desc: 'Красные огненные частицы' },
         ]
     },
+    {
+        id: 'pet', icon: '🐾', name: 'Яйцо призыва', tag: 'Профиль', color: '#34d399',
+        desc: '3D-зверёк в правом углу твоего профиля. Интерактивный - крути мышкой, анимированный. Свинка, попугай, кот, волк и другие!',
+        effect: 'Косметика профиля'
+    },
 ];
 
 function _hasActiveArtifact(authorName, artifactId) {
@@ -3844,6 +4068,441 @@ function _getArtifactConfig(authorName, artifactId) {
     return entry.config || {};
 }
 
+
+
+
+var _petPreviewRenderers = {}; 
+
+const PET_TYPES_MAP = {
+    pig:      { name:'Свинка',   emoji:'🐷', color:'#FDA4AF', camZ:3.8, camY:0.55 },
+    cow:      { name:'Корова',   emoji:'🐄', color:'#8B7355', camZ:4.4, camY:0.65 },
+    sheep:    { name:'Овечка',   emoji:'🐑', color:'#D4D4D4', camZ:4.3, camY:0.55 },
+    chicken:  { name:'Курица',   emoji:'🐔', color:'#FEF08A', camZ:3.5, camY:0.40 },
+    cat:      { name:'Кот',      emoji:'🐱', color:'#FB923C', camZ:3.9, camY:0.45 },
+    wolf:     { name:'Волк',     emoji:'🐺', color:'#94A3B8', camZ:3.9, camY:0.50 },
+    parrot:   { name:'Попугай',  emoji:'🦜', color:'#F87171', camZ:3.3, camY:0.50 },
+    creeper:  { name:'Криппер',  emoji:'💚', color:'#4ADE80', camZ:4.0, camY:0.70 },
+    zombie:   { name:'Зомби',    emoji:'🧟', color:'#7BA05B', camZ:4.2, camY:0.70 },
+    enderman: { name:'Эндермен', emoji:'🕳️', color:'#A855F7', camZ:4.2, camY:0.90, modelScale:0.58 },
+    skeleton: { name:'Скелет',   emoji:'💀', color:'#D8D8D8', camZ:4.0, camY:0.70 },
+    frog:     { name:'Лягушка',  emoji:'🐸', color:'#E07040', camZ:3.6, camY:0.28 },
+};
+
+function _destroyPetPreview(canvasId) {
+    var s = _petPreviewRenderers[canvasId];
+    if (!s) return;
+    if (s.raf) { cancelAnimationFrame(s.raf); s.raf = null; }
+    try { if (s.renderer) s.renderer.dispose(); } catch(e) {}
+    delete _petPreviewRenderers[canvasId];
+}
+
+function _spawnPetCanvas(canvasEl, petId, opts) {
+    if (!canvasEl || typeof THREE === 'undefined') return function(){};
+    var cid = canvasEl.id;
+    if (!cid) { cid = 'pet-c-' + Math.random().toString(36).slice(2, 8); canvasEl.id = cid; }
+    _destroyPetPreview(cid);
+    opts = opts || {};
+    var W = opts.w || 200, H = opts.h || 200;
+    var interactive = !!opts.interactive;
+    var pt = PET_TYPES_MAP[petId] || PET_TYPES_MAP['pig'];
+    var camZ = opts.camZ || pt.camZ || 3.9;
+    var camY = opts.camY || pt.camY || 0.55;
+    var DPR = Math.min(window.devicePixelRatio || 1, 2);
+    canvasEl.width  = W * DPR;
+    canvasEl.height = H * DPR;
+    canvasEl.style.width  = W + 'px';
+    canvasEl.style.height = H + 'px';
+    var renderer = new THREE.WebGLRenderer({ canvas: canvasEl, alpha: true, antialias: false });
+    renderer.setSize(W * DPR, H * DPR, false);
+    renderer.setClearColor(0x000000, 0);
+    renderer.setPixelRatio(1);
+    var scene  = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
+    camera.position.set(0, camY, camZ);
+    camera.lookAt(0, 0.25, 0);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.60));
+    var dl  = new THREE.DirectionalLight(0xffffff, 0.95);  dl.position.set(2, 4, 3);   scene.add(dl);
+    var dl2 = new THREE.DirectionalLight(0x99aaff, 0.22); dl2.position.set(-2, -1, -2); scene.add(dl2);
+    var pet = _buildPetModel(petId);
+    scene.add(pet.group);
+    var rotY = -0.5, rotX = 0.08, drag = false, lx = 0, ly = 0;
+    var t0 = performance.now();
+    if (interactive) {
+        canvasEl.style.cursor = 'grab';
+        function gxy(e) { return e.touches ? {x:e.touches[0].clientX, y:e.touches[0].clientY} : {x:e.clientX, y:e.clientY}; }
+        canvasEl.addEventListener('mousedown', function(e){ drag=true; var p=gxy(e); lx=p.x; ly=p.y; canvasEl.style.cursor='grabbing'; });
+        window.addEventListener('mouseup', function(){ drag=false; if(canvasEl.isConnected) canvasEl.style.cursor='grab'; });
+        canvasEl.addEventListener('mousemove', function(e){ if(!drag)return; var p=gxy(e); rotY+=(p.x-lx)*0.014; rotX+=(p.y-ly)*0.010; rotX=Math.max(-0.55,Math.min(0.55,rotX)); lx=p.x; ly=p.y; });
+        canvasEl.addEventListener('touchstart', function(e){ drag=true; var p=gxy(e); lx=p.x; ly=p.y; e.preventDefault(); }, {passive:false});
+        canvasEl.addEventListener('touchend',   function(){ drag=false; }, {passive:true});
+        canvasEl.addEventListener('touchmove',  function(e){ if(!drag)return; var p=gxy(e); rotY+=(p.x-lx)*0.014; rotX+=(p.y-ly)*0.010; rotX=Math.max(-0.55,Math.min(0.55,rotX)); lx=p.x; ly=p.y; e.preventDefault(); }, {passive:false});
+    }
+    var state = { renderer: renderer, raf: null };
+    _petPreviewRenderers[cid] = state;
+    (function loop(ts) {
+        state.raf = requestAnimationFrame(loop);
+        var t = (ts - t0) / 1000;
+        pet.group.position.y = Math.sin(t * 1.6) * 0.044;
+        if (pet.headGroup) {
+            pet.headGroup.rotation.y = Math.sin(t * 0.85) * 0.13;
+            pet.headGroup.rotation.x = Math.sin(t * 0.55 + 0.7) * 0.05;
+        }
+        if (pet.wingL && pet.wingR) {
+            var fl = Math.sin(t * 4.2) * 0.30;
+            pet.wingL.rotation.z = fl + 0.15;
+            pet.wingR.rotation.z = -(fl + 0.15);
+        }
+        if (pet.armL && pet.armR) {
+            if (pet.armMode === 'zombie') {
+                pet.armL.rotation.x = -1.32 + Math.sin(t * 1.0) * 0.06;
+                pet.armR.rotation.x = -1.32 + Math.sin(t * 1.0 + 0.5) * 0.06;
+            } else {
+                pet.armL.rotation.z =  Math.sin(t * 1.4) * 0.14;
+                pet.armR.rotation.z = -Math.sin(t * 1.4) * 0.14;
+            }
+        }
+        if (pet.tail) {
+            pet.tail.rotation.z = Math.sin(t * 2.8) * 0.18 + 0.18;
+        }
+        if (!drag) rotY += 0.009;
+        pet.group.rotation.y = rotY;
+        pet.group.rotation.x = rotX;
+        renderer.render(scene, camera);
+    })(performance.now());
+    return function() { _destroyPetPreview(cid); };
+}
+
+function _selPrimePet(slotIdx, petId) {
+    Object.keys(PET_TYPES_MAP).forEach(function(pid) {
+        var el = document.getElementById('prime-pet-opt-' + slotIdx + '-' + pid);
+        if (!el) return;
+        var col = PET_TYPES_MAP[pid].color;
+        var isSel = pid === petId;
+        el.style.border      = isSel ? '2px solid ' + col : '1px solid #2a2a2a';
+        el.style.background  = isSel ? col + '22' : '#0a0a0a';
+        el.style.transform   = isSel ? 'scale(1.06)' : 'scale(1)';
+        var nm = el.querySelector('.pet-card-name');
+        if (nm) nm.style.color = isSel ? col : '#666';
+    });
+    var hid = document.getElementById('prim-cfg-pet-type-' + slotIdx);
+    if (hid) hid.value = petId;
+    var previewWrap   = document.getElementById('prim-pet-preview-wrap-' + slotIdx);
+    var previewCanvas = document.getElementById('prim-pet-preview-canvas-' + slotIdx);
+    var previewLbl    = document.getElementById('prim-pet-preview-lbl-' + slotIdx);
+    if (previewWrap && previewCanvas) {
+        previewWrap.style.display = '';
+        var pt = PET_TYPES_MAP[petId] || {};
+        var w  = previewWrap.offsetWidth || 280;
+        _spawnPetCanvas(previewCanvas, petId, {
+            w: w, h: 155, interactive: false,
+            camZ: (pt.camZ || 3.9) * 0.95, camY: pt.camY || 0.55
+        });
+        if (previewLbl) previewLbl.textContent = (pt.emoji || '') + '  ' + (pt.name || petId);
+    }
+}
+
+function _destroyPet() {
+    _destroyPetPreview('profile-pet-canvas');
+    var w = document.getElementById('profile-pet-wrap');
+    if (w) w.style.display = 'none';
+}
+
+function _renderPet(authorName) {
+    _destroyPet();
+    if (typeof THREE === 'undefined') return;
+    var cfg = _getArtifactConfig(authorName, 'pet');
+    if (!cfg) return;
+    var wrap   = document.getElementById('profile-pet-wrap');
+    var canvas = document.getElementById('profile-pet-canvas');
+    if (!wrap || !canvas) return;
+    wrap.style.display = 'block';
+    _spawnPetCanvas(canvas, cfg.petType || 'pig', { w: 110, h: 110, interactive: true });
+}
+
+function _buildPetModel(type) {
+    var G = new THREE.Group();
+    var res = { group: G, headGroup: null, wingL: null, wingR: null, armL: null, armR: null, tail: null, armMode: 'zombie' };
+    var _mc = {};
+    function mat(hex) { if (!_mc[hex]) _mc[hex] = new THREE.MeshLambertMaterial({ color: hex }); return _mc[hex]; }
+    function bx(w, h, d, col, px, py, pz, rx, ry, rz) {
+        var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(col));
+        m.position.set(px||0, py||0, pz||0);
+        if (rx) m.rotation.x=rx; if (ry) m.rotation.y=ry; if (rz) m.rotation.z=rz;
+        return m;
+    }
+
+    if (type === 'pig') {
+        var pk=0xF9A0B8, dpk=0xE07090, snc=0xCC6080, blk=0x111111;
+        G.add(bx(1.05, 0.64, 1.28, pk));
+        G.add(bx(0.72, 0.1,  0.88, 0xFFBBCC, 0,-0.34, 0));  
+        var hG = new THREE.Group();
+        hG.add(bx(0.72, 0.7,  0.68, pk));
+        hG.add(bx(0.44, 0.28, 0.12, dpk, 0,-0.12, 0.42));   
+        hG.add(bx(0.07, 0.07, 0.06, blk,-0.10,-0.13,0.5));   
+        hG.add(bx(0.07, 0.07, 0.06, blk, 0.10,-0.13,0.5));   
+        hG.add(bx(0.09, 0.12, 0.05, blk,-0.21, 0.11,0.37));  
+        hG.add(bx(0.09, 0.12, 0.05, blk, 0.21, 0.11,0.37));  
+        hG.add(bx(0.15, 0.22, 0.06, dpk,-0.30, 0.38,0.10));  
+        hG.add(bx(0.15, 0.22, 0.06, dpk, 0.30, 0.38,0.10));  
+        hG.position.set(0, 0.42, 0.72); G.add(hG); res.headGroup = hG;
+        var tl = bx(0.1, 0.28, 0.1, dpk, 0, 0.1,-0.7); tl.rotation.x=-0.65; G.add(tl); res.tail = tl;
+        [[-0.3,0.22],[0.3,0.22],[-0.3,-0.22],[0.3,-0.22]].forEach(function(p){ G.add(bx(0.28,0.6,0.28,pk,p[0],-0.46,p[1])); });
+        G.position.y = 0.29;
+
+    } else if (type === 'cow') {
+        var br=0x3E2B1F, wh=0xF0EFE9, db=0x2A1A0F, ud=0xEAA0A8, hn=0xF0E0B0;
+        G.add(bx(1.6,  0.78, 1.22, br));
+        G.add(bx(0.58, 0.32, 0.54, wh, -0.32, 0.09, 0.14));  
+        G.add(bx(0.42, 0.24, 0.38, wh,  0.34,-0.11,-0.22));  
+        G.add(bx(1.05, 0.15, 0.72, wh,  0,-0.44, 0));        
+        G.add(bx(0.50, 0.18, 0.34, ud,  0,-0.47, 0.22));     
+        var hG = new THREE.Group();
+        hG.add(bx(0.72, 0.72, 0.70, br));
+        hG.add(bx(0.48, 0.30, 0.12, wh,  0,-0.14,0.40));    
+        hG.add(bx(0.08, 0.08, 0.06, db,-0.10,-0.17,0.47));  
+        hG.add(bx(0.08, 0.08, 0.06, db, 0.10,-0.17,0.47));  
+        hG.add(bx(0.09, 0.12, 0.05, db,-0.23, 0.12,0.38));  
+        hG.add(bx(0.09, 0.12, 0.05, db, 0.23, 0.12,0.38));  
+        hG.add(bx(0.09, 0.24, 0.09, hn,-0.28, 0.44,0.06));  
+        hG.add(bx(0.09, 0.24, 0.09, hn, 0.28, 0.44,0.06));  
+        hG.position.set(0, 0.54, 0.82); G.add(hG); res.headGroup = hG;
+        var tl = bx(0.1, 0.36, 0.1, br, 0, 0.2,-0.7); tl.rotation.x=-0.5; G.add(tl);
+        G.add(bx(0.1, 0.15, 0.1, db, 0,-0.12,-0.94)); 
+        res.tail = tl;
+        [[-0.44,0.30],[0.44,0.30],[-0.44,-0.30],[0.44,-0.30]].forEach(function(p){ G.add(bx(0.30,0.85,0.30,br,p[0],-0.57,p[1])); });
+        G.position.y = 0.38;
+
+    } else if (type === 'sheep') {
+        var wo=0xD8D8D8, sk=0x4E3828, ds=0x2E1E10;
+        G.add(bx(1.50, 0.88, 1.50, wo));
+        var hG = new THREE.Group();
+        hG.add(bx(0.55, 0.55, 0.50, sk));
+        hG.add(bx(0.10, 0.10, 0.05, ds,-0.16, 0.08,0.28));  // eye L
+        hG.add(bx(0.10, 0.10, 0.05, ds, 0.16, 0.08,0.28));  // eye R
+        hG.add(bx(0.20, 0.12, 0.10, 0xAA8870, 0,-0.15,0.28)); // muzzle
+        hG.position.set(0, 0.50, 0.70); G.add(hG); res.headGroup = hG;
+        [[-0.42,0.32],[0.42,0.32],[-0.42,-0.32],[0.42,-0.32]].forEach(function(p){ G.add(bx(0.26,0.62,0.26,sk,p[0],-0.52,p[1])); });
+        G.position.y = 0.33;
+
+    } else if (type === 'chicken') {
+        var wh=0xF2F2F2, dw=0xD8D8D8, yw=0xFFBB00, rd=0xCC1122, blk=0x111111;
+        G.add(bx(0.60, 0.75, 0.56, wh));
+        // Tail feathers
+        G.add(bx(0.18, 0.28, 0.10, dw, 0, 0.26,-0.36,-0.40));
+        G.add(bx(0.10, 0.22, 0.08, dw,-0.08, 0.32,-0.38,-0.52));
+        G.add(bx(0.10, 0.22, 0.08, dw, 0.08, 0.32,-0.38,-0.52));
+        var wL = new THREE.Group(); wL.add(bx(0.14, 0.55, 0.44, dw)); wL.position.set(-0.38, 0.05, 0); G.add(wL); res.wingL = wL;
+        var wR = new THREE.Group(); wR.add(bx(0.14, 0.55, 0.44, dw)); wR.position.set( 0.38, 0.05, 0); G.add(wR); res.wingR = wR;
+        var hG = new THREE.Group();
+        hG.add(bx(0.52, 0.50, 0.50, wh));
+        hG.add(bx(0.15, 0.10, 0.10, yw, 0,-0.10, 0.30));   // beak top
+        hG.add(bx(0.15, 0.08, 0.08, yw, 0,-0.18, 0.30));   // beak bot
+        hG.add(bx(0.10, 0.14, 0.05, blk,-0.14, 0.09,0.28)); // eye L
+        hG.add(bx(0.10, 0.14, 0.05, blk, 0.14, 0.09,0.28)); // eye R
+        hG.add(bx(0.10, 0.24, 0.07, rd,  0, 0.30, 0.16));   // comb
+        hG.add(bx(0.08, 0.10, 0.07, rd,  0,-0.20, 0.30));   // wattle
+        hG.position.set(0, 0.60, 0.28); G.add(hG); res.headGroup = hG;
+        G.add(bx(0.10, 0.44, 0.10, yw,-0.12,-0.52, 0.06));  // leg L
+        G.add(bx(0.10, 0.44, 0.10, yw, 0.12,-0.52, 0.06));  // leg R
+        G.add(bx(0.25, 0.06, 0.18, yw,-0.12,-0.76, 0.10));  // foot L
+        G.add(bx(0.25, 0.06, 0.18, yw, 0.12,-0.76, 0.10));  // foot R
+        G.position.y = 0.36;
+
+    } else if (type === 'cat') {
+        var og=0xDD6622, dog=0xAA4010, wh=0xF8EEE8, gn=0x22BB44, blk=0x111111;
+        G.add(bx(0.88, 0.62, 1.12, og));
+        G.add(bx(0.55, 0.14, 0.65, wh, 0,-0.30, 0.10)); // chest/belly
+        var hG = new THREE.Group();
+        hG.add(bx(0.72, 0.65, 0.66, og));
+        hG.add(bx(0.16, 0.26, 0.07, og, -0.27, 0.40, 0.08)); // ear L
+        hG.add(bx(0.16, 0.26, 0.07, og,  0.27, 0.40, 0.08)); // ear R
+        hG.add(bx(0.08, 0.16, 0.05, dog,-0.26, 0.39, 0.12)); // inner ear L
+        hG.add(bx(0.08, 0.16, 0.05, dog, 0.26, 0.39, 0.12)); // inner ear R
+        hG.add(bx(0.10, 0.16, 0.05, gn, -0.20, 0.10, 0.37)); // eye L
+        hG.add(bx(0.10, 0.16, 0.05, gn,  0.20, 0.10, 0.37)); // eye R
+        hG.add(bx(0.04, 0.16, 0.04, blk,-0.20, 0.10, 0.39)); // slit L
+        hG.add(bx(0.04, 0.16, 0.04, blk, 0.20, 0.10, 0.39)); // slit R
+        hG.add(bx(0.12, 0.06, 0.05, dog, 0,-0.15, 0.38));   // nose
+        hG.position.set(0, 0.36, 0.60); G.add(hG); res.headGroup = hG;
+        // Tail (multi-segment)
+        var tG = new THREE.Group();
+        tG.add(bx(0.12, 0.55, 0.12, og, 0,-0.27, 0));
+        tG.add(bx(0.12, 0.38, 0.12, og, 0,-0.61, 0.14,-0.5));
+        tG.add(bx(0.12, 0.24, 0.12, wh, 0,-0.80, 0.26,-0.4)); // tip
+        tG.position.set(0, 0.22,-0.62); G.add(tG); res.tail = tG;
+        [[-0.28,0.25],[0.28,0.25],[-0.28,-0.25],[0.28,-0.25]].forEach(function(p){
+            G.add(bx(0.22, 0.44, 0.22, og, p[0],-0.38, p[1]));
+            G.add(bx(0.22, 0.08, 0.28, wh, p[0],-0.61, p[1]+0.04)); // paw
+        });
+        G.position.y = 0.28;
+
+    } else if (type === 'wolf') {
+        var gy=0x888888, dg=0x4A4A4A, wh=0xDDDDDD, yw=0xFFAA22, blk=0x111111;
+        G.add(bx(1.02, 0.66, 1.12, gy));
+        G.add(bx(0.46, 0.18, 0.55, wh, 0, 0.28, 0.20)); // neck fur
+        var hG = new THREE.Group();
+        hG.add(bx(0.70, 0.68, 0.72, gy));
+        hG.add(bx(0.42, 0.28, 0.14, wh,  0,-0.10, 0.42)); // muzzle
+        hG.add(bx(0.08, 0.08, 0.05, blk,-0.09,-0.09,0.51)); // nose L
+        hG.add(bx(0.08, 0.08, 0.05, blk, 0.09,-0.09,0.51)); // nose R
+        hG.add(bx(0.10, 0.13, 0.05, yw, -0.20, 0.10,0.40)); // eye L
+        hG.add(bx(0.10, 0.13, 0.05, yw,  0.20, 0.10,0.40)); // eye R
+        hG.add(bx(0.05, 0.13, 0.04, blk,-0.20, 0.10,0.42)); // pupil L
+        hG.add(bx(0.05, 0.13, 0.04, blk, 0.20, 0.10,0.42)); // pupil R
+        hG.add(bx(0.18, 0.28, 0.08, gy, -0.24, 0.44, 0.12)); // ear L
+        hG.add(bx(0.18, 0.28, 0.08, gy,  0.24, 0.44, 0.12)); // ear R
+        hG.add(bx(0.10, 0.18, 0.06, dg, -0.23, 0.43, 0.16)); // inner L
+        hG.add(bx(0.10, 0.18, 0.06, dg,  0.23, 0.43, 0.16)); // inner R
+        hG.position.set(0, 0.46, 0.62); G.add(hG); res.headGroup = hG;
+        var tG = new THREE.Group();
+        tG.add(bx(0.15, 0.52, 0.15, gy,  0, 0, 0,-0.8));
+        tG.add(bx(0.12, 0.30, 0.12, wh,  0,-0.38, 0.28,-1.2)); // tip
+        tG.position.set(0, 0.28,-0.62); G.add(tG); res.tail = tG;
+        [[-0.34,0.24],[0.34,0.24],[-0.34,-0.24],[0.34,-0.24]].forEach(function(p){
+            G.add(bx(0.24, 0.50, 0.24, gy,  p[0],-0.44, p[1]));
+            G.add(bx(0.28, 0.12, 0.28, dg, p[0],-0.70, p[1]+0.02));
+        });
+        G.position.y = 0.30;
+
+    } else if (type === 'parrot') {
+        var rd=0xDD2211, gn=0x22AA33, bl=0x2244DD, yw=0xFFCC00, blk=0x111111;
+        G.add(bx(0.44, 0.75, 0.40, rd));
+        G.add(bx(0.26, 0.35, 0.20, gn, 0,-0.16, 0));  // chest
+        var wL = new THREE.Group(); wL.add(bx(0.15, 0.65, 0.44, bl)); wL.add(bx(0.12, 0.50, 0.36, gn, 0,-0.06, 0.01)); wL.position.set(-0.32, 0.08, 0); G.add(wL); res.wingL = wL;
+        var wR = new THREE.Group(); wR.add(bx(0.15, 0.65, 0.44, bl)); wR.add(bx(0.12, 0.50, 0.36, gn, 0,-0.06, 0.01)); wR.position.set( 0.32, 0.08, 0); G.add(wR); res.wingR = wR;
+        G.add(bx(0.20, 0.62, 0.12, bl,  0,-0.52,-0.26, 0.45)); // tail main
+        G.add(bx(0.12, 0.52, 0.10, rd,-0.10,-0.50,-0.28, 0.50));
+        G.add(bx(0.12, 0.52, 0.10, rd, 0.10,-0.50,-0.28, 0.50));
+        var hG = new THREE.Group();
+        hG.add(bx(0.50, 0.50, 0.48, rd));
+        hG.add(bx(0.14, 0.12, 0.10, yw, 0,-0.08, 0.28)); // beak top
+        hG.add(bx(0.12, 0.10, 0.08, yw, 0,-0.16, 0.28)); // beak bot
+        hG.add(bx(0.11, 0.14, 0.05, blk,-0.14, 0.08,0.27)); // eye L
+        hG.add(bx(0.11, 0.14, 0.05, blk, 0.14, 0.08,0.27)); // eye R
+        // Crest feathers
+        hG.add(bx(0.08, 0.22, 0.07, rd,   0, 0.32, 0.10,-0.20));
+        hG.add(bx(0.07, 0.19, 0.06, yw, -0.10, 0.28, 0.12,-0.30));
+        hG.add(bx(0.07, 0.19, 0.06, yw,  0.10, 0.28, 0.12,-0.30));
+        hG.position.set(0, 0.60, 0.12); G.add(hG); res.headGroup = hG;
+        G.add(bx(0.12, 0.32, 0.12, yw,-0.10,-0.50, 0.04)); // foot L
+        G.add(bx(0.12, 0.32, 0.12, yw, 0.10,-0.50, 0.04)); // foot R
+        G.position.y = 0.28;
+
+    } else if (type === 'creeper') {
+        var cg=0x44AA44, dk=0x226622, blk=0x111111;
+        G.add(bx(0.55, 1.10, 0.50, cg));
+        G.add(bx(0.15, 0.60, 0.02, dk,-0.10, 0, 0.27)); // body stripe L
+        G.add(bx(0.15, 0.60, 0.02, dk, 0.10, 0, 0.27)); // body stripe R
+        var hG = new THREE.Group();
+        hG.add(bx(0.88, 0.88, 0.88, cg));
+        hG.add(bx(0.26, 0.24, 0.06, blk,-0.22, 0.15, 0.47)); // eye L
+        hG.add(bx(0.26, 0.24, 0.06, blk, 0.22, 0.15, 0.47)); // eye R
+        hG.add(bx(0.12, 0.22, 0.06, blk,-0.15,-0.14, 0.47)); // mouth L
+        hG.add(bx(0.26, 0.12, 0.06, blk,   0,-0.28, 0.47));  // mouth mid
+        hG.add(bx(0.12, 0.22, 0.06, blk, 0.15,-0.14, 0.47)); // mouth R
+        hG.position.set(0, 0.80, 0); G.add(hG); res.headGroup = hG;
+        [[-0.17,0.12],[0.17,0.12],[-0.17,-0.12],[0.17,-0.12]].forEach(function(p){ G.add(bx(0.22, 0.40, 0.22, dk, p[0],-0.63, p[1])); });
+        G.position.y = 0.22;
+
+    } else if (type === 'zombie') {
+        var sk=0x799C5B, ds=0x4A6430, sh=0x3D6492, pn=0x2A3E58, blk=0x111111, eg=0x55AA22;
+        G.add(bx(0.52, 0.92, 0.36, sh));   // shirt/torso
+        G.add(bx(0.52, 0.46, 0.36, pn, 0,-0.50, 0)); // pants
+        var hG = new THREE.Group();
+        hG.add(bx(0.62, 0.62, 0.58, sk));
+        hG.add(bx(0.10, 0.13, 0.05, blk,-0.17, 0.12,0.32)); // eye socket L
+        hG.add(bx(0.10, 0.13, 0.05, blk, 0.17, 0.12,0.32)); // eye socket R
+        hG.add(bx(0.07, 0.09, 0.04, eg,  -0.17, 0.12,0.34)); // glow L
+        hG.add(bx(0.07, 0.09, 0.04, eg,   0.17, 0.12,0.34)); // glow R
+        hG.add(bx(0.20, 0.06, 0.04, ds,   0,-0.15,0.32));   // mouth
+        hG.position.set(0, 0.74, 0); G.add(hG); res.headGroup = hG;
+        // Arms stretched forward (zombie pose)
+        var aL = new THREE.Group(); aL.add(bx(0.26, 0.78, 0.26, sk)); aL.position.set(-0.45, 0.35, 0); aL.rotation.x = -1.32; G.add(aL); res.armL = aL;
+        var aR = new THREE.Group(); aR.add(bx(0.26, 0.78, 0.26, sk)); aR.position.set( 0.45, 0.35, 0); aR.rotation.x = -1.32; G.add(aR); res.armR = aR;
+        G.add(bx(0.24, 0.62, 0.24, pn,-0.14,-0.88, 0)); // leg L
+        G.add(bx(0.24, 0.62, 0.24, pn, 0.14,-0.88, 0)); // leg R
+        res.armMode = 'zombie';
+        G.position.y = 0.46;
+
+    } else if (type === 'enderman') {
+        var bk=0x151515, dk=0x0A0A0A, pu=0xBB00FF, wh=0xFFFFFF;
+        G.add(bx(0.28, 2.0, 0.28, bk)); // body
+        var hG = new THREE.Group();
+        hG.add(bx(0.50, 0.50, 0.50, dk));
+        hG.add(bx(0.12, 0.08, 0.04, pu,-0.13, 0.07, 0.27)); // eye L
+        hG.add(bx(0.12, 0.08, 0.04, pu, 0.13, 0.07, 0.27)); // eye R
+        hG.add(bx(0.07, 0.05, 0.03, wh,-0.13, 0.07, 0.29)); // glow L
+        hG.add(bx(0.07, 0.05, 0.03, wh, 0.13, 0.07, 0.29)); // glow R
+        hG.position.set(0, 1.23, 0); G.add(hG); res.headGroup = hG;
+        // Very long arms hanging down
+        G.add(bx(0.14, 1.80, 0.14, bk,-0.25,-0.10, 0));
+        G.add(bx(0.14, 1.80, 0.14, bk, 0.25,-0.10, 0));
+        // Very long thin legs
+        G.add(bx(0.14, 1.60, 0.14, bk,-0.10,-1.42, 0));
+        G.add(bx(0.14, 1.60, 0.14, bk, 0.10,-1.42, 0));
+        var sc = (PET_TYPES_MAP['enderman'] && PET_TYPES_MAP['enderman'].modelScale) ? PET_TYPES_MAP['enderman'].modelScale : 0.58;
+        G.scale.set(sc, sc, sc);
+        G.position.y = 0.64;
+
+    } else if (type === 'skeleton') {
+        var bn=0xDDDDDD, jt=0xAAAAAA, blk=0x111111, wh=0xFFFFFF;
+        G.add(bx(0.44, 0.55, 0.22, bn,  0, 0.12, 0));  // rib cage
+        [-0.10, 0.00, 0.10].forEach(function(y){ G.add(bx(0.42, 0.05, 0.06, jt, 0, y, 0.12)); }); // ribs
+        G.add(bx(0.44, 0.26, 0.22, jt,  0,-0.26, 0));  // pelvis
+        var hG = new THREE.Group();
+        hG.add(bx(0.58, 0.58, 0.50, bn));
+        hG.add(bx(0.14, 0.14, 0.04, blk,-0.15, 0.10, 0.28)); // eye socket L
+        hG.add(bx(0.14, 0.14, 0.04, blk, 0.15, 0.10, 0.28)); // eye socket R
+        hG.add(bx(0.08, 0.08, 0.03, wh, -0.15, 0.10, 0.30)); // glow L
+        hG.add(bx(0.08, 0.08, 0.03, wh,  0.15, 0.10, 0.30)); // glow R
+        hG.add(bx(0.10, 0.08, 0.04, blk,  0, -0.04, 0.28));  // nose
+        hG.add(bx(0.05, 0.10, 0.04, wh, -0.10,-0.20, 0.28)); // tooth 1
+        hG.add(bx(0.05, 0.10, 0.04, wh,   0, -0.20, 0.28)); // tooth 2
+        hG.add(bx(0.05, 0.10, 0.04, wh,  0.10,-0.20, 0.28)); // tooth 3
+        hG.position.set(0, 0.66, 0); G.add(hG); res.headGroup = hG;
+        
+        var aL = new THREE.Group(); aL.add(bx(0.18, 0.72, 0.18, bn)); aL.position.set(-0.35, 0.12, 0); G.add(aL); res.armL = aL;
+        var aR = new THREE.Group(); aR.add(bx(0.18, 0.72, 0.18, bn)); aR.position.set( 0.35, 0.12, 0); G.add(aR); res.armR = aR;
+        G.add(bx(0.18, 0.72, 0.18, bn,-0.12,-0.68, 0)); // leg L
+        G.add(bx(0.18, 0.72, 0.18, bn, 0.12,-0.68, 0)); // leg R
+        res.armMode = 'natural';
+        G.position.y = 0.45;
+
+    } else if (type === 'frog') {
+        var og=0xC86030, lo=0xE07840, do2=0x903020, yw=0xFFEE00, blk=0x111111;
+       
+        G.add(bx(1.28, 0.44, 1.12, og));
+        G.add(bx(0.90, 0.12, 0.70, lo,  0,-0.20, 0.06)); // belly
+        
+        var hG = new THREE.Group();
+        hG.add(bx(1.10, 0.36, 0.62, og));
+        
+        hG.add(bx(0.30, 0.32, 0.28, lo, -0.40, 0.28, 0));  // eye bulge L
+        hG.add(bx(0.30, 0.32, 0.28, lo,  0.40, 0.28, 0));  // eye bulge R
+        hG.add(bx(0.18, 0.20, 0.18, yw, -0.40, 0.32, 0.08)); // iris L
+        hG.add(bx(0.18, 0.20, 0.18, yw,  0.40, 0.32, 0.08)); // iris R
+        hG.add(bx(0.10, 0.14, 0.10, blk,-0.40, 0.32, 0.17)); // pupil L
+        hG.add(bx(0.10, 0.14, 0.10, blk, 0.40, 0.32, 0.17)); // pupil R
+        hG.add(bx(0.70, 0.04, 0.04, do2, 0,-0.09, 0.33)); // mouth line
+        hG.position.set(0, 0.36, 0.34); G.add(hG); res.headGroup = hG;
+       
+        G.add(bx(0.22, 0.22, 0.38, lo,-0.72,-0.28, 0.32, 0, 0,  0.30));
+        G.add(bx(0.22, 0.22, 0.38, lo, 0.72,-0.28, 0.32, 0, 0, -0.30));
+        
+        G.add(bx(0.28, 0.22, 0.60, lo,-0.66,-0.20,-0.34, 0, 0,-0.50));
+        G.add(bx(0.28, 0.22, 0.60, lo, 0.66,-0.20,-0.34, 0, 0, 0.50));
+        
+        G.add(bx(0.40, 0.12, 0.28, lo,-0.84,-0.30,-0.60));
+        G.add(bx(0.40, 0.12, 0.28, lo, 0.84,-0.30,-0.60));
+        G.position.y = 0.18;
+
+    } else {
+        G.add(bx(0.80, 0.60, 0.60, 0xF4A0B0));
+    }
+
+    return res;
+}
+
 var _currentShopFilter = 'Все';
 function shopFilter(tag) {
     _currentShopFilter = tag;
@@ -3866,10 +4525,11 @@ function shopFilter(tag) {
 function _renderShopGrid(tag) {
     const grid = document.getElementById('shop-grid');
     if (!grid) return;
-    const filtered = tag === 'Все' ? ARTIFACTS : ARTIFACTS.filter(a => a.tag === tag);
+    const filtered = (tag === 'Все' ? ARTIFACTS : ARTIFACTS.filter(a => a.tag === tag))
+        .filter(a => !(a.id === 'pet' && window._siteFlags && window._siteFlags.showPet === false));
     grid.innerHTML = filtered.map(a => {
         const tc = SHOP_TAG_COLORS[a.tag] || '#fff';
-        return `<div data-artifact-id="${a.id}" style="background:#141414;border-radius:18px;border:1px solid ${a.color}20;padding:0;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:all .25s;"
+        return `<div data-artifact-id="${a.id}" onclick="_openShopModal('${a.id}')" style="background:#141414;border-radius:18px;border:1px solid ${a.color}20;padding:0;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:all .25s;cursor:pointer;"
              onmouseover="this.style.borderColor='${a.color}55';this.style.transform='translateY(-5px)';this.style.boxShadow='0 16px 40px rgba(0,0,0,.6),0 0 20px ${a.color}15'"
              onmouseout="this.style.borderColor='${a.color}20';this.style.transform='';this.style.boxShadow=''">
             
@@ -3889,8 +4549,9 @@ function _renderShopGrid(tag) {
                     <div style="font-size:11px;color:#555;line-height:1.6;">${a.desc}</div>
                 </div>
                 
-                <div style="display:flex;align-items:center;padding-top:12px;border-top:1px solid #ffffff08;">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid #ffffff08;">
                     <span style="font-size:9px;color:${a.color};font-weight:800;text-transform:uppercase;letter-spacing:.08em;">⚙ ${a.effect}</span>
+                    <span style="font-size:9px;color:#444;font-weight:700;letter-spacing:.04em;">Подробнее →</span>
                 </div>
             </div>
         </div>`;
@@ -3898,43 +4559,405 @@ function _renderShopGrid(tag) {
 }
 
 function _openShopModal(id) {
-    const a = ARTIFACTS.find(x => x.id === id);
+    var a = ARTIFACTS.find(function(x){ return x.id === id; });
     if (!a) return;
-    const m = document.getElementById('shop-modal');
+    var m = document.getElementById('shop-modal');
+    window._smColor = a.color;
+
+   
+    var iconEl = document.getElementById('sm-icon');
+    iconEl.style.borderColor = a.color + '44';
+    iconEl.style.boxShadow = '0 0 20px ' + a.color + '33';
     if (a.iconUrl) {
-        document.getElementById('sm-icon').innerHTML = `<img src="${a.iconUrl}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'"><span style="display:none">${a.icon}</span>`;
+        var _smImg = document.createElement('img');
+        _smImg.src = a.iconUrl;
+        _smImg.style.cssText = 'width:38px;height:38px;object-fit:contain;border-radius:8px;';
+        _smImg.onerror = function(){ this.style.display='none'; };
+        iconEl.innerHTML = '';
+        iconEl.appendChild(_smImg);
     } else {
-        document.getElementById('sm-icon').textContent = a.icon;
+        iconEl.textContent = a.icon;
     }
-    document.getElementById('sm-icon').style.color = a.color;
+
     document.getElementById('sm-name').textContent = a.name;
-    document.getElementById('sm-desc').textContent = a.desc;
-    document.getElementById('sm-tag').textContent = a.tag;
-    document.getElementById('sm-tag').style.color = a.color;
-    document.getElementById('sm-effect').textContent = a.effect;
-    document.getElementById('sm-effect').style.color = a.color;
-    document.getElementById('sm-bar').style.background = `linear-gradient(90deg,${a.color},${a.color}44)`;
-    document.getElementById('sm-nick').value = '';
-    document.getElementById('sm-err').style.display = 'none';
-    document.getElementById('sm-btn').textContent = '📩 Отправить заявку';
-    document.getElementById('sm-btn').disabled = false;
-    document.getElementById('sm-btn').dataset.artifactId = id;
-    document.getElementById('sm-btn').style.background = a.color;
+    document.getElementById('sm-desc').textContent  = a.desc;
+    document.getElementById('sm-tag').textContent   = a.tag;
+    document.getElementById('sm-tag').style.color   = a.color;
+    document.getElementById('sm-bar').style.background = 'linear-gradient(90deg,' + a.color + ',' + a.color + '44)';
+
+    var badge = document.getElementById('sm-effect-badge');
+    badge.textContent = '⚙ ' + a.effect;
+    badge.style.color  = a.color;
+    badge.style.border = '1px solid ' + a.color + '33';
+
+    document.getElementById('sm-err') && (document.getElementById('sm-err').style.display = 'none');
+    document.getElementById('sm-success') && (document.getElementById('sm-success').style.display = 'none');
+
+   
+    if (window._smCanvasRAF) { cancelAnimationFrame(window._smCanvasRAF); window._smCanvasRAF = null; }
+
+    
+    var banner   = document.getElementById('sm-preview-banner');
+    var bannerBg = document.getElementById('sm-banner-bg');
+    var canvas   = document.getElementById('sm-effect-canvas');
+    banner.style.background = '#0a0a0a';
+    bannerBg.style.background = '';
+    bannerBg.innerHTML = '';
+    canvas.style.opacity = '0';
+    if (canvas.getContext) { canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); }
+
+    
+    bannerBg.style.background = 'radial-gradient(ellipse at 30% 50%, ' + a.color + '22 0%, transparent 65%), radial-gradient(ellipse at 80% 20%, ' + a.color + '15 0%, transparent 50%)';
+
+    
+    if (id === 'profile_effect' && typeof _PEF_DEFS !== 'undefined') {
+        var efKeys = Object.keys(_PEF_DEFS);
+        var efIdx  = 0;
+        var ps     = [];
+        canvas.style.opacity = '1';
+
+        function _smStartEffect(ef) {
+            if (!ef) return;
+            if (window._smCanvasRAF) { cancelAnimationFrame(window._smCanvasRAF); window._smCanvasRAF = null; }
+            var W = canvas.offsetWidth  || 420;
+            var H = canvas.offsetHeight || 130;
+            canvas.width  = W;
+            canvas.height = H;
+            var cnt = Math.min(ef.count || 30, 45);
+            ps = [];
+            for (var i = 0; i < cnt; i++) {
+                ps.push({
+                    x: Math.random() * W, y: Math.random() * H,
+                    vx: (Math.random() - .5) * (ef.speed || 1) * .7,
+                    vy: -(0.3 + Math.random() * (ef.speed || 1) * .9),
+                    life: Math.random(), maxLife: .5 + Math.random() * .5,
+                    size: 7 + Math.random() * 10,
+                    char: ef.chars[Math.floor(Math.random() * ef.chars.length)],
+                    col: Math.random() > .5 ? ef.color : (ef.color2 || ef.color)
+                });
+            }
+            var ctx = canvas.getContext('2d');
+            (function tick() {
+                ctx.clearRect(0, 0, W, H);
+                ps.forEach(function(p) {
+                    p.x += p.vx; p.y += p.vy; p.life -= 0.006;
+                    if (p.life <= 0 || p.y < -12) {
+                        p.x = Math.random() * W; p.y = H + 5;
+                        p.life = p.maxLife = .5 + Math.random() * .5;
+                        p.char = ef.chars[Math.floor(Math.random() * ef.chars.length)];
+                        p.col  = Math.random() > .5 ? ef.color : (ef.color2 || ef.color);
+                    }
+                    ctx.save();
+                    ctx.globalAlpha = (p.life / p.maxLife) * .85;
+                    ctx.fillStyle   = p.col;
+                    ctx.shadowColor = p.col;
+                    ctx.shadowBlur  = ef.glow || 8;
+                    ctx.font        = 'bold ' + p.size + 'px monospace';
+                    ctx.fillText(p.char, p.x, p.y);
+                    ctx.restore();
+                });
+                window._smCanvasRAF = requestAnimationFrame(tick);
+            })();
+        }
+
+        
+        var smExtra = document.getElementById('sm-extra');
+        smExtra.style.display = '';
+        smExtra.innerHTML = '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#444;margin-bottom:8px;">Доступные эффекты — нажми для превью</div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:5px;max-height:90px;overflow-y:auto;padding-bottom:2px;">' +
+            efKeys.map(function(k, i) {
+                var ef = _PEF_DEFS[k];
+                var _bColor = i===0 ? ef.color : '#2a2a2a';
+                var _bBg    = i===0 ? ef.color+'22' : 'transparent';
+                var _bTxt   = i===0 ? ef.color : '#555';
+                var _btn    = document.createElement('button');
+                _btn.id = 'sm-ef-btn-' + k;
+                _btn.style.cssText = 'padding:4px 10px;border-radius:20px;border:1px solid '+_bColor+';background:'+_bBg+';color:'+_bTxt+';font-size:10px;font-weight:800;cursor:pointer;transition:all .15s;font-family:inherit;';
+                _btn.textContent = (ef.emoji||'✨') + ' ' + (ef.name||k);
+                (function(_k){ _btn.onclick = function(){ window._smPreviewEffect(_k); }; })(k);
+                return _btn.outerHTML;
+            }).join('') +
+            '</div>';
+
+        window._smEfKeys = efKeys;
+        window._smPreviewEffect = function(k) {
+            var ef = _PEF_DEFS[k];
+            if (!ef) return;
+            efKeys.forEach(function(key) {
+                var btn = document.getElementById('sm-ef-btn-' + key);
+                if (!btn) return;
+                var isActive = key === k;
+                btn.style.borderColor = isActive ? _PEF_DEFS[key].color : '#2a2a2a';
+                btn.style.background  = isActive ? _PEF_DEFS[key].color + '22' : 'transparent';
+                btn.style.color       = isActive ? _PEF_DEFS[key].color : '#555';
+            });
+            _smStartEffect(ef);
+        };
+        
+        requestAnimationFrame(function() {
+            efKeys.forEach(function(k) {
+                var btn = document.getElementById('sm-ef-btn-' + k);
+                if (btn) btn.onclick = function() { window._smPreviewEffect(k); };
+            });
+            _smStartEffect(_PEF_DEFS[efKeys[0]]);
+        });
+
+    } else if (id === 'pet') {
+        var smExtra = document.getElementById('sm-extra');
+        smExtra.style.display = '';
+        var petKeys2 = Object.keys(PET_TYPES_MAP);
+        var activePetId = petKeys2[0];
+        smExtra.innerHTML =
+            '<div style="background:#0c0c0c;border:1px solid #34d39933;border-radius:14px;overflow:hidden;margin-bottom:10px;">' +
+            '<canvas id="sm-pet-preview-canvas" style="display:block;"></canvas>' +
+            '<div style="padding:4px 12px 8px;text-align:center;">' +
+            '<span id="sm-pet-name-lbl" style="font-size:11px;font-weight:900;color:#34d399;"></span>' +
+            '<span style="font-size:9px;color:#444;margin-left:6px;">← тяни мышкой</span>' +
+            '</div></div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:5px;">' +
+            petKeys2.map(function(pid){
+                var pt = PET_TYPES_MAP[pid];
+                return '<button id="sm-pet-btn-'+pid+'" onclick="window._smSwitchPet(\''+pid+'\')" ' +
+                    'style="padding:4px 9px;border-radius:20px;border:1px solid #2a2a2a;background:transparent;color:#555;font-size:9px;font-weight:800;cursor:pointer;transition:all .15s;font-family:inherit;">' +
+                    pt.emoji+' '+pt.name+'</button>';
+            }).join('') +
+            '</div>';
+        requestAnimationFrame(function() {
+            var canvas = document.getElementById('sm-pet-preview-canvas');
+            var extra  = document.getElementById('sm-extra');
+            if (!canvas || !extra) return;
+            var W = extra.offsetWidth || 420;
+            var H = Math.round(W * 0.42);
+            canvas.style.width = W+'px'; canvas.style.height = H+'px';
+            function spawnSm(pid) {
+                var pt = PET_TYPES_MAP[pid] || {};
+                _spawnPetCanvas(canvas, pid, { w: W, h: H, interactive: true, camZ: pt.camZ, camY: pt.camY });
+                var lbl = document.getElementById('sm-pet-name-lbl');
+                if (lbl) lbl.textContent = pt.emoji + '  ' + pt.name;
+                petKeys2.forEach(function(k) {
+                    var b = document.getElementById('sm-pet-btn-'+k);
+                    if (!b) return;
+                    var isSel = k === pid, col = PET_TYPES_MAP[k].color;
+                    b.style.borderColor = isSel ? col : '#2a2a2a';
+                    b.style.background  = isSel ? col+'22' : 'transparent';
+                    b.style.color       = isSel ? col : '#555';
+                });
+            }
+            window._smSwitchPet = spawnSm;
+            spawnSm(activePetId);
+        });
+
+    } else {
+       
+        var smExtra = document.getElementById('sm-extra');
+        smExtra.style.display = '';
+        smExtra.innerHTML = '';
+        var details = [];
+
+        if (id === 'golden_frame') {
+            
+            smExtra.innerHTML =
+                '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#444;margin-bottom:10px;">Выбери стиль рамки — кликни для выбора</div>' +
+                '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="sm-frame-grid">' +
+                  '<div id="sm-frame-opt-gold" style="padding:12px;border-radius:12px;border:2px solid #D4AF37;background:#D4AF3712;text-align:center;cursor:pointer;transition:all .15s;">' +
+                    '<div style="position:relative;width:50px;height:50px;margin:0 auto 7px;border-radius:10px;overflow:hidden;border:2px solid #D4AF37;box-shadow:0 0 14px rgba(212,175,55,0.7);">' +
+                      '<img src="https://visage.surgeplay.com/head/80/Steve" style="width:100%;height:100%;image-rendering:pixelated;object-fit:cover;"></div>' +
+                    '<div style="font-size:11px;font-weight:900;color:#D4AF37;">Золотая</div>' +
+                    '<div style="font-size:9px;color:#555;margin-top:2px;">Классика</div>' +
+                    '<div style="font-size:8px;color:#D4AF37;margin-top:4px;font-weight:900;">✓ выбрано</div>' +
+                  '</div>' +
+                  '<div id="sm-frame-opt-rainbow" style="padding:12px;border-radius:12px;border:1px solid #2a2a2a;background:#0a0a0a;text-align:center;cursor:pointer;transition:all .15s;">' +
+                    '<div style="position:relative;width:50px;height:50px;margin:0 auto 7px;border-radius:10px;overflow:hidden;border:2px solid transparent;background:linear-gradient(#111,#111) padding-box,linear-gradient(90deg,#ff0080,#ff8c00,#ffed00,#00ff80,#00cfff,#7c3aed,#ff0080) border-box;box-shadow:0 0 14px rgba(168,85,247,0.5);animation:_rbFrameAnim 3s linear infinite;">' +
+                      '<img src="https://visage.surgeplay.com/head/80/Steve" style="width:100%;height:100%;image-rendering:pixelated;object-fit:cover;"></div>' +
+                    '<div style="font-size:11px;font-weight:900;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffed00,#00ff80,#00cfff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Радуга</div>' +
+                    '<div style="font-size:9px;color:#555;margin-top:2px;">Переливается</div>' +
+                    '<div style="font-size:8px;color:#555;margin-top:4px;font-weight:900;" id="sm-frame-rainbow-lbl"></div>' +
+                  '</div>' +
+                '</div>' +
+                '<input type="hidden" id="sm-frame-selected" value="gold">';
+            
+            requestAnimationFrame(function() {
+
+                function _smSelectFrame(style) {
+                    document.getElementById('sm-frame-selected').value = style;
+                    var gOpt = document.getElementById('sm-frame-opt-gold');
+                    var rOpt = document.getElementById('sm-frame-opt-rainbow');
+                    var rLbl = document.getElementById('sm-frame-rainbow-lbl');
+                    if (style === 'gold') {
+                        gOpt.style.border = '2px solid #D4AF37'; gOpt.style.background = '#D4AF3712';
+                        gOpt.querySelector('div:last-child').style.color = '#D4AF37'; gOpt.querySelector('div:last-child').textContent = '✓ выбрано';
+                        rOpt.style.border = '1px solid #2a2a2a'; rOpt.style.background = '#0a0a0a';
+                        if (rLbl) { rLbl.textContent = ''; }
+                    } else {
+                        rOpt.style.border = '2px solid #a855f7'; rOpt.style.background = '#a855f712';
+                        if (rLbl) { rLbl.style.color = '#a855f7'; rLbl.textContent = '✓ выбрано'; }
+                        gOpt.style.border = '1px solid #2a2a2a'; gOpt.style.background = '#0a0a0a';
+                        gOpt.querySelector('div:last-child').style.color = '#555'; gOpt.querySelector('div:last-child').textContent = '';
+                    }
+                }
+                var gEl = document.getElementById('sm-frame-opt-gold');
+                var rEl = document.getElementById('sm-frame-opt-rainbow');
+                if (gEl) gEl.onclick = function() { _smSelectFrame('gold'); };
+                if (rEl) rEl.onclick = function() { _smSelectFrame('rainbow'); };
+                window._smSelectFrame = _smSelectFrame;
+            });
+
+        } else if (id === 'custom_medal') {
+            
+            smExtra.innerHTML =
+                '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#444;margin-bottom:8px;">Нажми на медаль — увидишь как выглядит рядом с ником</div>' +
+                '<div id="sm-medal-gallery-grid" style="display:flex;flex-wrap:wrap;gap:6px;min-height:44px;margin-bottom:10px;"><div style="font-size:11px;color:#555;font-style:italic;padding:4px;">Загрузка...</div></div>' +
+                '<div id="sm-medal-nick-preview" style="display:none;background:#0e0e0e;border:1px solid #fb923c33;border-radius:10px;padding:10px 14px;">' +
+                  '<div style="font-size:9px;color:#fb923c;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Превью — как у ника</div>' +
+                  '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
+                    '<img id="sm-medal-preview-img" class="donor-img" src="" style="width:22px;height:22px;border-radius:5px;object-fit:cover;display:block;">' +
+                    '<span style="font-size:13px;font-weight:900;color:#fff;">Ваш_Ник</span>' +
+                    '<span style="font-size:9px;color:#D4AF37;font-weight:700;">✦ Prime</span>' +
+                  '</div>' +
+                  '<div style="display:flex;gap:14px;">' +
+                    '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;">' +
+                      '<input type="checkbox" id="sm-medal-glow-on" checked style="width:13px;height:13px;accent-color:#fb923c;cursor:pointer;" onchange="_smUpdateMedalPreview()">' +
+                      '<span style="font-size:10px;color:#aaa;">Свечение</span>' +
+                    '</label>' +
+                    '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;">' +
+                      '<input type="checkbox" id="sm-medal-effect-on" checked style="width:13px;height:13px;accent-color:#fb923c;cursor:pointer;" onchange="_smUpdateMedalPreview()">' +
+                      '<span style="font-size:10px;color:#aaa;">Анимация</span>' +
+                    '</label>' +
+                  '</div>' +
+                '</div>';
+            
+            window._smUpdateMedalPreview = function() {
+                var prevImg = document.getElementById('sm-medal-preview-img');
+                if (!prevImg || !prevImg._smMedalData) return;
+                var m = prevImg._smMedalData;
+                var glowOn   = document.getElementById('sm-medal-glow-on')?.checked !== false;
+                var effectOn = document.getElementById('sm-medal-effect-on')?.checked !== false;
+                var normalEffect = (m.effect || '').replace(/^donor-effect-/, '');
+                if (typeof _applyDonorStyle === 'function') {
+                    _applyDonorStyle(prevImg, glowOn ? (m.glow || '#fb923c') : 'none', effectOn ? normalEffect : '', 22);
+                }
+            };
+            var _smSelectedMedal = null;
+            var _loadSmMedals = function(medals) {
+                var grid = document.getElementById('sm-medal-gallery-grid');
+                if (!grid) return;
+                var keys = Object.keys(medals || {});
+                if (!keys.length) {
+                    grid.innerHTML = '<div style="font-size:11px;color:#555;font-style:italic;">Медали добавит администратор</div>';
+                    return;
+                }
+                grid.innerHTML = '';
+                keys.forEach(function(k) {
+                    var med = medals[k];
+                    var glow = med.glow || '#fb923c';
+                    var card = document.createElement('div');
+                    card.id = 'sm-medal-card-' + k;
+                    card.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:10px;background:#0a0a0a;border:1px solid #2a2a2a;min-width:56px;max-width:72px;cursor:pointer;transition:all .15s;';
+                    card.onmouseenter = function(){ if(_smSelectedMedal!==k) this.style.borderColor=glow+'66'; };
+                    card.onmouseleave = function(){ if(_smSelectedMedal!==k) this.style.borderColor='#2a2a2a'; };
+                    card.onclick = (function(key, m) { return function() {
+                       
+                        Object.keys(medals).forEach(function(kk) {
+                            var c = document.getElementById('sm-medal-card-' + kk);
+                            if (c) { c.style.borderColor='#2a2a2a'; c.style.background='#0a0a0a'; }
+                        });
+                        
+                        card.style.borderColor = m.glow || '#fb923c';
+                        card.style.background  = (m.glow || '#fb923c') + '18';
+                        _smSelectedMedal = key;
+                        
+                        var prevWrap = document.getElementById('sm-medal-nick-preview');
+                        var prevImg  = document.getElementById('sm-medal-preview-img');
+                        if (prevWrap) prevWrap.style.display = '';
+                        if (prevImg) {
+                            prevImg.style.cssText = 'width:22px;height:22px;border-radius:5px;object-fit:cover;display:block;';
+                            prevImg.dataset.glow = m.glow || '#fb923c';
+                            prevImg.dataset.effect = (m.effect || '').replace(/^donor-effect-/, '');
+                            prevImg.dataset.medalName = m.name || '';
+                            prevImg._smMedalData = m; 
+                            prevImg.onload = function() {
+                                if (typeof window._smUpdateMedalPreview === 'function') window._smUpdateMedalPreview();
+                                else if (typeof _applyDonorStyleEl === 'function') _applyDonorStyleEl(prevImg);
+                            };
+                            prevImg.src = m.icon || '';
+                            if (prevImg.complete && prevImg.naturalWidth) {
+                                if (typeof window._smUpdateMedalPreview === 'function') window._smUpdateMedalPreview();
+                                else if (typeof _applyDonorStyleEl === 'function') _applyDonorStyleEl(prevImg);
+                            }
+                        }
+                    }; })(k, med);
+                    var img = document.createElement('img');
+                    img.src = med.icon || '';
+                    img.className = 'donor-img';
+                    img.style.cssText = 'width:28px;height:28px;border-radius:6px;object-fit:cover;display:block;pointer-events:none;';
+                    img.dataset.glow = glow;
+                    img.dataset.effect = (med.effect || '').replace(/^donor-effect-/, '');
+                    img.dataset.medalName = med.name || '';
+                    img.onload = function() { if (typeof _applyDonorStyleEl === 'function') _applyDonorStyleEl(img); };
+                    if (img.complete && img.naturalWidth) { setTimeout(function(){ if (typeof _applyDonorStyleEl === 'function') _applyDonorStyleEl(img); }, 0); }
+                    img.onerror = function(){ this.outerHTML = '<span style="font-size:20px;pointer-events:none;">🏅</span>'; };
+                    var lbl = document.createElement('div');
+                    lbl.style.cssText = 'font-size:8px;font-weight:900;color:#777;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;';
+                    lbl.textContent = med.name || k;
+                    card.appendChild(img);
+                    card.appendChild(lbl);
+                    grid.appendChild(card);
+                });
+            };
+            var cachedMedals = _medalCatalog || window._medalCatalogData;
+            if (cachedMedals) { _loadSmMedals(cachedMedals); }
+            else if (window._fbRef && window._fbDb && window._fbGet) {
+                window._fbGet(window._fbRef(window._fbDb, 'config/medalCatalog')).then(function(snap) {
+                    _medalCatalog = snap.exists() ? snap.val() : {};
+                    _loadSmMedals(_medalCatalog);
+                }).catch(function(){ var g = document.getElementById('sm-medal-gallery-grid'); if(g) g.innerHTML='<div style="color:#555;font-size:11px;">Нет данных</div>'; });
+            }
+
+        } else {
+            if (id === 'profile_bg') details = [
+                { emoji:'🖼️', label:'Фон шапки полного профиля', color:'#4ade80' },
+                { emoji:'🃏', label:'Фон hover-карточки при наведении', color:'#34d399' },
+                { emoji:'🏆', label:'Фон карточки в Топе авторов', color:'#6ee7b7' },
+                { emoji:'⏱', label:'Смена 1 раз в неделю через поддержку', color:'#fbbf24' },
+            ];
+            else if (id === 'build_glow') details = [
+                { emoji:'✨', label:'Золотое свечение на рамке карточки постройки', color:'#a78bfa' },
+                { emoji:'📌', label:'Применяется к последней добавленной постройке', color:'#818cf8' },
+            ];
+            else if (id === 'double_exp') details = [
+                { emoji:'⚡', label:'×2 EXP за каждую новую постройку', color:'#fbbf24' },
+                { emoji:'⏱', label:'Действует всё время пока активна Prime-подписка', color:'#f59e0b' },
+            ];
+
+            smExtra.style.display = details.length ? '' : 'none';
+            smExtra.innerHTML = details.length
+                ? '<div style="display:flex;flex-direction:column;gap:7px;">' +
+                  details.map(function(d) {
+                      return '<div style="display:flex;align-items:center;gap:10px;">' +
+                          '<span style="width:28px;height:28px;border-radius:8px;background:' + d.color + '15;border:1px solid ' + d.color + '33;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">' + d.emoji + '</span>' +
+                          '<span style="font-size:11px;color:#777;line-height:1.4;">' + d.label + '</span>' +
+                          '</div>';
+                  }).join('') + '</div>'
+                : '';
+        }
+    }
+
     m.style.display = 'flex';
 }
-// ── хранилище выборов: { slotIndex: { id, color } } ──
+
+
 window._primeSlotSelected = {};
 
 function _buildItemGrid(slotIdx) {
     const arts = typeof ARTIFACTS !== 'undefined' ? ARTIFACTS : [];
     const selectedId = (window._primeSlotSelected[slotIdx] || {}).id || '';
-    // Собрать ID уже выбранные в ДРУГИХ слотах
+    
     const takenIds = new Set(
         Object.entries(window._primeSlotSelected || {})
             .filter(([k]) => parseInt(k) !== slotIdx)
             .map(([, v]) => v.id)
     );
-    return arts.map(a => {
+    return arts.filter(a => !(a.id === 'pet' && window._siteFlags && window._siteFlags.showPet === false)).map(a => {
         const sel    = a.id === selectedId;
         const taken  = takenIds.has(a.id);
         const iconHtml = a.iconUrl
@@ -4008,7 +5031,7 @@ function _primeSlotCollapse(idx) {
     const arts = typeof ARTIFACTS !== 'undefined' ? ARTIFACTS : [];
     const a    = arts.find(x => x.id === sel.id);
 
-    // Обновить плашку-summary
+    
     const sum = document.getElementById('prime-slot-summary-' + idx);
     const chk = document.getElementById('prime-slot-check-' + idx);
     const box = document.getElementById('prime-slot-' + idx);
@@ -4016,7 +5039,7 @@ function _primeSlotCollapse(idx) {
     if (chk) chk.style.display = '';
     if (box) box.style.borderColor = '#4ade8033';
 
-    // Артефакты без конфига — автосворачиваем и открываем следующий
+    
     const needsCfg = ['custom_medal','profile_bg','profile_effect'].includes(sel.id);
     if (!needsCfg) {
         setTimeout(() => {
@@ -4024,7 +5047,7 @@ function _primeSlotCollapse(idx) {
             const chevron = document.getElementById('prime-slot-chevron-' + idx);
             if (body)    body.style.display    = 'none';
             if (chevron) chevron.style.transform = 'rotate(-90deg)';
-            // Открыть следующий незаполненный
+            
             for (let n = idx + 1; n < 5; n++) {
                 if (!window._primeSlotSelected[n]) {
                     const nb = document.getElementById('prime-slot-body-' + n);
@@ -4075,11 +5098,14 @@ function _closePrimeModal() {
     if (window._pefRAFs) { Object.values(window._pefRAFs).forEach(function(r){ if(r) cancelAnimationFrame(r); }); window._pefRAFs = {}; }
     if (typeof _pefTileRAFs !== 'undefined') { Object.values(_pefTileRAFs).forEach(function(r){ if(r) cancelAnimationFrame(r); }); _pefTileRAFs = {}; }
     document.getElementById('prime-modal').style.display = 'none';
+    Object.keys(_petPreviewRenderers).forEach(function(id) {
+        if (id.indexOf('prim-pet-preview') === 0) _destroyPetPreview(id);
+    });
 }
 
 function _primSelectItem(slotIdx, id, color) {
     window._primeSlotSelected[slotIdx] = { id, color };
-    // Обновить стиль карточек в этом слоте
+   
     document.querySelectorAll(`.prime-item-opt[data-slot="${slotIdx}"]`).forEach(el => {
         const isThis = el.dataset.id === id;
         el.style.borderColor = isThis ? color : '#222';
@@ -4089,7 +5115,7 @@ function _primSelectItem(slotIdx, id, color) {
     document.getElementById('prime-item-err').style.display = 'none';
     _renderPrimeArtConfig(slotIdx, id);
     _primeSlotCollapse(slotIdx);
-    // Перерисовать гриды других слотов чтобы заблокировать этот артефакт
+    
     const months = window._primeMonths || 1;
     const count  = months === 5 ? 5 : 1;
     for (let i = 0; i < count; i++) {
@@ -4115,7 +5141,7 @@ function _renderPrimeArtConfig(slotIdx, id) {
     if (!wrap) return;
     wrap.innerHTML = '';
     wrap.style.display = 'none';
-    const S = slotIdx; // suffix for unique IDs
+    const S = slotIdx; 
 
     const fld = (lbl, inner) =>
         `<div style="margin-bottom:10px;">
@@ -4129,92 +5155,70 @@ function _renderPrimeArtConfig(slotIdx, id) {
 
     if (id === 'custom_medal') {
         wrap.style.display = '';
-        const effOpts = _DONOR_EFFECT_OPTS.map(o=>`<option value="${o.v}">${o.l}</option>`).join('');
+        
+        var medalListEl = null;
         wrap.innerHTML =
-            `<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#fb923c;margin-bottom:12px;">⚙ Настройка медальки</div>
-            <div style="margin-bottom:10px;">
-                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:5px;">URL иконки медальки *</div>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <input id="prim-cfg-medal-icon-${S}" type="text" placeholder="https://... (PNG 64×64)"
-                     style="flex:1;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 11px;color:#fff;font-size:11px;outline:none;font-family:inherit;"
-                     onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#2a2a2a'">
-                    <img id="prim-cfg-medal-prev-${S}" style="width:38px;height:38px;border-radius:7px;object-fit:cover;border:1px solid #333;flex-shrink:0;display:none;" onerror="this.style.display='none'">
-                </div>
+            `<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#fb923c;margin-bottom:12px;">⚙ Выбери медальку</div>
+            <div id="prim-medal-list-${S}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-bottom:14px;">
+                <div style="font-size:11px;color:#555;text-align:center;padding:20px;grid-column:1/-1;">Загрузка...</div>
             </div>
-            <div style="margin-bottom:10px;">
-                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:5px;">Название (тултип)</div>
-                <input id="prim-cfg-medal-name-${S}" type="text" placeholder="Легенда сервера"
-                 style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 11px;color:#fff;font-size:11px;outline:none;font-family:inherit;"
-                 onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#2a2a2a'">
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-                <div>
-                    <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:5px;">Цвет свечения</div>
-                    <input type="color" id="prim-cfg-medal-glow-${S}" value="#fb923c"
-                        style="width:100%;height:34px;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;cursor:pointer;padding:2px;">
-                </div>
-                <div>
-                    <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:5px;">Анимация</div>
-                    <select id="prim-cfg-medal-effect-${S}" style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:8px;padding:8px;color:#fff;font-size:10px;font-family:inherit;">${effOpts}</select>
-                </div>
-            </div>
-            <div style="background:#0e0e0e;border:1px solid #fb923c33;border-radius:10px;padding:12px;">
-                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#fb923c;margin-bottom:8px;">Превью</div>
-                <div style="display:flex;align-items:center;gap:8px;min-height:30px;">
-                    <div id="prim-medal-live-wrap-${S}" style="display:none;position:relative;flex-shrink:0;">
-                        <img id="prim-medal-live-img-${S}" class="donor-img" src="" style="width:24px;height:24px;border-radius:5px;object-fit:cover;display:block;" onerror="this.parentElement.style.display='none'">
+            <input type="hidden" id="prim-cfg-medal-id-${S}">
+            <div id="prim-medal-preview-${S}" style="display:none;background:#0e0e0e;border:1px solid #fb923c33;border-radius:10px;padding:12px;margin-bottom:10px;">
+                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#fb923c;margin-bottom:8px;">Превью — как будет смотреться у ника</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                    <div id="prim-medal-live-wrap-${S}" style="flex-shrink:0;">
+                        <img id="prim-medal-live-img-${S}" class="donor-img" src="" style="width:24px;height:24px;border-radius:5px;object-fit:cover;display:block;">
                     </div>
-                    <span id="prim-medal-placeholder-${S}" style="font-size:9px;color:#444;font-style:italic;">← введи URL иконки выше</span>
                     <span style="font-size:13px;font-weight:900;color:#fff;">Ваш_Ник</span>
                     <span style="font-size:9px;color:#D4AF37;font-weight:700;">✦ Prime</span>
                 </div>
-                <div style="font-size:9px;color:#555;margin-top:6px;">Медалька появится слева от ника, отдельно от донатерской 🪙</div>
-            </div>`;
+                <div style="display:flex;flex-direction:column;gap:5px;">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
+                        <input type="checkbox" id="prim-cfg-medal-glow-on-${S}" checked
+                            style="width:14px;height:14px;accent-color:#fb923c;cursor:pointer;"
+                            onchange="_toggleMedalGlow(${S}, this.checked)">
+                        <span style="font-size:10px;color:#aaa;">Свечение медали</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
+                        <input type="checkbox" id="prim-cfg-medal-effect-on-${S}" checked
+                            style="width:14px;height:14px;accent-color:#fb923c;cursor:pointer;"
+                            onchange="_toggleMedalEffect(${S}, this.checked)">
+                        <span style="font-size:10px;color:#aaa;">Анимация эффекта</span>
+                    </label>
+                </div>
+            </div>
+            <div style="font-size:9px;color:#555;">Медалька отображается рядом с ником. Список медалей обновляется администратором.</div>`;
+        
         setTimeout(function() {
-            var iconEl   = document.getElementById('prim-cfg-medal-icon-'+S);
-            var glowEl   = document.getElementById('prim-cfg-medal-glow-'+S);
-            var effectEl = document.getElementById('prim-cfg-medal-effect-'+S);
-            function updateMedalPreview() {
-                var v    = iconEl ? iconEl.value.trim() : '';
-                var prev = document.getElementById('prim-cfg-medal-prev-'+S);
-                var lw   = document.getElementById('prim-medal-live-wrap-'+S);
-                var li   = document.getElementById('prim-medal-live-img-'+S);
-                var ph   = document.getElementById('prim-medal-placeholder-'+S);
-                if (!prev || !lw || !li) return;
-                if (v) {
-                    prev.src = v; prev.style.display = 'block';
-                    li.dataset.glow      = glowEl   ? glowEl.value   : '#fb923c';
-                    li.dataset.effect    = effectEl ? effectEl.value : '';
-                    li.dataset.medalName = document.getElementById('prim-cfg-medal-name-'+S) ? (document.getElementById('prim-cfg-medal-name-'+S).value || '') : '';
-                    li.src = v; lw.style.display = 'block';
-                    if (ph) ph.style.display = 'none';
-                    li.onload = function() { if (typeof _applyDonorStyleEl === 'function') _applyDonorStyleEl(li); };
-                    if (li.complete && li.naturalWidth) { if (typeof _applyDonorStyleEl === 'function') _applyDonorStyleEl(li); }
-                } else {
-                    prev.style.display = 'none'; lw.style.display = 'none';
-                    if (ph) ph.style.display = '';
-                }
-            }
-            if (iconEl)   iconEl.addEventListener('input',  updateMedalPreview);
-            if (glowEl)   glowEl.addEventListener('input',  updateMedalPreview);
-            if (effectEl) effectEl.addEventListener('change', updateMedalPreview);
+            _loadMedalPicker(S);
         }, 50);
 
     } else if (id === 'golden_frame') {
         wrap.style.display = '';
         wrap.innerHTML =
-            `<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#D4AF37;margin-bottom:10px;">⚙ Золотая рамка</div>
-            <div style="display:flex;gap:14px;align-items:center;">
-                <div style="position:relative;flex-shrink:0;">
-                    <div style="width:60px;height:60px;border-radius:12px;overflow:hidden;border:2px solid #D4AF37;box-shadow:0 0 14px rgba(212,175,55,0.7),0 0 28px rgba(212,175,55,0.3);">
+            `<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#D4AF37;margin-bottom:12px;">⚙ Выбери стиль рамки</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+                <div id="gframe-opt-gold" onclick="_selGoldenFrame(${S},'gold')"
+                     style="padding:14px;border-radius:12px;border:2px solid #D4AF37;background:#D4AF3712;cursor:pointer;text-align:center;transition:all .15s;">
+                    <div style="position:relative;width:54px;height:54px;margin:0 auto 8px;border-radius:10px;overflow:hidden;border:2px solid #D4AF37;box-shadow:0 0 14px rgba(212,175,55,0.7);">
                         <img src="https://visage.surgeplay.com/head/80/Steve" style="width:100%;height:100%;image-rendering:pixelated;object-fit:cover;">
                     </div>
+                    <div style="font-size:11px;font-weight:900;color:#D4AF37;">Золотая</div>
+                    <div style="font-size:9px;color:#666;margin-top:2px;">Классическая</div>
                 </div>
-                <div style="font-size:11px;color:#888;line-height:1.7;">
-                    Золотистая рамка применится автоматически.<br>
-                    <span style="color:#D4AF37;font-weight:700;">Дополнительных настроек не требуется.</span>
+                <div id="gframe-opt-rainbow" onclick="_selGoldenFrame(${S},'rainbow')"
+                     style="padding:14px;border-radius:12px;border:1px solid #2a2a2a;background:#0a0a0a;cursor:pointer;text-align:center;transition:all .15s;">
+                    <div style="position:relative;width:54px;height:54px;margin:0 auto 8px;border-radius:10px;overflow:hidden;border:2px solid transparent;background:linear-gradient(#111,#111) padding-box,linear-gradient(var(--rba,0deg),#ff0080,#ff8c00,#ffed00,#00ff80,#00cfff,#7c3aed,#ff0080) border-box;box-shadow:0 0 14px rgba(168,85,247,0.5);animation:_rbFrameAnim 3s linear infinite;" style="">
+                        <img src="https://visage.surgeplay.com/head/80/Steve" style="width:100%;height:100%;image-rendering:pixelated;object-fit:cover;">
+                    </div>
+                    <div style="font-size:11px;font-weight:900;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffed00,#00ff80,#00cfff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Радуга</div>
+                    <div style="font-size:9px;color:#666;margin-top:2px;">Переливается</div>
                 </div>
-            </div>`;
+            </div>
+            <input type="hidden" id="prim-cfg-frame-style-${S}" value="gold">
+            <div style="font-size:9px;color:#555;">Рамка применяется в профиле и карточке Топа авторов.</div>`;
+        
+        setTimeout(function(){ _selGoldenFrame(S,'gold'); }, 10);
 
     } else if (id === 'profile_bg') {
         wrap.style.display = '';
@@ -4223,7 +5227,10 @@ function _renderPrimeArtConfig(slotIdx, id) {
             fld('Фон полного профиля (шапка)', inp('prim-cfg-bg-main','https://...')) +
             fld('Фон hover-карточки (при наведении)', inp('prim-cfg-bg-hover','https://...')) +
             fld('Фон карточки в Топе авторов', inp('prim-cfg-bg-top','https://...')) +
-            `<div style="font-size:9px;color:#555;">Можно заполнить один или все три. Администратор применит фоны после получения заявки.</div>`;
+            `<div style="background:#1a2e0a;border:1px solid #4ade8033;border-radius:10px;padding:10px 12px;margin-top:8px;">
+                <div style="font-size:10px;font-weight:900;color:#4ade80;margin-bottom:4px;">⚠ Важно</div>
+                <div style="font-size:10px;color:#86efac;line-height:1.6;">Фон профиля можно менять <strong>1 раз в неделю</strong> — через обращение в поддержку. Выбирай осознанно!</div>
+            </div>`;
 
     } else if (id === 'build_glow') {
         wrap.style.display = '';
@@ -4239,30 +5246,75 @@ function _renderPrimeArtConfig(slotIdx, id) {
 
     } else if (id === 'double_exp') {
         wrap.style.display = '';
+        const _dexpArt = (typeof ARTIFACTS !== 'undefined') ? ARTIFACTS.find(function(a){ return a.id === 'double_exp'; }) : null;
+        const _dexpIcon = _dexpArt && _dexpArt.iconUrl
+            ? `<img src="${_dexpArt.iconUrl}" style="width:48px;height:48px;object-fit:contain;border-radius:10px;" onerror="this.style.display='none'">`
+            : `<span style="font-size:36px;filter:drop-shadow(0 0 12px rgba(251,191,36,0.8));">${(_dexpArt && _dexpArt.icon) || '⚡'}</span>`;
         wrap.innerHTML =
             `<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#fbbf24;margin-bottom:10px;">⚙ Двойной опыт</div>
             <div style="display:flex;gap:14px;align-items:center;">
-                <div style="font-size:36px;filter:drop-shadow(0 0 12px rgba(251,191,36,0.8));flex-shrink:0;">⚡</div>
+                <div style="flex-shrink:0;filter:drop-shadow(0 0 12px rgba(251,191,36,0.8));">${_dexpIcon}</div>
                 <div style="font-size:11px;color:#888;line-height:1.7;">
                     <strong style="color:#fbbf24;font-size:13px;">×2 EXP</strong> за каждую загруженную постройку пока активна подписка.<br>
                     <span style="color:#555;font-size:10px;">1 000 EXP → 2 000 EXP за постройку. Как только подписка кончается - опыт возвращается к стандартному способу начисления.</span>
                 </div>
             </div>`;
 
+    } else if (id === 'pet') {
+        wrap.style.display = '';
+        var petKeys = Object.keys(PET_TYPES_MAP);
+        wrap.innerHTML =
+            '<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#34d399;margin-bottom:12px;">⚙ Выбери зверька</div>' +
+            '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;">' +
+            petKeys.map(function(pid){
+                var pt = PET_TYPES_MAP[pid];
+                return '<div id="prime-pet-opt-'+S+'-'+pid+'" onclick="_selPrimePet('+S+',\''+pid+'\')" ' +
+                    'style="padding:9px 4px;border-radius:10px;border:1px solid #2a2a2a;background:#0a0a0a;cursor:pointer;text-align:center;transition:all .15s;">' +
+                    '<div style="font-size:1.3rem;margin-bottom:3px;">'+pt.emoji+'</div>' +
+                    '<div class="pet-card-name" style="font-size:8px;font-weight:900;color:#666;line-height:1.1;">'+pt.name+'</div>' +
+                    '</div>';
+            }).join('') +
+            '</div>' +
+            '<div id="prim-pet-preview-wrap-'+S+'" style="display:none;background:#0c0c0c;border:1px solid #34d39933;border-radius:12px;overflow:hidden;position:relative;height:155px;margin-bottom:10px;">' +
+            '<canvas id="prim-pet-preview-canvas-'+S+'" style="position:absolute;top:0;left:0;"></canvas>' +
+            '<div style="position:absolute;bottom:7px;left:0;right:0;text-align:center;z-index:2;pointer-events:none;">' +
+            '<span id="prim-pet-preview-lbl-'+S+'" style="font-size:10px;font-weight:900;color:#fff;text-shadow:0 2px 10px #000;"></span>' +
+            '</div>' +
+            '</div>' +
+            '<input type="hidden" id="prim-cfg-pet-type-'+S+'" value="">' +
+            '<div style="font-size:9px;color:#555;">3D-зверёк в профиле. Интерактивный — можно крутить мышкой!</div>';
+
     } else if (id === 'profile_effect') {
         wrap.style.display = '';
         const efs = [
-            {id:'enderman',  name:'Эндермен',     color:'#8b5cf6', emoji:'🟣'},
-            {id:'enchant',   name:'Зачарование',  color:'#3b82f6', emoji:'🔵'},
-            {id:'creeper',   name:'Криппер',      color:'#22c55e', emoji:'🟢'},
+            {id:'enderman',  name:'Эндермен',     color:'#8b5cf6', emoji:'👾'},
+            {id:'enchant',   name:'Зачарование',  color:'#3b82f6', emoji:'📖'},
+            {id:'creeper',   name:'Криппер',      color:'#22c55e', emoji:'💥'},
             {id:'nether',    name:'Незер',        color:'#ef4444', emoji:'🔴'},
-            {id:'sand',      name:'Песчаная буря',color:'#d97706', emoji:'🟠'},
-            {id:'snow',      name:'Метель',       color:'#bfdbfe', emoji:'🌨'},
+            {id:'sand',      name:'Песчаная буря',color:'#d97706', emoji:'🏜️'},
+            {id:'snow',      name:'Метель',       color:'#bfdbfe', emoji:'❄️'},
             {id:'dragon',    name:'Дракон',       color:'#a855f7', emoji:'🐉'},
             {id:'lava',      name:'Лава',         color:'#f97316', emoji:'🌋'},
             {id:'lightning', name:'Молния',       color:'#fde047', emoji:'⚡'},
             {id:'blaze',     name:'Блейз',        color:'#fb923c', emoji:'🔥'},
+            {id:'bubbles',   name:'Пузырьки',     color:'#7dd3fc', emoji:'🫧'},
+            {id:'thunder',   name:'Гром',         color:'#fde047', emoji:'🌩️'},
+            {id:'pollen',    name:'Цветок',       color:'#fef08a', emoji:'🌸'},
+            {id:'sparks',    name:'Искры костра', color:'#fb923c', emoji:'🔥'},
+            {id:'souls',     name:'Песок душ',    color:'#5eead4', emoji:'💀'},
+            {id:'xp',        name:'Пузырёк опыта',color:'#4ade80', emoji:'✨'},
+            {id:'gunpowder', name:'Порох',        color:'#9ca3af', emoji:'💣'},
+            {id:'bonemeal',  name:'Семена',       color:'#f0fdf4', emoji:'🌿'},
+            {id:'portal',    name:'Портал',       color:'#7c3aed', emoji:'🟣'},
         ];
+       
+        const allPefDefs = _PEF_DEFS || {};
+        Object.keys(allPefDefs).forEach(function(k) {
+            if (!efs.find(function(e){ return e.id === k; })) {
+                var d = allPefDefs[k];
+                efs.push({id:k, name:d.name||k, color:d.color||'#c084fc', emoji:d.emoji||'✨'});
+            }
+        });
         const efGrid = efs.map(e =>
             `<div id="pef-opt-${S}-${e.id}" onclick="_selPrimEffect(${S},'${e.id}','${e.color}')"
                   style="padding:8px 4px;border-radius:10px;border:1px solid #2a2a2a;background:#0a0a0a;cursor:pointer;text-align:center;transition:all .15s;position:relative;overflow:hidden;">
@@ -4275,7 +5327,7 @@ function _renderPrimeArtConfig(slotIdx, id) {
         ).join('');
         wrap.innerHTML =
             `<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#c084fc;margin-bottom:10px;">⚙ Выбери эффект профиля</div>
-            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px;">${efGrid}</div>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:12px;max-height:220px;overflow-y:auto;padding-right:2px;">${efGrid}</div>
             <input type="hidden" id="prim-cfg-effect-id-${S}">
             <div id="pef-preview-wrap-${S}" style="display:none;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:14px;overflow:hidden;position:relative;height:100px;margin-bottom:10px;">
                 <canvas id="pef-preview-canvas-${S}" style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
@@ -4285,14 +5337,14 @@ function _renderPrimeArtConfig(slotIdx, id) {
                 </div>
             </div>
             <div style="font-size:9px;color:#555;">Эффект виден в профиле, hover-карточке и Топе авторов.</div>`;
-        // Запустить мини-анимации на плитках сразу после рендера
+       
         requestAnimationFrame(function() { _startPefTileAnimations(S, null); });
     }
 }
 
 var _pefPreviewRAF = null;
 function _selPrimEffect(slotIdx, id, color) {
-    var allIds = ['enderman','sand','enchant','creeper','nether','snow','dragon','lava','lightning','blaze'];
+    var allIds = Object.keys(_PEF_DEFS);
     var hidEl = document.getElementById('prim-cfg-effect-id-' + slotIdx);
     if (hidEl) hidEl.value = id;
     allIds.forEach(function(e) {
@@ -4301,26 +5353,24 @@ function _selPrimEffect(slotIdx, id, color) {
         el.style.borderColor = (e === id) ? color : '#2a2a2a';
         el.style.background  = (e === id) ? color + '18' : '#0a0a0a';
     });
-    // Каждый слот имеет свой RAF — останавливаем предыдущий для этого слота
+    
     if (!window._pefRAFs) window._pefRAFs = {};
     if (window._pefRAFs[slotIdx]) { cancelAnimationFrame(window._pefRAFs[slotIdx]); window._pefRAFs[slotIdx] = null; }
-    // Глобальный тоже для обратной совместимости
+ 
     if (_pefPreviewRAF) { cancelAnimationFrame(_pefPreviewRAF); _pefPreviewRAF = null; }
     var wrap   = document.getElementById('pef-preview-wrap-' + slotIdx);
     var canvas = document.getElementById('pef-preview-canvas-' + slotIdx);
     var lbl    = document.getElementById('pef-preview-label-' + slotIdx);
     if (!wrap || !canvas) return;
-    var efLabels = {
-        enderman:'Эндермен', sand:'Песчаная буря', enchant:'Зачарование',
-        creeper:'Криппер',   nether:'Незер',        snow:'Метель',
-        dragon:'Дракон',     lava:'Лава',           lightning:'Молния',  blaze:'Блейз'
-    };
+   
+    var efLabels = {};
+    Object.keys(_PEF_DEFS).forEach(function(k){ efLabels[k] = (_PEF_DEFS[k].name || k); });
     if (lbl) lbl.textContent = efLabels[id] || id;
     wrap.style.display = '';
     var ef = _PEF_DEFS[id];
     if (!ef) return;
 
-    // Откладываем — чтобы браузер успел посчитать размеры враппера
+    
     requestAnimationFrame(function() {
         var W = wrap.offsetWidth  || 340;
         var H = wrap.offsetHeight || 100;
@@ -4356,11 +5406,11 @@ function _selPrimEffect(slotIdx, id, color) {
         draw();
     });
 
-    // Запустить мини-анимации на всех плитках этого слота
+    
     _startPefTileAnimations(slotIdx, id);
 }
 
-// Хелпер — создать одну частицу
+
 function _makePefParticle(W, H, ef, randomY) {
     return {
         x: Math.random() * W,
@@ -4375,7 +5425,7 @@ function _makePefParticle(W, H, ef, randomY) {
     };
 }
 
-// Мини-анимации на плитках выбора
+
 var _pefTileRAFs = {};
 function _startPefTileAnimations(slotIdx, selectedId) {
     var allIds = Object.keys(_PEF_DEFS);
@@ -4429,7 +5479,7 @@ function _submitPrimeRequest() {
     errEl.style.display = 'none';
     itemErrEl.style.display = 'none';
 
-    // Проверить что все слоты заполнены
+    
     const slots = window._primeSlotSelected || {};
     for (let i = 0; i < slotCount; i++) {
         if (!slots[i] || !slots[i].id) {
@@ -4443,7 +5493,7 @@ function _submitPrimeRequest() {
     if (!nick)    { errEl.textContent = 'Введи свой ник';              errEl.style.display = ''; return; }
     if (!contact) { errEl.textContent = 'Укажи Discord или Telegram';  errEl.style.display = ''; return; }
 
-    // Собрать строки по каждому слоту
+    
     const arts = typeof ARTIFACTS !== 'undefined' ? ARTIFACTS : [];
     const slotLines = [];
     for (let i = 0; i < slotCount; i++) {
@@ -4451,25 +5501,28 @@ function _submitPrimeRequest() {
         const a = arts.find(x => x.id === itemId);
         const cfg = [];
 
-        if (itemId === 'custom_medal') {
-            const icon  = (document.getElementById(`prim-cfg-medal-icon-${i}`)?.value||'').trim();
-            const name2 = (document.getElementById(`prim-cfg-medal-name-${i}`)?.value||'').trim();
-            const glow  = document.getElementById(`prim-cfg-medal-glow-${i}`)?.value||'#fb923c';
-            const eff   = document.getElementById(`prim-cfg-medal-effect-${i}`)?.value||'';
-            if (!icon) {
-                errEl.textContent = slotCount > 1
-                    ? `Укажи URL иконки медальки для месяца ${i+1}`
-                    : 'Укажи URL иконки медальки';
-                errEl.style.display = ''; return;
-            }
-            cfg.push(`Иконка: ${icon}`, `Название: ${name2||'—'}`, `Свечение: ${glow}`, `Эффект: ${eff||'нет'}`);
-        } else if (itemId === 'profile_bg') {
+        if (itemId === 'profile_bg') {
             const b1=(document.getElementById(`prim-cfg-bg-main-${i}`)?.value||'').trim();
             const b2=(document.getElementById(`prim-cfg-bg-hover-${i}`)?.value||'').trim();
             const b3=(document.getElementById(`prim-cfg-bg-top-${i}`)?.value||'').trim();
             if(b1) cfg.push(`Профиль: ${b1}`);
             if(b2) cfg.push(`Hover: ${b2}`);
             if(b3) cfg.push(`Топ: ${b3}`);
+        } else if (itemId === 'golden_frame') {
+            const fs = document.getElementById(`prim-cfg-frame-style-${i}`)?.value || 'gold';
+            cfg.push(`Стиль рамки: ${fs === 'rainbow' ? 'Радуга (переливается)' : 'Золотая (классика)'}`);
+        } else if (itemId === 'custom_medal') {
+            const mid = document.getElementById(`prim-cfg-medal-id-${i}`)?.value || '';
+            if (!mid) {
+                errEl.textContent = slotCount > 1
+                    ? `Выбери медальку для месяца ${i+1}`
+                    : 'Выбери медальку из списка';
+                errEl.style.display = ''; return;
+            }
+            const mName = (_medalCatalog && _medalCatalog[mid]) ? _medalCatalog[mid].name : mid;
+            const glowOn   = document.getElementById(`prim-cfg-medal-glow-on-${i}`)?.checked !== false;
+            const effectOn = document.getElementById(`prim-cfg-medal-effect-on-${i}`)?.checked !== false;
+            cfg.push(`Медалька: ${mName} (${mid})`, `Свечение: ${glowOn ? 'да' : 'нет'}`, `Анимация: ${(glowOn && effectOn) ? 'да' : 'нет'}`);
         } else if (itemId === 'profile_effect') {
             const eid = document.getElementById(`prim-cfg-effect-id-${i}`)?.value||'';
             if (!eid) {
@@ -4479,6 +5532,16 @@ function _submitPrimeRequest() {
                 errEl.style.display = ''; return;
             }
             cfg.push(`Эффект: ${eid}`);
+        } else if (itemId === 'pet') {
+            const pid = document.getElementById(`prim-cfg-pet-type-${i}`)?.value||'';
+            if (!pid) {
+                errEl.textContent = slotCount > 1
+                    ? `Выбери зверька для месяца ${i+1}`
+                    : 'Выбери зверька';
+                errEl.style.display = ''; return;
+            }
+            const pn = PET_TYPES_MAP[pid]?.name || pid;
+            cfg.push(`Зверёк: ${pn} (${pid})`);
         }
 
         const prefix = slotCount > 1 ? `  Месяц ${i+1}: ` : '  ';
@@ -4526,83 +5589,11 @@ function _submitPrimeRequest() {
 
 function _closeShopModal() {
     document.getElementById('shop-modal').style.display = 'none';
+    if (window._smCanvasRAF) { cancelAnimationFrame(window._smCanvasRAF); window._smCanvasRAF = null; }
+    _destroyPetPreview('sm-pet-preview-canvas');
 }
-function _submitShopRequest() {
-    const btn = document.getElementById('sm-btn');
-    const id = btn.dataset.artifactId;
-    const a = ARTIFACTS.find(x => x.id === id);
-    const nick = (document.getElementById('sm-nick').value || '').trim();
-    const contact = (document.getElementById('sm-contact').value || '').trim();
-    const errEl = document.getElementById('sm-err');
-    errEl.style.display = 'none';
-    if (!nick) { errEl.textContent = 'Введи свой ник'; errEl.style.display = ''; return; }
-    if (!contact) { errEl.textContent = 'Укажи Discord или Telegram для связи'; errEl.style.display = ''; return; }
+function _submitShopRequest() { /* removed — покупка через Prime */ }
 
-    const text = [
-        `🛒 <b>Заявка на артефакт - Classic HUB Prime</b>`,
-        ``,
-        `📦 <b>Предмет:</b> ${a.icon} ${a.name}`,
-        `🏷 <b>Категория:</b> ${a.tag}`,
-        `⚙️ <b>Эффект:</b> ${a.effect}`,
-        `👤 <b>Ник игрока:</b> ${nick}`,
-        `💬 <b>Контакт:</b> ${contact}`,
-        `🆔 <b>ID предмета:</b> <code>${id}</code>`,
-    ].join('\n');
-
-    btn.disabled = true;
-    btn.textContent = 'Отправляем...';
-
-    fetch('https://d1-template.herotorch.workers.dev/sendMessage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.ok) {
-            btn.textContent = '✓ Заявка отправлена!';
-            btn.style.background = '#16a34a';
-            document.getElementById('sm-success').style.display = 'block';
-            setTimeout(_closeShopModal, 2500);
-        } else { throw new Error(data.description || 'Ошибка'); }
-    })
-    .catch(err => {
-        btn.disabled = false;
-        btn.textContent = '📩 Отправить заявку';
-        errEl.textContent = 'Ошибка: ' + err.message;
-        errEl.style.display = '';
-    });
-}
-
-
-var STATIC_UPDATES = [
-    { date:'2026-03-07', version:'v1.6', title:'Prime-подписка, артефакты и инвентарь', type:'new', items:[
-        '✦ Система Prime: добровольная подписка-поддержка с привилегиями для игроков',
-        'Медаль донатера, статус «подписчик с...» и счётчик Prime ×N в профиле',
-        'Каталог артефактов - 10 предметов с эффектами для профиля, карточек и достижений',
-        'Инвентарь: предметы активны 30 дней, истёкшие уходят в Архив профиля',
-        'Витрина снаряжения - 5 слотов с активными артефактами в профиле',
-        'Страница Информация: подробный блок о Prime, как купить и что даёт',
-        'FAQ обновлён - добавлены вопросы о Prime и артефактах',
-    ]},
-    { date:'2026-03-07', version:'v1.5', title:'Профили, навыки, мульти-авторы и фоны', type:'new', items:['Совместные постройки: каждый автор имеет независимый профиль и статистику','Система навыков: 9 стилей × 5 уровней (Ученик → Легенда) - бонус EXP к постройкам','Редизайн профиля: 3D голова, фоновое изображение, широкий макет','hover-карточка','3 поля фона в CHAdmins - профиль, hover-карточка, карточка топа','«Есть у X%» - правый нижний угол каждой карточки достижения','Раздел Информация: блок «Система навыков»'] },
-    { date:'2026-03-07', version:'v1.4', title:'Магазин, редизайн и улучшения', type:'new', items:['Вкладка «Магазин артефактов» - 8 предметов с эффектами','Редизайн мини-профиля: граф стилей, витрина достижений','EXP ×2 за постройки в трендовом стиле сезона - новая механика','Поддержка нескольких авторов у одной постройки','Медаль донатера отображается теперь в профиле и топе'] },
-    { date:'2026-03-06', version:'v1.3', title:'Система достижений и CMS-панель', type:'new', items:['52 достижения трёх уровней','Тайный ранг - открывается при достижении определенного количества опыта','Самописная CMS-панель CHAdmins для управления контентом'] },
-    { date:'2026-03-05', version:'v1.2', title:'Вкладка Обновления и правки', type:'fix', items:['Добавлена вкладка «Обновления сайта»','Поле «Стиль постройки» в форме заявки','Координаты в модальном окне','Мобильная навигация - горизонтальный скролл'] },
-    { date:'2026-03-05', version:'v1.1', title:'Архив и редизайн Информации', type:'new', items:['Вкладка «Архив» - постройки по сезонам','Страница «Информация» переработана','Карточки: стиль → название → автор'] },
-    { date:'2026-03-04', version:'v1.0', title:'Первый запуск Classic HUB', type:'new', items:['Галерея построек с карточками и модальными окнами','Система рангов и опыта','27 достижений','Форма заявки с отправкой в Telegram'] },
-    { date:'-', version:'v?.?', title:'Планируется в следующих обновлениях', type:'upcoming', items:[
-        'Xaero`s Minimap - интеграция интерактивной карты сервера',
-        'Уведомления о новых постройках в браузере',
-        'Личный кабинет: авторизация по через Discord',
-        'Ввод системы рейтинга и лайков',
-        'Новые тип артефактов - питомцы',
-        'Больше косметики для кастомизации',
-        'Возможность получать уведомления нужного типа напрямую от Telegram-бота',
-        'Редизайн сайта',
-        'И другие грандиозные планы, о которых если я вспомню, то допищу)',
-    ]},
-];
 
 function _buildUpdatesHtml(list) {
     var typeStyles = {
@@ -4613,7 +5604,8 @@ function _buildUpdatesHtml(list) {
     return list.map(function(u) {
         var s = typeStyles[u.type] || typeStyles['new'];
         var items = Array.isArray(u.items) ? u.items
-            : (typeof u.items === 'string' ? u.items.split('\n').filter(Boolean) : []);
+            : (typeof u.items === 'string' ? u.items.split('\n').filter(Boolean)
+            : (u.items && typeof u.items === 'object' ? Object.values(u.items) : []));
         var itemsHtml = items.map(function(it) {
             return '<li style="display:flex;gap:8px;font-size:12px;color:#9ca3af;line-height:1.5;margin-bottom:4px">'+
                 '<span style="flex-shrink:0;margin-top:2px;color:'+s.dot+'">▸</span>'+it+'</li>';
@@ -4633,6 +5625,11 @@ function _buildUpdatesHtml(list) {
         '</div>';
     }).join('');
 }
+
+
+const STATIC_UPDATES = [
+ 
+];
 
 function renderUpdates() {
     document.getElementById('page-title').innerText = 'Обновления сайта';
@@ -4679,7 +5676,7 @@ function renderUpdates() {
         var wrap = document.getElementById('updates-cards-wrap');
         if (wrap) wrap.innerHTML = _buildUpdatesHtml(merged);
     }).catch(function(e) {
-        // Fallback: показываем статику
+        
         var wrap = document.getElementById('updates-cards-wrap');
         if (wrap) wrap.innerHTML = _buildUpdatesHtml(STATIC_UPDATES);
     });
@@ -4764,6 +5761,7 @@ function startApp() {
     loadArtifactIconsFromDB();
     loadPrimePerkIcons();
     loadStyleIconsFromDB();
+    loadSkillIconsFromDB();
 }
 
 if (window._fbReady) {
@@ -5289,6 +6287,15 @@ if (window._fbReady) {
     letter-spacing: 0.05em;
   }
 
+  @media (max-width: 640px) {
+    .profile-two-col { grid-template-columns: 1fr !important; }
+    .prime-modal-grid { grid-template-columns: 1fr !important; }
+    .prime-modal-grid > div:first-child {
+      border-right: none !important;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+  }
+
 </style>
 
 <div id="disc-overlay">
@@ -5378,7 +6385,7 @@ if (window._fbReady) {
           <div class="upd-block-desc">Выбери один предмет при оформлении подписки — он активен 30 дней.</div>
           <ul class="upd-list">
             <li><strong style="color:#fb923c;">Бирка</strong> - своя кастомная медаль рядом с ником, цветом и анимацией свечения</li>
-            <li><strong style="color:#D4AF37;">Золотая рамка</strong> - золотое обрамление аватара в профиле и топе</li>
+            <li><strong style="color:#D4AF37;">Рамка</strong> - золотое обрамление аватара в профиле и топе</li>
             <li><strong style="color:#4ade80;">Картина</strong> - своё изображение во всех трёх зонах фона профиля</li>
             <li><strong style="color:#a78bfa;">Фонарь</strong> - золотое свечение вокруг карточки постройки в галерее</li>
             <li><strong style="color:#fbbf24;">Пузырёк опыта</strong> - ×2 EXP за все постройки что загружаются, пока артефакт активен</li>
@@ -5457,6 +6464,55 @@ if (window._fbReady) {
   </div>
 </div>
 
+
+<div id="contest-banner" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:900;cursor:pointer;animation:contest-bounce 2.2s ease-in-out infinite;"
+     onclick="contestOpen()">
+  <div id="contest-banner-inner" style="background:linear-gradient(135deg,#1a0a00,#2a1500);border:1px solid #f59e0b88;border-radius:16px;padding:10px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 0 24px #f59e0b44,0 4px 20px rgba(0,0,0,0.7);">
+    <span id="contest-banner-icon" style="font-size:1.3rem;animation:contest-trophy 1.5s ease-in-out infinite;display:flex;align-items:center;justify-content:center;min-width:1.3rem;min-height:1.3rem;"></span>
+    <div>
+      <div id="contest-banner-label" style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#f59e0b;">Идёт конкурс</div>
+      <div style="font-size:11px;color:#d4a800;font-weight:700;" id="contest-banner-sub">Нажми, чтобы узнать подробности</div>
+    </div>
+    <span style="font-size:10px;color:#f59e0b88;margin-left:4px;">›</span>
+  </div>
+</div>
+
+<div id="contest-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.82);backdrop-filter:blur(6px);align-items:center;justify-content:center;" onclick="if(event.target===this)contestClose()">
+  <div id="contest-modal" style="background:#0e0e0e;border:1px solid #f59e0b44;border-radius:20px;padding:32px;max-width:460px;width:90%;position:relative;box-shadow:0 0 60px #f59e0b22;">
+    <button onclick="contestClose()" style="position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;background:#1f1f1f;border:1px solid #333;color:#555;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;">✕</button>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div id="contest-modal-icon" style="font-size:2.5rem;margin-bottom:8px;display:flex;align-items:center;justify-content:center;min-height:2.5rem;"></div>
+      <div id="contest-modal-label" style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.2em;color:#f59e0b;margin-bottom:6px;"></div>
+      <h2 id="contest-modal-title" style="font-size:18px;font-weight:900;color:#fff;margin:0;line-height:1.3;"></h2>
+    </div>
+    <div id="contest-modal-subdesc" style="font-size:11px;color:#666;text-align:center;margin-bottom:14px;margin-top:-10px;"></div>
+    <div id="contest-modal-desc" style="font-size:13px;color:#aaa;line-height:1.7;margin-bottom:22px;text-align:center;"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#1a1000;border:1px solid #f59e0b33;border-radius:12px;">
+        <span style="font-size:1.4rem;">🥇</span>
+        <div><div id="contest-prize-1-label" style="font-size:10px;font-weight:900;color:#FFD700;text-transform:uppercase;letter-spacing:.1em;"></div>
+        <div id="contest-prize-1" style="font-size:12px;color:#d4a800;"></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#0e0e18;border:1px solid #a0aec033;border-radius:12px;">
+        <span style="font-size:1.4rem;">🥈</span>
+        <div><div id="contest-prize-2-label" style="font-size:10px;font-weight:900;color:#c0c0c0;text-transform:uppercase;letter-spacing:.1em;"></div>
+        <div id="contest-prize-2" style="font-size:12px;color:#aaa;"></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#0a0a00;border:1px solid #cd7f3233;border-radius:12px;">
+        <span style="font-size:1.4rem;">🥉</span>
+        <div><div id="contest-prize-3-label" style="font-size:10px;font-weight:900;color:#cd7f32;text-transform:uppercase;letter-spacing:.1em;"></div>
+        <div id="contest-prize-3" style="font-size:12px;color:#a0825a;"></div></div>
+      </div>
+    </div>
+    <div id="contest-modal-footer" style="margin-top:16px;text-align:center;font-size:11px;color:#555;"></div>
+  </div>
+</div>
+
+<style>
+@keyframes contest-bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-5px)} }
+@keyframes contest-trophy { 0%,100%{transform:scale(1) rotate(-5deg)} 50%{transform:scale(1.15) rotate(5deg)} }
+</style>
+
 <div id="disc-mini" onclick="discReopen()" title="Открыть дисклеймер">
   <div class="disc-mini-dot"></div>
   <span class="disc-mini-text">BETA</span>
@@ -5494,15 +6550,144 @@ if (window._fbReady) {
 
   function discConfirm() {
     if (!document.getElementById('disc-check').checked) return;
+    localStorage.setItem('ch_disc_confirmed', '1');
     const overlay = document.getElementById('disc-overlay');
     overlay.style.transition = 'opacity 0.35s';
     overlay.style.opacity = '0';
     setTimeout(() => {
       overlay.style.display = 'none';
-      document.getElementById('disc-mini').style.display = 'flex';
-      document.getElementById('update-mini').style.display = 'flex';
+      var flags = window._siteFlags || {};
+      var dm = document.getElementById('disc-mini');
+      var um = document.getElementById('update-mini');
+      if (dm && flags.showDisclaimer  !== false) dm.style.display = 'flex';
+      if (um && flags.showUpdateMini  !== false) um.style.display = 'flex';
     }, 350);
   }
+
+
+  
+  function _applySiteFlags(flags) {
+      flags = flags || {};
+      window._siteFlags = flags;
+
+      
+      var discSeen  = !!localStorage.getItem('ch_disc_confirmed');
+      var showDisc  = flags.showDisclaimer !== false;
+      var ov = document.getElementById('disc-overlay');
+      var dm = document.getElementById('disc-mini');
+      if (!showDisc) {
+          if (ov) ov.style.display = 'none';
+          if (dm) dm.style.display = 'none';
+      } else {
+          
+          if (ov && ov.style.display === 'none' && !discSeen) ov.style.display = 'flex';
+         
+          if (dm && discSeen) dm.style.display = 'flex';
+      }
+
+      
+      var um = document.getElementById('update-mini');
+      if (um) um.style.display = flags.showUpdateMini === false ? 'none' : 'flex';
+
+      
+      var shopTab  = document.getElementById('nav-tab-shop');
+      var faqPrime = document.getElementById('faq-prime-block');
+      var hide = flags.showShop === false;
+      if (shopTab)  shopTab.style.display  = hide ? 'none' : '';
+      if (faqPrime) faqPrime.style.display = hide ? 'none' : '';
+  }
+
+  function _loadSiteFlags() {
+      if (!window._fbDb || !window._fbRef || !window._fbOnValue) {
+          setTimeout(_loadSiteFlags, 600);
+          return;
+      }
+      var r = window._fbRef(window._fbDb, 'config/siteFlags');
+      window._fbOnValue(r, function(snap) {
+          _applySiteFlags(snap.exists() ? snap.val() : {});
+      });
+  }
+  document.addEventListener('DOMContentLoaded', _loadSiteFlags);
+
+
+ 
+  var _contestData = null;
+  function _loadContest() {
+      if (!window._fbDb || !window._fbRef || !window._fbOnValue) { setTimeout(_loadContest, 600); return; }
+      var ref = window._fbRef(window._fbDb, 'config/contest');
+      window._fbOnValue(ref, function(snap) { _applyContest(snap.exists() ? snap.val() : null); });
+  }
+  function _applyContest(data) {
+      _contestData = data;
+      var banner = document.getElementById('contest-banner');
+      if (!banner) return;
+      if (!data || !data.active) { banner.style.display = 'none'; return; }
+      banner.style.display = 'block';
+      function _cSet(id, val) { var el = document.getElementById(id); if (el) { el.innerHTML = ''; el.textContent = val != null ? val : ''; } }
+      
+      var iconEl = document.getElementById('contest-banner-icon');
+      if (iconEl) {
+          iconEl.innerHTML = '';
+          if (data.iconUrl && data.iconUrl.trim()) {
+              var img = document.createElement('img');
+              img.src = data.iconUrl.trim();
+              img.style.cssText = 'width:1.4rem;height:1.4rem;object-fit:contain;border-radius:4px;display:block;';
+              img.onerror = function() { iconEl.innerHTML = ''; iconEl.textContent = data.iconEmoji || '🏆'; };
+              iconEl.appendChild(img);
+          } else {
+              iconEl.textContent = data.iconEmoji || '🏆';
+          }
+      }
+      _cSet('contest-banner-label', data.bannerLabel || 'Идёт конкурс');
+      _cSet('contest-banner-sub',   data.bannerSub   || 'Нажми, чтобы узнать подробности');
+  }
+  function contestOpen() {
+      var d = _contestData;
+      if (!d) return;
+      
+      function _cSet(id, val) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          el.innerHTML = '';
+          el.textContent = val || '';
+      }
+      function _cIcon(id, url, emoji, sz) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          el.innerHTML = '';
+          if (url && url.trim()) {
+              var img = document.createElement('img');
+              img.src = url.trim();
+              img.style.cssText = 'width:' + sz + ';height:' + sz + ';object-fit:contain;border-radius:8px;display:block;';
+              img.onerror = function() { el.innerHTML = ''; el.textContent = emoji || '🏆'; };
+              el.appendChild(img);
+          } else {
+              el.textContent = emoji || '🏆';
+          }
+      }
+     
+      _cIcon('contest-modal-icon', d.iconUrl, d.iconEmoji || '🏆', '2.5rem');
+      _cSet('contest-modal-label',   d.modalLabel  || d.bannerLabel || 'Сезонный конкурс');
+      _cSet('contest-modal-title',   d.title       || 'Конкурс сезона');
+      _cSet('contest-modal-subdesc', d.subdesc     || '');
+      _cSet('contest-modal-desc',    d.desc        || '');
+      _cSet('contest-prize-1-label', d.prize1label || '1 место');
+      _cSet('contest-prize-1',       d.prize1      || 'Ультра привилегия на месяц');
+      _cSet('contest-prize-2-label', d.prize2label || '2 место');
+      _cSet('contest-prize-2',       d.prize2      || 'Гранд привилегия на месяц');
+      _cSet('contest-prize-3-label', d.prize3label || '3 место');
+      _cSet('contest-prize-3',       d.prize3      || 'VIP привилегия на месяц');
+      _cSet('contest-modal-footer',  d.footer      || '');
+      var ov = document.getElementById('contest-overlay');
+      ov.style.display = 'flex'; ov.style.opacity = '0';
+      requestAnimationFrame(function(){ ov.style.transition='opacity .25s'; ov.style.opacity='1'; });
+  }
+  function contestClose() {
+      var ov = document.getElementById('contest-overlay');
+      ov.style.transition = 'opacity .2s'; ov.style.opacity = '0';
+      setTimeout(function(){ ov.style.display = 'none'; }, 200);
+  }
+  document.addEventListener('DOMContentLoaded', _loadContest);
 
   function discReopen() {
     const overlay = document.getElementById('disc-overlay');
@@ -5519,5 +6704,131 @@ if (window._fbReady) {
 
 </script>
 
+<script>
+
+var _medalCatalog = null; // кеш
+function _loadMedalPicker(slotIdx) {
+    var listEl = document.getElementById('prim-medal-list-' + slotIdx);
+    if (!listEl) return;
+    function renderMedals(medals) {
+        var keys = Object.keys(medals || {});
+        if (!keys.length) {
+            listEl.innerHTML = '<div style="font-size:11px;color:#555;text-align:center;padding:20px;grid-column:1/-1;">Медалей пока нет.<br>Скоро появятся!</div>';
+            return;
+        }
+        listEl.innerHTML = '';
+        keys.forEach(function(k) {
+            var m = medals[k];
+            var glow = m.glow || '#fb923c';
+            var card = document.createElement('div');
+            card.id = 'prim-medal-card-' + slotIdx + '-' + k;
+            card.style.cssText = 'padding:10px 6px;border-radius:10px;border:1px solid #2a2a2a;background:#0a0a0a;cursor:pointer;text-align:center;transition:all .15s;';
+            card.onclick = (function(key){ return function(){ _pickMedal(slotIdx, key); }; })(k);
+            var img = document.createElement('img');
+            img.src = m.icon || '';
+           
+            img.style.width = '32px';
+            img.style.height = '32px';
+            img.style.borderRadius = '7px';
+            img.style.objectFit = 'cover';
+            img.style.margin = '0 auto 5px';
+            img.style.display = 'block';
+            img.dataset.glow   = m.glow   || '#fb923c';
+            img.dataset.effect = (m.effect || '').replace(/^donor-effect-/, '');
+            img.dataset.medalName = m.name || '';
+            img.classList.add('donor-img');
+            img.onerror = function(){ this.outerHTML = '<div style="font-size:22px;margin-bottom:5px">🏅</div>'; };
+            img.onload = function() { if (typeof _applyDonorStyleEl === 'function') _applyDonorStyleEl(this); };
+           
+            if (img.complete && img.naturalWidth) { setTimeout(function(){ if (typeof _applyDonorStyleEl === 'function') _applyDonorStyleEl(img); }, 0); }
+            var lbl = document.createElement('div');
+            lbl.style.cssText = 'font-size:9px;font-weight:900;color:#fff;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+            lbl.textContent = m.name || k;
+            card.appendChild(img);
+            card.appendChild(lbl);
+            listEl.appendChild(card);
+        });
+    }
+    var cached = _medalCatalog || window._medalCatalogData;
+    if (cached) { _medalCatalog = cached; renderMedals(cached); return; }
+    var ref = window._fbRef(window._fbDb, 'config/medalCatalog');
+    window._fbGet(ref).then(function(snap) {
+        _medalCatalog = snap.exists() ? snap.val() : {};
+        renderMedals(_medalCatalog);
+    }).catch(function() {
+        listEl.innerHTML = '<div style="color:#f87171;font-size:11px;text-align:center;padding:16px;grid-column:1/-1;">Ошибка загрузки</div>';
+    });
+}
+function _pickMedal(slotIdx, key) {
+    var medals = _medalCatalog || window._medalCatalogData || {};
+    var m = medals[key];
+    if (!m) return;
+    Object.keys(medals).forEach(function(k) {
+        var c = document.getElementById('prim-medal-card-' + slotIdx + '-' + k);
+        if (c) { c.style.borderColor = '#2a2a2a'; c.style.background = '#0a0a0a'; }
+    });
+    var card = document.getElementById('prim-medal-card-' + slotIdx + '-' + key);
+    if (card) { card.style.borderColor = m.glow || '#fb923c'; card.style.background = (m.glow || '#fb923c') + '18'; }
+    var hidEl = document.getElementById('prim-cfg-medal-id-' + slotIdx);
+    if (hidEl) hidEl.value = key;
+    var prevWrap = document.getElementById('prim-medal-preview-' + slotIdx);
+    var prevImg  = document.getElementById('prim-medal-live-img-' + slotIdx);
+    if (prevWrap) prevWrap.style.display = '';
+    if (prevImg) {
+        prevImg.style.cssText = 'width:24px;height:24px;border-radius:5px;object-fit:cover;display:block;';
+        prevImg.dataset.medalName = m.name || '';
+        
+        prevImg.onload = function() { _applyMedalPreview(slotIdx); };
+        prevImg.src = m.icon || '';
+        if (prevImg.complete && prevImg.naturalWidth) { _applyMedalPreview(slotIdx); }
+    }
+}
+
+
+function _getMedalData(slotIdx) {
+    var medals = _medalCatalog || window._medalCatalogData || {};
+    var mid = (document.getElementById('prim-cfg-medal-id-' + slotIdx) || {}).value || '';
+    return { m: medals[mid] || null, mid: mid };
+}
+
+function _applyMedalPreview(slotIdx) {
+    var prevImg = document.getElementById('prim-medal-live-img-' + slotIdx);
+    if (!prevImg) return;
+    var d = _getMedalData(slotIdx);
+    if (!d.m) return;
+    var glowChk   = document.getElementById('prim-cfg-medal-glow-on-'   + slotIdx);
+    var effectChk = document.getElementById('prim-cfg-medal-effect-on-' + slotIdx);
+    var glowOn   = !glowChk   || glowChk.checked;
+    var effectOn = !effectChk || effectChk.checked;
+    var normalEffect = (d.m.effect || '').replace(/^donor-effect-/, '');
+    
+    var glowColor = glowOn ? (d.m.glow || '#fb923c') : 'none';
+   
+    var anim = effectOn ? normalEffect : '';
+    if (typeof _applyDonorStyle === 'function') _applyDonorStyle(prevImg, glowColor, anim, 24);
+}
+function _toggleMedalGlow(slotIdx, enabled) { _applyMedalPreview(slotIdx); }
+function _toggleMedalEffect(slotIdx, enabled) { _applyMedalPreview(slotIdx); }
+
+
+function _selGoldenFrame(slotIdx, style) {
+    var hidEl = document.getElementById('prim-cfg-frame-style-' + slotIdx);
+    if (hidEl) hidEl.value = style;
+    var optGold    = document.getElementById('gframe-opt-gold');
+    var optRainbow = document.getElementById('gframe-opt-rainbow');
+    if (!optGold || !optRainbow) return;
+    if (style === 'gold') {
+        optGold.style.border    = '2px solid #D4AF37';
+        optGold.style.background = '#D4AF3712';
+        optRainbow.style.border  = '1px solid #2a2a2a';
+        optRainbow.style.background = '#0a0a0a';
+    } else {
+        optRainbow.style.border  = '2px solid #a855f7';
+        optRainbow.style.background = '#a855f712';
+        optGold.style.border    = '1px solid #2a2a2a';
+        optGold.style.background = '#0a0a0a';
+    }
+}
+</script>
 </body>
 </html>
