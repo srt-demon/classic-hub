@@ -6,7 +6,7 @@ Puzata Hata LTD © 2026
              -------------------------------------
 ISC License
 
-Copyright (c) 2026, Puzata Hata LTD
+Copyright (c) 2026, Polybius LTD
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -74,6 +74,7 @@ Development by slowdown
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <style>
         body {
             background-color: #1a1a1a;
@@ -343,6 +344,10 @@ Development by slowdown
                 <a href="#" class="nav-tab" id="tab-updates-link">Обновления<span id="updates-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px #4ade80;animation:pulse-dot 1.4s infinite;" title="Новое обновление"></span></a>
                 <a href="#" class="nav-tab" id="nav-tab-shop">Магазин</a>
                 <div class="ml-auto flex items-center gap-2 flex-shrink-0">
+                    <span id="mc-status-badge" onclick="_mcStatusOpen()" class="hidden md:inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full whitespace-nowrap" style="background:#0a1520;border:1px solid rgba(96,165,250,0.3);color:#60a5fa;cursor:pointer;transition:border-color .2s;" onmouseover="this.style.borderColor='rgba(96,165,250,0.6)'" onmouseout="this.style.borderColor='rgba(96,165,250,0.3)'">
+                        <span id="mc-status-dot" class="w-2 h-2 rounded-full inline-block flex-shrink-0" style="background:#60a5fa;animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;"></span>
+                        На сервере: <span id="mc-online-count">...</span>
+                    </span>
                     <span id="header-trend-badge" class="hidden md:inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full whitespace-nowrap" style="background:#D4AF3712;border:1px solid #D4AF3730;color:#D4AF37;">
                         <span class="w-2 h-2 rounded-full inline-block flex-shrink-0" style="background:#D4AF37;animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;"></span>
                         Текущий стиль: <span id="header-trend-name">GOTHIC</span>
@@ -413,7 +418,7 @@ Development by slowdown
     </footer>
 
     <div id="modal-overlay" onclick="closeModal()">
-        <div class="bg-[#151515] w-full max-w-7xl rounded-2xl overflow-hidden flex flex-col md:flex-row relative shadow-2xl border border-white/5"
+        <div class="bg-[#151515] w-full max-w-7xl rounded-2xl overflow-hidden flex flex-col md:flex-row relative shadow-2xl border border-white/5" style="max-height:92vh;"
              onclick="event.stopPropagation()">
 
             <button onclick="closeModal()" class="absolute top-3 right-3 z-50 bg-black/60 text-white w-9 h-9 rounded-full hover:bg-[#D4AF37] hover:text-black transition flex items-center justify-center border border-white/10 text-sm">✕</button>
@@ -442,7 +447,7 @@ Development by slowdown
 
                 <div class="mb-4">
                     <h4 class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">Галерея объекта</h4>
-                    <div id="modal-gallery-grid" class="grid grid-cols-3 gap-1.5"></div>
+                    <div id="modal-gallery-grid" class="grid grid-cols-3 gap-1.5 custom-scrollbar" style="max-height:180px;overflow-y:auto;"></div>
                 </div>
 
                 <div class="mt-auto space-y-3 pt-4 border-t border-white/5">
@@ -507,7 +512,8 @@ Development by slowdown
                     </div>
 
                     <div id="profile-prime-row" style="display:none;margin-bottom:10px;">
-                        <span id="profile-prime-badge" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;padding:3px 10px;border-radius:20px;background:linear-gradient(90deg,rgba(212,175,55,0.18),rgba(212,175,55,0.06));border:1px solid rgba(212,175,55,0.35);color:#D4AF37;letter-spacing:.05em;">
+                        <span id="profile-prime-badge" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;padding:3px 10px;border-radius:20px;background:linear-gradient(90deg,rgba(212,175,55,0.18),rgba(212,175,55,0.06));border:1px solid rgba(212,175,55,0.35);color:#D4AF37;letter-spacing:.05em;cursor:default;position:relative;"
+                            onmouseenter="_showPrimeTip(this)" onmouseleave="_hidePrimeTip()">
                             ✦ PRIME — <span id="profile-prime-since"></span>
                         </span>
                         <span id="profile-prime-count" style="margin-left:8px;font-size:9px;color:#555;font-weight:700;"></span>
@@ -754,7 +760,7 @@ Development by slowdown
 
     <div id="prime-modal" onclick="if(event.target===this)_closePrimeModal()"
          style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);z-index:501;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
-        <div onclick="event.stopPropagation()" style="background:#111;border:1px solid rgba(212,175,55,0.25);border-radius:24px;width:100%;max-width:820px;position:relative;overflow:hidden;my:auto;">
+        <div onclick="event.stopPropagation()" style="background:#111;border:1px solid rgba(212,175,55,0.25);border-radius:24px;width:100%;max-width:820px;position:relative;overflow:hidden;max-height:calc(100vh - 32px);overflow-y:auto;">
 
             <div style="height:3px;background:linear-gradient(90deg,#D4AF37,#f5d77e,#D4AF37);"></div>
             <button onclick="_closePrimeModal()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:#1f1f1f;border:1px solid #333;color:#666;cursor:pointer;font-size:12px;z-index:10;line-height:1;">✕</button>
@@ -770,7 +776,7 @@ Development by slowdown
                             <div style="font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.03em;line-height:1;">Подписка Prime</div>
                         </div>
                     </div>
-                    <div style="font-size:11px;color:#555;margin-bottom:18px;line-height:1.7;">1 подписка = 1 артефакт на 30 дней · Добровольная поддержка проекта<br><span style="color:#4ade8088;font-size:10px;">5 подписок сразу — скидка 50% · 6-я и далее — скидка 65%</span></div>
+                    <div style="font-size:11px;color:#555;margin-bottom:18px;line-height:1.7;">1 подписка = 1 артефакт на 30 дней · Добровольная поддержка проекта<br><span style="color:#4ade8088;font-size:10px;">5 подписок сразу - скидка 20% · 6-я и далее - скидка 40%</span></div>
 
                     <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#444;margin-bottom:10px;">Что входит в Prime</div>
                     <div id="prime-perks-list" style="display:flex;flex-direction:column;gap:7px;margin-bottom:18px;">
@@ -1134,6 +1140,24 @@ function loadArtifactIconsFromDB() {
         });
         const grid = document.getElementById('shop-grid');
         if (grid) _renderShopGrid(_currentShopFilter || 'Все');
+    });
+
+
+    window._fbOnValue(window._fbRef(window._fbDb, 'config/customPets'), snap => {
+        Object.keys(PET_TYPES_MAP).forEach(k => { if (PET_TYPES_MAP[k]._custom) delete PET_TYPES_MAP[k]; });
+        window._customPetsMap = {};
+        if (!snap.exists()) return;
+        Object.entries(snap.val()).forEach(([id, cfg]) => {
+            if (!cfg || !cfg.name) return;
+            window._customPetsMap[id] = cfg;
+            PET_TYPES_MAP[id] = { name: cfg.name, emoji: cfg.emoji||'🐾', color: cfg.uiColor||'#34d399', camZ: 3.9, camY: 0.55, _custom: true };
+        });
+    });
+
+ 
+    window._hiddenBuiltinPets = {};
+    window._fbOnValue(window._fbRef(window._fbDb, 'config/hiddenBuiltinPets'), snap => {
+        window._hiddenBuiltinPets = snap.exists() ? snap.val() : {};
     });
 }
 
@@ -1599,11 +1623,18 @@ function openModal(index) {
 
     document.getElementById('modal-overlay').classList.add('is-open');
     document.body.style.overflow = 'hidden';
+    var _cb = document.getElementById('contest-banner');
+    if (_cb) _cb.style.visibility = 'hidden';
 }
 
 function closeModal() {
     document.getElementById('modal-overlay').classList.remove('is-open');
     document.body.style.overflow = 'auto';
+    var _ao = document.getElementById('author-overlay');
+    if (!_ao || _ao.style.display !== 'flex') {
+        var _cb = document.getElementById('contest-banner');
+        if (_cb) _cb.style.visibility = '';
+    }
 }
 
 function openModalById(id) {
@@ -1791,7 +1822,7 @@ function openAuthorProfile(nameOverride) {
                     <div style="display:flex;align-items:center;gap:1px;margin-bottom:4px;">${starsHtml}</div>
                     <div style="display:flex;align-items:center;justify-content:space-between;">
                         <div style="flex:1;background:rgba(255,255,255,0.06);border-radius:4px;height:3px;overflow:hidden;margin-right:6px;">
-                            <div style="height:100%;width:${Math.min(s.level/5*100,100)}%;background:${col};border-radius:4px;"></div>
+                            <div style="height:100%;width:${s.level>=5?100:s.nextAt?Math.min(s.count/s.nextAt*100,100):0}%;background:${col};border-radius:4px;"></div>
                         </div>
                         <span style="font-size:7px;color:#555;margin-right:4px;">${nextInfo}</span>
                         ${bonusBadge}
@@ -1818,6 +1849,11 @@ function openAuthorProfile(nameOverride) {
             const statusColor = primeActive ? '#4ade80' : '#555';
             document.getElementById('profile-prime-count').innerHTML =
                 `Prime ×${cnt} &nbsp;<span style="color:${statusColor};font-size:9px;">${statusTxt}</span>`;
+            const badge = document.getElementById('profile-prime-badge');
+            if (badge) {
+                badge.dataset.activeUntil = primeData.activeUntil || '';
+                badge.dataset.primeActive = primeActive ? '1' : '0';
+            }
             primeRow.style.display = '';
         } else {
             primeRow.style.display = 'none';
@@ -1988,6 +2024,8 @@ function openAuthorProfile(nameOverride) {
     setTimeout(() => { bar.style.width = progress.pct + '%'; }, 80);
 
     document.getElementById('author-overlay').style.display = 'flex';
+    var _cb2 = document.getElementById('contest-banner');
+    if (_cb2) _cb2.style.visibility = 'hidden';
  
     document.querySelectorAll('[id^="pef-top-"]').forEach(function(c){ c.style.display = 'none'; });
    
@@ -1998,6 +2036,10 @@ function openAuthorProfile(nameOverride) {
 
 function closeAuthorProfile() {
     document.getElementById('author-overlay').style.display = 'none';
+    if (!document.getElementById('modal-overlay').classList.contains('is-open')) {
+        var _cb3 = document.getElementById('contest-banner');
+        if (_cb3) _cb3.style.visibility = '';
+    }
     _destroyPet();
     document.querySelectorAll('[id^="pef-big-"],[id^="pef-sm-"]').forEach(function(c){ c.remove(); });
     Object.keys(_pefRAF).forEach(function(k){
@@ -3163,6 +3205,7 @@ function renderInfo() {
                     '<li class="flex gap-2"><span class="gold-accent font-black flex-shrink-0">3.</span> Приложи ссылку на фотоальбом</li>' +
                     '<li class="flex gap-2"><span class="gold-accent font-black flex-shrink-0">4.</span> Оставь контакт для связи</li>' +
                     '<li class="flex gap-2"><span class="gold-accent font-black flex-shrink-0">5.</span> Жди проверки от 12 до 48 часов</li>' +
+                    '<li class="flex gap-2 items-start mt-2 pt-2 border-t border-white/5"><span style="font-size:9px;padding:2px 7px;border-radius:5px;background:rgba(74,222,128,0.12);color:#4ade80;font-weight:900;border:1px solid rgba(74,222,128,0.25);flex-shrink:0;white-space:nowrap;margin-top:1px;">✓ Авто</span><span style="color:rgba(74,222,128,0.75);font-size:10px;line-height:1.5;">Профиль регистрируется автоматически при отправке заявки - никакая отдельная регистрация и сторонние сервисы не нужны.</span></li>' +
                 '</ol>' +
                 '<button onclick="toggleForm(true)" class="mt-4 w-full bg-[#D4AF37] text-black font-black py-2 rounded-xl text-xs uppercase tracking-widest hover:brightness-110 transition active:scale-95"> Заявить о постройке</button>' +
             '</div>' +
@@ -3244,7 +3287,7 @@ function renderInfo() {
                         '</div>';
                     }).join('') +
                 '</div>' +
-                '<p class="text-gray-600 text-[9px] mt-3 leading-relaxed">Навыки прокачиваются автоматически — просто публикуй постройки в любимом стиле. Бонус суммируется к базовым 1 000 EXP за постройку. Максимальный уровень — Легенда (15+ построек одного стиля).</p>' +
+                '<p class="text-gray-600 text-[9px] mt-3 leading-relaxed">Навыки прокачиваются автоматически - просто публикуй постройки в любимом стиле. Бонус суммируется к базовым 1 000 EXP за постройку. Максимальный уровень - Легенда (15+ построек одного стиля).</p>' +
             '</div>' +
 
             '</div>' +
@@ -3320,9 +3363,9 @@ function renderInfo() {
             '</div>' +
         '</div>' +
 
-        // FAQ расширенный
-        '<div id="faq-prime-block" class="relative rounded-2xl overflow-hidden mb-6" style="background:linear-gradient(135deg,#0d0d0d 0%,#130f00 50%,#0d0d0d 100%);border:1px solid rgba(212,175,55,0.2);">' +
-            '<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 15% 50%,rgba(212,175,55,0.09) 0%,transparent 55%);"></div>' +
+        //заметкаЗакомичена
+        ' <div id="faq-prime-block" class="relative rounded-2xl overflow-hidden mb-6" style="background:linear-gradient(135deg,#0d0d0d 0%,#130f00 50%,#0d0d0d 100%);border:1px solid rgba(212,175,55,0.2);">' +
+            '<!--<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 15% 50%,rgba(212,175,55,0.09) 0%,transparent 55%);"></div>' +
             '<div style="position:relative;padding:28px 32px;">' +
                 '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;">' +
                     '<div style="flex:1;min-width:260px;">' +
@@ -3367,7 +3410,7 @@ function renderInfo() {
                             'style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:12px;background:linear-gradient(90deg,#D4AF37,#c49b20);border:none;color:#000;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;font-family:inherit;">✦ Приобрести Prime</button> ' +
                     '</div>' +
                 '</div>' +
-            '</div>' +
+            '</div> -->' +
         '</div>' +
 
         '<div class="bg-[#1e1e1e] rounded-2xl border border-white/5 overflow-hidden mb-6">' +
@@ -3395,18 +3438,18 @@ function renderInfo() {
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое стиль-тренд сезона?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Каждый сезон игроки выбирают один архитектурный стиль как приоритетный. Постройка в этом стиле даёт достижение <span class="text-white font-bold">«Стиль сезона»</span> и дополнительный EXP.</p>' +
                 '</div>' +
-                '<div>' +
+                '<!-- <div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что будет с постройками после вайпа?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Ничего - записи хранятся навсегда. Скриншоты, описание и просмотры сохраняются в разделе <a href="#" onclick="document.querySelectorAll(\'.nav-tab\')[4].click()" class="gold-accent hover:underline font-bold">Архив</a>, сгруппированном по сезонам.</p>' +
-                '</div>' +
+                '</div> -->' +
                 '<div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Где посмотреть свой профиль и навыки?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Открой вкладку <span class="text-white font-bold">«Топ авторов»</span> и нажми на своё имя - откроется полный профиль с рангом, EXP, постройками, достижениями и уровнями навыков по стилям.</p>' +
                 '</div>' +
-                '<div>' +
+                '<!-- <div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Как отсортировать постройки в галерее?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">В верхней части галереи есть выпадающий список: <span class="text-white font-bold">Сначала новые</span> (по умолчанию), <span class="text-white font-bold">Сначала старые</span> и <span class="text-white font-bold">По просмотрам</span> - чтобы найти самые популярные постройки.</p>' +
-                '</div>' +
+                '</div> -->' +
             '</div>' +
 
             // друга
@@ -3415,27 +3458,28 @@ function renderInfo() {
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Можно ли исправить ошибку в постройке?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Да. Обратись через кнопку <a href="#" onclick="event.preventDefault();toggleQuestion(true)" class="gold-accent font-bold hover:underline">«Тех. Поддержка»</a> - администратор поправит название, описание, фото или координаты.</p>' +
                 '</div>' +
-                '<div>' +
+                '<!-- <div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое статус донатера?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Особый статус за поддержку проекта. Рядом с ником отображается уникальная иконка - при наведении появляется всплывающая подсказка. Статус выдаётся вручную администратором.</p>' +
-                '</div>' +
-                '<div>' +
+                '</div> -->' +
+                '<!-- <div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое Prime?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Prime - это добровольная подписка-поддержка проекта. <strong class="text-white">1 подписка</strong> даёт: статус Prime в профиле, медаль донатера, 1 артефакт на выбор на 30 дней и открывает витрину снаряжения (до 5 предметов). Купить можно через кнопку <span class="text-[#D4AF37] font-bold">«Приобрести Prime»</span> в разделе <strong class="text-white">Магазин</strong> - заполняешь форму, мы свяжемся в Discord/Telegram.</p>' +
-                '</div>' +
-                '<div>' +
+                '</div> -->' +
+
+                '<!-- <div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое Артефакты?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Артефакты - это особые предметы с эффектами, доступные только подписчикам <strong class="text-white">Prime</strong>. У каждого предмета есть <strong class="text-white">срок действия</strong> - обычно 30 дней. Когда срок истекает, предмет уходит в <strong class="text-white">Архив предметов</strong> в профиле и перестает действовать. Если подписка аннулируется раньше - все предметы тоже уходят в архив. В данный момент с доступными артефактами можно ознакомиться во вкладке <strong class="text-white">Магазин</strong>.</p>' +
-                '</div>' +
+                '</div> -->' +
                 
                 '<div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что за частицы мерцают у автора в профиле?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Это эффекты профиля - анимированные частицы вокруг аватарки. Виден в <strong class="text-white">трёх местах</strong>: в большом профиле, в ховер-карточке при наведении и у головы в Топе авторов.</p>' +
                 '</div>' +
                 '<div>' +
-                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое Архив предметов?</div>' +
-                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Архив - это специальная секция в профиле с истёкшими артефактами. Предметы там отображаются <strong class="text-white">тёмными и неактивными</strong> - как история того, что было. Переобрести предмет можно заново через новую подписку Prime и тогда он станет активным снова.</p>' +
-                '</div>' +
+                    '<!-- <div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое Архив предметов?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Архив - это специальная секция в профиле с истёкшими артефактами. Предметы там отображаются <strong class="text-white">тёмными и неактивными</strong> - как история того, что было. Переобрести предмет можно заново через новую подписку Prime и тогда он станет активным снова.</p>' + 
+                '</div> -->' +
             '</div>' +
 
             '</div>' +
@@ -4087,6 +4131,7 @@ const PET_TYPES_MAP = {
     skeleton: { name:'Скелет',   emoji:'💀', color:'#D8D8D8', camZ:4.0, camY:0.70 },
     frog:     { name:'Лягушка',  emoji:'🐸', color:'#E07040', camZ:3.6, camY:0.28 },
 };
+window._customPetsMap = {};
 
 function _destroyPetPreview(canvasId) {
     var s = _petPreviewRenderers[canvasId];
@@ -4104,6 +4149,8 @@ function _spawnPetCanvas(canvasEl, petId, opts) {
     opts = opts || {};
     var W = opts.w || 200, H = opts.h || 200;
     var interactive = !!opts.interactive;
+  
+    var fxMove = (canvasEl.parentElement && canvasEl.parentElement.dataset && canvasEl.parentElement.dataset.fxMove) || opts.fxMove || '';
     var pt = PET_TYPES_MAP[petId] || PET_TYPES_MAP['pig'];
     var camZ = opts.camZ || pt.camZ || 3.9;
     var camY = opts.camY || pt.camY || 0.55;
@@ -4123,8 +4170,38 @@ function _spawnPetCanvas(canvasEl, petId, opts) {
     scene.add(new THREE.AmbientLight(0xffffff, 0.60));
     var dl  = new THREE.DirectionalLight(0xffffff, 0.95);  dl.position.set(2, 4, 3);   scene.add(dl);
     var dl2 = new THREE.DirectionalLight(0x99aaff, 0.22); dl2.position.set(-2, -1, -2); scene.add(dl2);
-    var pet = _buildPetModel(petId);
-    scene.add(pet.group);
+  
+    var cpCfg = window._customPetsMap && window._customPetsMap[petId];
+    var glbSrc = cpCfg && cpCfg.glbData;
+    var pet = { group: new THREE.Group(), headGroup:null, wingL:null, wingR:null, armL:null, armR:null, tail:null, armMode:'none' };
+    var mixer = null, lastTs = performance.now();
+    if (glbSrc && typeof THREE.GLTFLoader !== 'undefined') {
+        scene.add(pet.group);
+        new THREE.GLTFLoader().load(glbSrc, function(gltf) {
+            var model = gltf.scene;
+            var box = new THREE.Box3().setFromObject(model);
+            var size = box.getSize(new THREE.Vector3());
+            var maxDim = Math.max(size.x, size.y, size.z);
+            if (maxDim > 0) { var sc = 2.0/maxDim; model.scale.set(sc,sc,sc); }
+            box.setFromObject(model);
+            var center = box.getCenter(new THREE.Vector3());
+            model.position.set(-center.x, -box.min.y, -center.z);
+            
+            box.setFromObject(model);
+            var midY = (box.min.y + box.max.y) * 0.5;
+            camera.position.set(0, camY, camZ);
+            camera.lookAt(0, midY, 0);
+            pet.group.add(model);
+            if (gltf.animations && gltf.animations.length) {
+                mixer = new THREE.AnimationMixer(model);
+                gltf.animations.forEach(function(c){ mixer.clipAction(c).play(); });
+            }
+        });
+    } else {
+        var builtPet = _buildPetModel(petId);
+        pet = builtPet;
+        scene.add(pet.group);
+    }
     var rotY = -0.5, rotX = 0.08, drag = false, lx = 0, ly = 0;
     var t0 = performance.now();
     if (interactive) {
@@ -4142,6 +4219,8 @@ function _spawnPetCanvas(canvasEl, petId, opts) {
     (function loop(ts) {
         state.raf = requestAnimationFrame(loop);
         var t = (ts - t0) / 1000;
+        if (mixer) { mixer.update((ts - lastTs) / 1000); }
+        lastTs = ts;
         pet.group.position.y = Math.sin(t * 1.6) * 0.044;
         if (pet.headGroup) {
             pet.headGroup.rotation.y = Math.sin(t * 0.85) * 0.13;
@@ -4164,7 +4243,13 @@ function _spawnPetCanvas(canvasEl, petId, opts) {
         if (pet.tail) {
             pet.tail.rotation.z = Math.sin(t * 2.8) * 0.18 + 0.18;
         }
-        if (!drag) rotY += 0.009;
+      
+        if (!drag) {
+            var rs = fxMove === 'spin_fast' ? 0.035 : fxMove === 'spin_slow' ? 0.003 : fxMove === 'static' ? 0 : fxMove === 'bounce' ? 0.009 : 0.009;
+            rotY += rs;
+        }
+        if (fxMove === 'orbit') { rotY += 0.009; pet.group.position.x = Math.sin(t * 0.8) * 0.25; }
+        else { pet.group.position.x = 0; }
         pet.group.rotation.y = rotY;
         pet.group.rotation.x = rotX;
         renderer.render(scene, camera);
@@ -4203,8 +4288,16 @@ function _selPrimePet(slotIdx, petId) {
 
 function _destroyPet() {
     _destroyPetPreview('profile-pet-canvas');
+    if (_petFxInterval) { clearInterval(_petFxInterval); _petFxInterval = null; }
+    if (_petParticleRaf) { cancelAnimationFrame(_petParticleRaf); _petParticleRaf = null; }
     var w = document.getElementById('profile-pet-wrap');
-    if (w) w.style.display = 'none';
+    if (w) {
+        w.style.display = 'none';
+        w.style.filter = '';
+        w.style.animation = '';
+        var pc = w.querySelector('.pet-particles');
+        if (pc) pc.remove();
+    }
 }
 
 function _renderPet(authorName) {
@@ -4216,7 +4309,95 @@ function _renderPet(authorName) {
     var canvas = document.getElementById('profile-pet-canvas');
     if (!wrap || !canvas) return;
     wrap.style.display = 'block';
-    _spawnPetCanvas(canvas, cfg.petType || 'pig', { w: 110, h: 110, interactive: true });
+
+ 
+    var petId = cfg.petType || 'pig';
+    var cpCfg = window._customPetsMap && window._customPetsMap[petId];
+    var dScale = (cpCfg && cpCfg.displayScale) ? parseFloat(cpCfg.displayScale) : 1.0;
+    wrap.style.transform = dScale !== 1.0 ? 'scale(' + dScale + ')' : '';
+    wrap.style.transformOrigin = 'top right';
+
+    
+    _applyPetFx(wrap, cfg.fx || {});
+
+    _spawnPetCanvas(canvas, petId, { w: 110, h: 110, interactive: true });
+}
+
+var _petFxInterval = null;
+function _applyPetFx(wrap, fx) {
+  
+    if (_petFxInterval) { clearInterval(_petFxInterval); _petFxInterval = null; }
+    wrap.style.animation = '';
+    wrap.style.filter = 'drop-shadow(0 4px 16px rgba(0,0,0,0.7))';
+  
+    var oldP = wrap.querySelector('.pet-particles');
+    if (oldP) oldP.remove();
+
+   
+    var glowColors = { gold:'212,175,55', green:'74,222,128', blue:'96,165,250', purple:'168,85,247', red:'248,113,113', white:'255,255,255', rainbow:null };
+    if (fx.glow && glowColors[fx.glow] !== undefined) {
+        var str = parseFloat(fx.glowStr || '2');
+        if (fx.glow === 'rainbow') {
+            var hue = 0;
+            _petFxInterval = setInterval(function() {
+                hue = (hue + 3) % 360;
+                wrap.style.filter = 'drop-shadow(0 4px 16px rgba(0,0,0,0.7)) drop-shadow(0 0 ' + (8*str) + 'px hsl(' + hue + ',100%,55%))';
+            }, 40);
+        } else {
+            var rgb = glowColors[fx.glow];
+            wrap.style.filter = 'drop-shadow(0 4px 16px rgba(0,0,0,0.7)) drop-shadow(0 0 ' + (8*str) + 'px rgba(' + rgb + ',0.85))';
+        }
+    }
+
+   
+    if (fx.blink) {
+        var blinkAnims = {
+            pulse_slow: 'pet-pulse-slow 2.5s ease-in-out infinite',
+            pulse_fast: 'pet-pulse-fast 0.8s ease-in-out infinite',
+            flicker:    'pet-flicker 0.15s linear infinite',
+            heartbeat:  'pet-heartbeat 1.2s ease-in-out infinite',
+        };
+        if (blinkAnims[fx.blink]) wrap.style.animation = blinkAnims[fx.blink];
+    }
+
+    
+    wrap.dataset.fxMove = fx.move || '';
+
+   
+    if (fx.particles) {
+        var pc = document.createElement('canvas');
+        pc.className = 'pet-particles';
+        pc.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:6;width:110px;height:110px;border-radius:12px;';
+        pc.width = 110; pc.height = 110;
+        wrap.appendChild(pc);
+        _runPetParticles(pc, fx.particles);
+    }
+}
+
+var _petParticleRaf = null;
+function _runPetParticles(canvas, type) {
+    if (_petParticleRaf) { cancelAnimationFrame(_petParticleRaf); _petParticleRaf = null; }
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    var emojis = { stars:'⭐', sparkles:'✨', hearts:'❤️', bubbles:'🫧', fire:'🔥', snow:'❄️', music:'🎵' };
+    var em = emojis[type] || '✨';
+    var particles = [];
+    for (var i = 0; i < 8; i++) {
+        particles.push({ x: Math.random()*W, y: Math.random()*H, vy: -0.4 - Math.random()*0.5, vx: (Math.random()-0.5)*0.5, life: Math.random(), size: 9 + Math.random()*5 });
+    }
+    function loop() {
+        _petParticleRaf = requestAnimationFrame(loop);
+        ctx.clearRect(0, 0, W, H);
+        particles.forEach(function(p) {
+            p.x += p.vx; p.y += p.vy; p.life += 0.008;
+            if (p.life > 1) { p.life = 0; p.x = Math.random()*W; p.y = H + 5; }
+            ctx.globalAlpha = Math.sin(p.life * Math.PI) * 0.9;
+            ctx.font = p.size + 'px serif';
+            ctx.fillText(em, p.x, p.y);
+        });
+        ctx.globalAlpha = 1;
+    }
+    loop();
 }
 
 function _buildPetModel(type) {
@@ -4434,10 +4615,10 @@ function _buildPetModel(type) {
         hG.add(bx(0.07, 0.05, 0.03, wh,-0.13, 0.07, 0.29)); // glow L
         hG.add(bx(0.07, 0.05, 0.03, wh, 0.13, 0.07, 0.29)); // glow R
         hG.position.set(0, 1.23, 0); G.add(hG); res.headGroup = hG;
-        // Very long arms hanging down
+        
         G.add(bx(0.14, 1.80, 0.14, bk,-0.25,-0.10, 0));
         G.add(bx(0.14, 1.80, 0.14, bk, 0.25,-0.10, 0));
-        // Very long thin legs
+       
         G.add(bx(0.14, 1.60, 0.14, bk,-0.10,-1.42, 0));
         G.add(bx(0.14, 1.60, 0.14, bk, 0.10,-1.42, 0));
         var sc = (PET_TYPES_MAP['enderman'] && PET_TYPES_MAP['enderman'].modelScale) ? PET_TYPES_MAP['enderman'].modelScale : 0.58;
@@ -4526,7 +4707,8 @@ function _renderShopGrid(tag) {
     const grid = document.getElementById('shop-grid');
     if (!grid) return;
     const filtered = (tag === 'Все' ? ARTIFACTS : ARTIFACTS.filter(a => a.tag === tag))
-        .filter(a => !(a.id === 'pet' && window._siteFlags && window._siteFlags.showPet === false));
+        .filter(a => !(a.id === 'pet' && window._siteFlags && window._siteFlags.showPet === false))
+        .filter(a => !((window._hiddenBuiltinPets||{})[a.id]));
     grid.innerHTML = filtered.map(a => {
         const tc = SHOP_TAG_COLORS[a.tag] || '#fff';
         return `<div data-artifact-id="${a.id}" onclick="_openShopModal('${a.id}')" style="background:#141414;border-radius:18px;border:1px solid ${a.color}20;padding:0;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:all .25s;cursor:pointer;"
@@ -4705,7 +4887,7 @@ function _openShopModal(id) {
     } else if (id === 'pet') {
         var smExtra = document.getElementById('sm-extra');
         smExtra.style.display = '';
-        var petKeys2 = Object.keys(PET_TYPES_MAP);
+        var petKeys2 = Object.keys(PET_TYPES_MAP).filter(function(pid){ return !((window._hiddenBuiltinPets||{})[pid]); });
         var activePetId = petKeys2[0];
         smExtra.innerHTML =
             '<div style="background:#0c0c0c;border:1px solid #34d39933;border-radius:14px;overflow:hidden;margin-bottom:10px;">' +
@@ -4943,6 +5125,8 @@ function _openShopModal(id) {
     }
 
     m.style.display = 'flex';
+    var _cbs = document.getElementById('contest-banner');
+    if (_cbs) _cbs.style.visibility = 'hidden';
 }
 
 
@@ -5073,6 +5257,8 @@ function _openPrimeModal() {
     window._primeSlotSelected = {};
     _selectPrimeMonths(1);
     document.getElementById('prime-modal').style.display = 'flex';
+    var _cbp = document.getElementById('contest-banner');
+    if (_cbp) _cbp.style.visibility = 'hidden';
 }
 
 function _selectPrimeMonths(n) {
@@ -5098,6 +5284,8 @@ function _closePrimeModal() {
     if (window._pefRAFs) { Object.values(window._pefRAFs).forEach(function(r){ if(r) cancelAnimationFrame(r); }); window._pefRAFs = {}; }
     if (typeof _pefTileRAFs !== 'undefined') { Object.values(_pefTileRAFs).forEach(function(r){ if(r) cancelAnimationFrame(r); }); _pefTileRAFs = {}; }
     document.getElementById('prime-modal').style.display = 'none';
+    var _cbp2 = document.getElementById('contest-banner');
+    if (_cbp2 && document.getElementById('shop-modal').style.display !== 'flex' && !document.getElementById('modal-overlay').classList.contains('is-open') && document.getElementById('author-overlay').style.display !== 'flex') _cbp2.style.visibility = '';
     Object.keys(_petPreviewRenderers).forEach(function(id) {
         if (id.indexOf('prim-pet-preview') === 0) _destroyPetPreview(id);
     });
@@ -5262,7 +5450,7 @@ function _renderPrimeArtConfig(slotIdx, id) {
 
     } else if (id === 'pet') {
         wrap.style.display = '';
-        var petKeys = Object.keys(PET_TYPES_MAP);
+        var petKeys = Object.keys(PET_TYPES_MAP).filter(function(pid){ return !((window._hiddenBuiltinPets||{})[pid]); });
         wrap.innerHTML =
             '<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#34d399;margin-bottom:12px;">⚙ Выбери зверька</div>' +
             '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;">' +
@@ -5553,7 +5741,7 @@ function _submitPrimeRequest() {
     const text = [
         `✦ <b>Заявка на подписку Prime — Classic HUB</b>`,
         ``,
-        `📦 <b>Месяцев:</b> ${months}${isMulti ? ' (×5 — скидка 50%)' : ''}`,
+        `📦 <b>Месяцев:</b> ${months}${isMulti ? ' (×5 — скидка 20%)' : ''}`,
         `⚗️ <b>Артефакты:</b>`,
         ...slotLines,
         ``,
@@ -5589,6 +5777,8 @@ function _submitPrimeRequest() {
 
 function _closeShopModal() {
     document.getElementById('shop-modal').style.display = 'none';
+    var _cbs2 = document.getElementById('contest-banner');
+    if (_cbs2 && document.getElementById('prime-modal').style.display !== 'flex' && !document.getElementById('modal-overlay').classList.contains('is-open') && document.getElementById('author-overlay').style.display !== 'flex') _cbs2.style.visibility = '';
     if (window._smCanvasRAF) { cancelAnimationFrame(window._smCanvasRAF); window._smCanvasRAF = null; }
     _destroyPetPreview('sm-pet-preview-canvas');
 }
@@ -6294,13 +6484,15 @@ if (window._fbReady) {
       border-right: none !important;
       border-bottom: 1px solid rgba(255,255,255,0.05);
     }
+    #prime-modal > div { max-height: calc(100svh - 24px) !important; border-radius: 16px !important; }
+    #prime-modal { padding: 12px !important; align-items: flex-start !important; }
   }
 
 </style>
 
 <div id="disc-overlay">
   <div id="disc-modal">
-    <div class="disc-badge">Beta v2.0</div>
+    <div class="disc-badge">Beta v1.2</div>
     <h2>Добро пожаловать в Classic HUB</h2>
     <p class="disc-sub">Пожалуйста, ознакомьтесь перед использованием сайта</p>
 
@@ -6316,13 +6508,10 @@ if (window._fbReady) {
 
     <div class="disc-section">
       <div class="disc-section-title">💬 Техническая Поддержка</div>
-      <p>По вопросам и ошибкам обращайтесь напрямую к администратору в&nbsp;<a href="https://t.me/melochniy1" target="_blank">Telegram</a>. Он старается отвечать как можно быстрее.</p>
+      <p>По вопросам и ошибкам обращайтесь напрямую через специальную форму, доступную по нажатии на кнопку "Тех.Поддержка". Если ситуация требует незамедлительного вмешательства, то там так-же есть контакт администратора, он старается отвечать как можно быстрее.</p>
     </div>
 
-    <div class="disc-section">
-      <div class="disc-section-title">💰 Донат</div>
-      <p>Все ваши пожертвования являются добровольными, никто не заставляет вас оплачивать какие-то услуги. В случае денежного пожертвования, ваши денежные средства возврату не подлежат. За вашу щедрость - вы получаете награды и эффекты для профиля, а так-же стабильную и качественную работу сервиса.</p>
-    </div>
+    
 
     <label class="disc-check-row">
       <input type="checkbox" id="disc-check" onchange="discCheckChange()">
@@ -6336,7 +6525,7 @@ if (window._fbReady) {
 </div>
 
 <!-- по обнове 2.0 заглушка -->
-<div id="update-mini" onclick="updOpen()" title="Обновление 2.0 — что нового">
+<div id="update-mini" onclick="updOpen()" title="Обновление 2.0 - что нового">
   <div class="upd-mini-dot"></div>
   <span class="upd-mini-text">Обновление 2.0</span>
 </div>
@@ -6348,7 +6537,7 @@ if (window._fbReady) {
     <div class="upd-header">
       <div class="upd-version-badge">Обновление 2.0</div>
       <div class="upd-title">Classic HUB - Масштабное обновление</div>
-      <div class="upd-subtitle">7 Марта 2026 · Список всех изменений</div>
+      <div class="upd-subtitle">? Марта 2026 · Список всех изменений</div>
     </div>
 
     <div class="upd-body" id="upd-content">
@@ -6366,7 +6555,7 @@ if (window._fbReady) {
             <li>Статус «подписчик с...» и счётчик покупок в профиле</li>
             <li>Медаль донатера с кастомным свечением и анимацией</li>
             <li>Один артефакт на выбор на 30 дней</li>
-            <li>Витрина снаряжения — 5 слотов в профиле</li>
+            <li>Витрина снаряжения - 5 слотов в профиле</li>
             <li>Архив истёкших предметов</li>
           </ul>
           <img src="https://i.imgur.com/ZsgSuVM.png" class="upd-img" alt="Prime профиль"> 
@@ -6382,7 +6571,7 @@ if (window._fbReady) {
         </div>
         <div class="upd-block-content">
           <div class="upd-block-title">Система артефактов Prime</div>
-          <div class="upd-block-desc">Выбери один предмет при оформлении подписки — он активен 30 дней.</div>
+          <div class="upd-block-desc">Выбери один предмет при оформлении подписки - он активен 30 дней.</div>
           <ul class="upd-list">
             <li><strong style="color:#fb923c;">Бирка</strong> - своя кастомная медаль рядом с ником, цветом и анимацией свечения</li>
             <li><strong style="color:#D4AF37;">Рамка</strong> - золотое обрамление аватара в профиле и топе</li>
@@ -6390,6 +6579,7 @@ if (window._fbReady) {
             <li><strong style="color:#a78bfa;">Фонарь</strong> - золотое свечение вокруг карточки постройки в галерее</li>
             <li><strong style="color:#fbbf24;">Пузырёк опыта</strong> - ×2 EXP за все постройки что загружаются, пока артефакт активен</li>
             <li><strong style="color:#c084fc;">Огненный порошок</strong> - частицы с эффектами в профиле (эндермен, зачарования и другие)</li>
+            <li><strong style="color:#D4AF37;">Яйцо призыва</strong> - 3D питомец у вас в профиле.</li>
           </ul>
           <img src="https://i.imgur.com/N4y6YVT.png" class="upd-img" alt="Артефакты"> 
           <p class="upd-img-caption">Магазин артефактов</p> 
@@ -6441,7 +6631,7 @@ if (window._fbReady) {
         </div>
         <div class="upd-block-content">
           <ul class="upd-list">
-            <li>Адаптация и обновление панели chAdmins: теперь может управлять артефактами, инвентарём, витриной и каталогом магазина</li>
+            <li>Адаптация и обновление панели CH Admins: теперь может управлять артефактами, инвентарём, витриной и каталогом магазина</li>
             <li>Новая система иконок</li>
             <li>Полный пересмотр страницы «Информация» с обновлёнными данными</li>
             <li>Множество мелких исправлений и улучшений производительности</li>
@@ -6459,13 +6649,13 @@ if (window._fbReady) {
       <button class="upd-btn-close" onclick="updClose()">
         Закрыть
       </button>
-      <div style="flex:1;min-width:100px;font-size:10px;color:#333;text-align:right;">Classic HUB · 7 Марта 2026</div>
+      <div style="flex:1;min-width:100px;font-size:10px;color:#333;text-align:right;">Classic HUB · ? Марта 2026</div>
     </div>
   </div>
 </div>
 
 
-<div id="contest-banner" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:900;cursor:pointer;animation:contest-bounce 2.2s ease-in-out infinite;"
+<div id="contest-banner" style="display:none;position:fixed;bottom:72px;left:50%;transform:translateX(-50%);z-index:900;cursor:pointer;animation:contest-bounce 2.2s ease-in-out infinite;"
      onclick="contestOpen()">
   <div id="contest-banner-inner" style="background:linear-gradient(135deg,#1a0a00,#2a1500);border:1px solid #f59e0b88;border-radius:16px;padding:10px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 0 24px #f59e0b44,0 4px 20px rgba(0,0,0,0.7);">
     <span id="contest-banner-icon" style="font-size:1.3rem;animation:contest-trophy 1.5s ease-in-out infinite;display:flex;align-items:center;justify-content:center;min-width:1.3rem;min-height:1.3rem;"></span>
@@ -6509,8 +6699,12 @@ if (window._fbReady) {
 </div>
 
 <style>
-@keyframes contest-bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-5px)} }
+@keyframes contest-bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-6px)} }
 @keyframes contest-trophy { 0%,100%{transform:scale(1) rotate(-5deg)} 50%{transform:scale(1.15) rotate(5deg)} }
+@keyframes pet-pulse-slow { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.65;transform:scale(0.96)} }
+@keyframes pet-pulse-fast { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.92)} }
+@keyframes pet-flicker    { 0%,100%{opacity:1} 25%{opacity:0.2} 50%{opacity:0.9} 75%{opacity:0.1} }
+@keyframes pet-heartbeat  { 0%{transform:scale(1)} 14%{transform:scale(1.1)} 28%{transform:scale(1)} 42%{transform:scale(1.08)} 70%,100%{transform:scale(1)} }
 </style>
 
 <div id="disc-mini" onclick="discReopen()" title="Открыть дисклеймер">
@@ -6686,6 +6880,8 @@ if (window._fbReady) {
       var ov = document.getElementById('contest-overlay');
       ov.style.transition = 'opacity .2s'; ov.style.opacity = '0';
       setTimeout(function(){ ov.style.display = 'none'; }, 200);
+      var banner = document.getElementById('contest-banner');
+      if (banner) banner.style.display = 'none';
   }
   document.addEventListener('DOMContentLoaded', _loadContest);
 
@@ -6829,6 +7025,162 @@ function _selGoldenFrame(slotIdx, style) {
         optGold.style.background = '#0a0a0a';
     }
 }
+</script>
+
+<div id="mc-modal-overlay" onclick="if(event.target===this)_mcStatusClose()"
+     style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;">
+    <div onclick="event.stopPropagation()" style="background:#0d1520;border:1px solid rgba(96,165,250,0.3);border-radius:20px;width:100%;max-width:360px;padding:24px;position:relative;box-shadow:0 0 40px rgba(96,165,250,0.12);">
+        <button onclick="_mcStatusClose()" style="position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;background:#1f2a3a;border:1px solid #2a3a4a;color:#60a5fa88;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;">✕</button>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+            <div style="font-size:1.4rem;">⛏</div>
+            <div>
+                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.2em;color:#60a5fa88;margin-bottom:1px;">Minecraft</div>
+                <div style="font-size:14px;font-weight:900;color:#fff;">Сервер <span style="color:#D4AF37;">Classic</span></div>
+            </div>
+        </div>
+        <div id="mc-modal-body" style="min-height:60px;display:flex;align-items:center;justify-content:center;">
+            <div style="color:#555;font-size:11px;">Загрузка...</div>
+        </div>
+    </div>
+</div>
+
+
+<div id="prime-tip" style="display:none;position:fixed;z-index:99999;pointer-events:none;background:#1a1200;border:1px solid rgba(212,175,55,0.4);border-radius:12px;padding:10px 14px;max-width:220px;box-shadow:0 8px 28px rgba(0,0,0,0.7);">
+    <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#D4AF37;margin-bottom:6px;">✦ Подписка Prime</div>
+    <div id="prime-tip-content" style="font-size:11px;color:#aaa;line-height:1.6;"></div>
+</div>
+
+<script>
+
+function _showPrimeTip(badgeEl) {
+    var tip = document.getElementById('prime-tip');
+    var content = document.getElementById('prime-tip-content');
+    if (!tip || !content) return;
+    var activeUntil = parseInt(badgeEl.dataset.activeUntil || '0', 10);
+    var isActive = badgeEl.dataset.primeActive === '1';
+    var now = Date.now();
+    if (isActive && activeUntil > now) {
+        var diff = activeUntil - now;
+        var days  = Math.floor(diff / 86400000);
+        var hours = Math.floor((diff % 86400000) / 3600000);
+        var d = new Date(activeUntil);
+        var expStr = String(d.getDate()).padStart(2,'0') + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + d.getFullYear();
+        if (days > 0) {
+            content.innerHTML = '⏳ Осталось: <b style="color:#D4AF37;">' + days + ' дн. ' + hours + ' ч.</b><br><span style="color:#555;font-size:10px;">Истекает ' + expStr + '</span>';
+        } else {
+            content.innerHTML = '⏳ Осталось менее суток!<br><b style="color:#f87171;">Истекает сегодня (' + expStr + ')</b>';
+        }
+    } else {
+        content.innerHTML = '<span style="color:#555;">Подписка истекла</span>';
+    }
+    tip.style.display = 'block';
+    var rect = badgeEl.getBoundingClientRect();
+    var tipW = 220;
+    var left = rect.left;
+    if (left + tipW > window.innerWidth - 10) left = window.innerWidth - tipW - 10;
+    tip.style.left = left + 'px';
+    tip.style.top  = (rect.bottom + 6) + 'px';
+}
+function _hidePrimeTip() {
+    var tip = document.getElementById('prime-tip');
+    if (tip) tip.style.display = 'none';
+}
+
+var _mcCache = null;
+var _mcCacheTime = 0;
+var _MC_HOST = '37.233.86.190:25510';
+var _MC_TTL = 60000; //разв60
+
+function _mcFetch(cb) {
+    var now = Date.now();
+    if (_mcCache && now - _mcCacheTime < _MC_TTL) { cb(_mcCache); return; }
+    fetch('https://api.mcsrvstat.us/3/' + _MC_HOST)
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+            _mcCache = data;
+            _mcCacheTime = Date.now();
+            cb(data);
+        })
+        .catch(function() { cb(null); });
+}
+
+function _mcUpdateBadge() {
+    _mcFetch(function(data) {
+        var badge = document.getElementById('mc-status-badge');
+        var countEl = document.getElementById('mc-online-count');
+        var dot = document.getElementById('mc-status-dot');
+        if (!badge || !countEl) return;
+        badge.classList.remove('hidden');
+        badge.classList.add('md:inline-flex');
+        if (data && data.online) {
+            var online = (data.players && data.players.online) || 0;
+            countEl.textContent = online + ' игроков';
+            if (dot) { dot.style.background = '#60a5fa'; }
+        } else {
+            countEl.textContent = 'офлайн';
+            if (dot) { dot.style.background = '#f87171'; dot.style.animation = 'none'; }
+        }
+    });
+}
+
+function _mcStatusOpen() {
+    var overlay = document.getElementById('mc-modal-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    var body = document.getElementById('mc-modal-body');
+    if (body) body.innerHTML = '<div style="color:#555;font-size:11px;">Загрузка...</div>';
+    _mcFetch(function(data) {
+        if (!body) return;
+        if (!data || !data.online) {
+            body.innerHTML = '<div style="text-align:center;">' +
+                '<div style="font-size:2rem;margin-bottom:8px;">🔴</div>' +
+                '<div style="font-size:13px;font-weight:900;color:#f87171;">Сервер недоступен</div>' +
+                '<div style="font-size:10px;color:#555;margin-top:4px;">Попробуй позже</div>' +
+                '</div>';
+            return;
+        }
+        var online = (data.players && data.players.online) || 0;
+        var max    = (data.players && data.players.max) || 0;
+        var list   = (data.players && data.players.list) || [];
+        var playersHtml = '';
+        if (list.length > 0) {
+            playersHtml = '<div style="margin-top:14px;">' +
+                '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#60a5fa88;margin-bottom:8px;">Сейчас играют</div>' +
+                '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
+                list.map(function(p) {
+                    var name = (typeof p === 'string') ? p : (p.name || '?');
+                    return '<div style="display:flex;align-items:center;gap:5px;background:#112030;border:1px solid #1a3050;border-radius:8px;padding:4px 8px;">' +
+                        '<img src="https://visage.surgeplay.com/face/16/' + encodeURIComponent(name) + '" style="width:16px;height:16px;image-rendering:pixelated;border-radius:3px;" onerror="this.style.display=\'none\'">' +
+                        '<span style="font-size:10px;font-weight:700;color:#aaa;">' + name + '</span>' +
+                        '</div>';
+                }).join('') +
+                '</div></div>';
+        } else if (online > 0) {
+            playersHtml = '<div style="margin-top:14px;font-size:10px;color:#555;font-style:italic;">Список игроков скрыт сервером</div>';
+        }
+        body.innerHTML =
+            '<div style="width:100%;">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+                '<div style="display:flex;align-items:center;gap:6px;">' +
+                    '<span style="width:9px;height:9px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 8px #4ade8099;"></span>' +
+                    '<span style="font-size:13px;font-weight:900;color:#4ade80;">Онлайн</span>' +
+                '</div>' +
+                '<span style="font-size:20px;font-weight:900;color:#fff;">' + online + ' <span style="font-size:11px;color:#555;font-weight:400;">/ ' + max + '</span></span>' +
+            '</div>' +
+            playersHtml +
+            '</div>';
+    });
+}
+
+function _mcStatusClose() {
+    var overlay = document.getElementById('mc-modal-overlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    _mcUpdateBadge();
+    setInterval(_mcUpdateBadge, 90000);
+});
 </script>
 </body>
 </html>
