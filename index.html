@@ -8059,41 +8059,40 @@ function renderMap(){
     var totalPx=_mapCols*_mapCellPx;
     container.innerHTML=
         '<div style="width:100%;">'+
-        '<div style="position:relative;border-radius:24px;overflow:hidden;margin-bottom:24px;padding:32px 36px;background:linear-gradient(135deg,#0a0a0a 0%,#0e0b00 50%,#0a0a0a 100%);border:1px solid rgba(212,175,55,0.18);">'+
-            '<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 15% 60%,rgba(212,175,55,0.07) 0%,transparent 55%),radial-gradient(ellipse at 85% 20%,rgba(212,175,55,0.04) 0%,transparent 50%);"></div>'+
-            '<div style="position:relative;">'+
-                '<div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;">'+
-                    
-                    '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#D4AF37;">Карта сервера</span>'+
+        '<div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:20px;padding:20px;background:linear-gradient(135deg,#0a0a0a 0%,#0e0b00 50%,#0a0a0a 100%);border:1px solid rgba(212,175,55,0.18);">'+
+        '<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 15% 60%,rgba(212,175,55,0.07) 0%,transparent 55%),radial-gradient(ellipse at 85% 20%,rgba(212,175,55,0.04) 0%,transparent 50%);"></div>'+
+        '<div style="position:relative;">'+
+            '<div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;">'+
+                '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#D4AF37;">Карта сервера</span>'+
+            '</div>'+
+            '<div style="display:grid;grid-template-columns:1fr min(200px,38%);gap:20px;align-items:start;">'+
+                '<div>'+
+                    '<h2 style="font-size:clamp(18px,5vw,26px);font-weight:900;text-transform:uppercase;margin-bottom:8px;color:#fff;line-height:1.1;">Интерактивная карта</h2>'+
+                    '<p style="color:#666;font-size:12px;line-height:1.7;margin-bottom:16px;">Карта сервера в масштабе <strong style="color:#D4AF37;">1:4</strong>. Каждый сектор снят вручную. Нажми на маркер чтобы узнать подробности.</p>'+
+                    '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">'+
+                        '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Масштаб</div><div style="font-size:18px;font-weight:900;color:#D4AF37;">1 : 4</div><div style="font-size:9px;color:#444;margin-top:2px;">4 блока на пиксель</div></div>'+
+                        '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Карт</div><div style="font-size:18px;font-weight:900;color:#fff;">1 156</div><div style="font-size:9px;color:#444;margin-top:2px;">34 &times; 34 сектора</div></div>'+
+                        '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Площадь</div><div style="font-size:14px;font-weight:900;color:#fff;">17 000 &times; 17 000</div><div style="font-size:9px;color:#444;margin-top:2px;">блоков</div></div>'+
+                        '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Архив</div><div style="font-size:14px;font-weight:900;color:#fff;">После сезона</div><div style="font-size:9px;color:#444;margin-top:2px;">карта сохраняется</div></div>'+
+                    '</div>'+
                 '</div>'+
-                '<div style="display:grid;grid-template-columns:1fr 200px;gap:32px;align-items:start;">'+
-                    '<div>'+
-                        '<h2 style="font-size:26px;font-weight:900;text-transform:uppercase;margin-bottom:10px;color:#fff;line-height:1.1;">Интерактивная карта </h2>'+
-                        '<p style="color:#666;font-size:12px;line-height:1.8;margin-bottom:18px;max-width:460px;">Интерактивная карта сервера в масштабе <strong style="color:#D4AF37;">1:4</strong>. Каждый сектор снят вручную. Постройки отмечены маркерами - нажми на любой.</p>'+
-                        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'+
-                            '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Масштаб</div><div style="font-size:18px;font-weight:900;color:#D4AF37;">1 : 4</div><div style="font-size:9px;color:#444;margin-top:2px;">4 блока на пиксель</div></div>'+
-                            '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Карт</div><div style="font-size:18px;font-weight:900;color:#fff;">1 156</div><div style="font-size:9px;color:#444;margin-top:2px;">34 &times; 34 сектора</div></div>'+
-                            '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Площадь</div><div style="font-size:16px;font-weight:900;color:#fff;">17 000 &times; 17 000</div><div style="font-size:9px;color:#444;margin-top:2px;">блоков всего</div></div>'+
-                            '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Архив</div><div style="font-size:14px;font-weight:900;color:#fff;">После сезона</div><div style="font-size:9px;color:#444;margin-top:2px;">карта сохраняется</div></div>'+
-                        '</div>'+
+                '<div style="padding:16px 18px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.07);border-radius:14px;">'+
+                    '<div style="font-size:9px;color:#555;font-weight:900;text-transform:uppercase;letter-spacing:.18em;margin-bottom:12px;">Легенда</div>'+
+                    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'+
+                        '<img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/18/Player_%28texture%29_BE2.png/revision/latest?cb=20210520170746" style="width:24px;height:24px;object-fit:contain;">'+
+                        '<div><div style="font-size:11px;font-weight:700;color:#fff;">Постройка</div><div style="font-size:9px;color:#555;">клик — карточка</div></div>'+
                     '</div>'+
-                    '<div style="padding:16px 18px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.07);border-radius:14px;">'+
-                        '<div style="font-size:9px;color:#555;font-weight:900;text-transform:uppercase;letter-spacing:.18em;margin-bottom:12px;">Легенда</div>'+
-                        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'+
-                            '<img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/18/Player_%28texture%29_BE2.png/revision/latest?cb=20210520170746" style="width:24px;height:24px;object-fit:contain;">'+
-                            '<div><div style="font-size:11px;font-weight:700;color:#fff;">Постройка</div><div style="font-size:9px;color:#555;">клик - карточка</div></div>'+
-                        '</div>'+
-                        '<div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:10px;"></div>'+
-                        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'+
-                            '<img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/16/Green_Marker_%28texture%29_BE2.png/revision/latest?cb=20210520171523" style="width:24px;height:24px;object-fit:contain;">'+
-                            '<div><div style="font-size:11px;font-weight:700;color:#fff;">Точка интереса</div><div style="font-size:9px;color:#555;">от администрации</div></div>'+
-                        '</div>'+
-                        '<div style="font-size:9px;color:#444;line-height:1.6;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">Тащи для перемещения.<br>Колёсико - зум.</div>'+
+                    '<div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:10px;"></div>'+
+                    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'+
+                        '<img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/16/Green_Marker_%28texture%29_BE2.png/revision/latest?cb=20210520171523" style="width:24px;height:24px;object-fit:contain;">'+
+                        '<div><div style="font-size:11px;font-weight:700;color:#fff;">Точка интереса</div><div style="font-size:9px;color:#555;">от администрации</div></div>'+
                     '</div>'+
+                    '<div style="font-size:9px;color:#444;line-height:1.6;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">Тащи для перемещения.<br>Колёсико — зум.</div>'+
                 '</div>'+
             '</div>'+
         '</div>'+
-        '<div id="map-coord-tip" style="position:fixed;z-index:9999;pointer-events:none;display:none;background:rgba(10,8,0,0.92);border:1px solid rgba(212,175,55,0.25);border-radius:10px;padding:7px 13px;font-size:11px;font-weight:700;color:#D4AF37;backdrop-filter:blur(12px);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.7);"></div>'+
+    '</div>'+
+'<div id="map-coord-tip" style="position:fixed;z-index:9999;pointer-events:none;display:none;background:rgba(10,8,0,0.92);border:1px solid rgba(212,175,55,0.25);border-radius:10px;padding:7px 13px;font-size:11px;font-weight:700;color:#D4AF37;backdrop-filter:blur(12px);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.7);"></div>'+
         '<div id="map-marker-tip" style="position:fixed;z-index:10000;pointer-events:none;display:none;background:rgba(10,8,0,0.96);border:1px solid rgba(212,175,55,0.4);border-radius:12px;padding:10px 14px;font-size:11px;color:#fff;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,0.8);max-width:220px;"></div>'+
         '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">'+
             '<button onclick="_mapZoom(0.3)" style="background:#1f1f1f;border:1px solid #333;color:#fff;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-weight:900;">+</button>'+
