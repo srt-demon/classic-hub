@@ -7309,13 +7309,13 @@ function _hidePrimeTip() {
 
 var _mcCache = null;
 var _mcCacheTime = 0;
-var _MC_HOST = '37.233.86.190:25510';
+var _MC_HOST = '185.77.231.42:25510';
 var _MC_TTL = 60000; //разв60
 
 function _mcFetch(cb) {
     var now = Date.now();
     if (_mcCache && now - _mcCacheTime < _MC_TTL) { cb(_mcCache); return; }
-    fetch('https://api.mcstatus.io/v2/status/java/' + _MC_HOST)
+    fetch('https://api.mcsrvstat.us/2/' + _MC_HOST)
         .then(function(r){ return r.json(); })
         .then(function(data) {
             _mcCache = data;
@@ -7333,8 +7333,8 @@ function _mcUpdateBadge() {
         if (!badge || !countEl) return;
         badge.classList.remove('hidden');
         badge.classList.add('md:inline-flex');
-        if (data && data.online) {
-            var online = (data.players && data.players.online) || 0;
+        if (data && data.online === true) {
+    var online = (data.players && data.players.online) || 0;
             countEl.textContent = online + ' игроков';
             if (dot) { dot.style.background = '#60a5fa'; }
         } else {
