@@ -7334,11 +7334,11 @@ function _mcUpdateBadge() {
         badge.classList.remove('hidden');
         badge.classList.add('md:inline-flex');
         if (data && data.online === true) {
-    var online = (data.players && data.players.online) || 0;
+    var online = Math.max(0, ((data.players && data.players.online) || 0) - 1);
             countEl.textContent = online + ' игроков';
             if (dot) { dot.style.background = '#60a5fa'; }
         } else {
-            countEl.textContent = 'офлайн';
+            countEl.textContent = 'оффлайн';
             if (dot) { dot.style.background = '#f87171'; dot.style.animation = 'none'; }
         }
     });
@@ -7403,7 +7403,7 @@ function _mcStatusOpen() {
                 '</div>';
             return;
         }
-        var online = (data.players && data.players.online) || 0;
+        var online = Math.max(0, ((data.players && data.players.online) || 0) - 1);
         var max    = (data.players && data.players.max) || 0;
         var list   = (data.players && data.players.list) || [];
 
@@ -7994,13 +7994,70 @@ function _mapEsc(s) {
 function _mapInitViewport(){
     var vp=document.getElementById('map-viewport'),stage=document.getElementById('map-stage');
     if(!vp||!stage)return;
+    var isMobile=window.innerWidth<640;
     _mapScale=Math.min(1,(vp.offsetWidth-2)/(_mapCols*_mapCellPx));_mapOffX=0;_mapOffY=0;
-    vp.style.height=Math.min(window.innerHeight*0.78,720)+'px';_mapApplyTransform();
+    // На мобиле — квадратный вьюпорт (ширина = высота), на десктопе — 78% экрана
+    vp.style.height=(isMobile ? vp.offsetWidth : Math.min(window.innerHeight*0.78,720))+'px';
+    _mapApplyTransform();
+
+    // Легенда на мобиле скрываем
+    var heroGrid=document.getElementById('map-hero-grid');
+    if(heroGrid&&isMobile){
+        heroGrid.style.gridTemplateColumns='1fr';
+        var legend=heroGrid.querySelector('div:last-child');
+        if(legend)legend.style.display='none';
+    } else if(heroGrid){
+        heroGrid.style.gridTemplateColumns='1fr 200px';
+    }
+
+    // Колёсико (десктоп)
     vp.addEventListener('wheel',function(e){e.preventDefault();_mapZoom(e.deltaY>0?-0.1:0.1,e.clientX,e.clientY);},{passive:false});
+
+    // Mouse drag (десктоп)
     var dragging=false,lastX=0,lastY=0;
     vp.addEventListener('mousedown',function(e){if(e.target.closest&&e.target.closest('[data-type]'))return;dragging=true;lastX=e.clientX;lastY=e.clientY;vp.style.cursor='grabbing';});
     window.addEventListener('mousemove',function(e){if(!dragging)return;_mapOffX+=e.clientX-lastX;_mapOffY+=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;_mapApplyTransform();});
     window.addEventListener('mouseup',function(){dragging=false;if(vp)vp.style.cursor='grab';});
+
+    // Touch drag + pinch zoom (мобиль)
+    var touches={};
+    vp.addEventListener('touchstart',function(e){
+        if(e.target.closest&&e.target.closest('[data-type]'))return;
+        e.preventDefault();
+        Array.from(e.changedTouches).forEach(function(t){touches[t.identifier]={x:t.clientX,y:t.clientY};});
+    },{passive:false});
+    vp.addEventListener('touchmove',function(e){
+        e.preventDefault();
+        var ids=Object.keys(touches);
+        if(ids.length===1){
+            // Одним пальцем — пан
+            var t=e.changedTouches[0];
+            var prev=touches[t.identifier];
+            if(!prev)return;
+            _mapOffX+=t.clientX-prev.x;
+            _mapOffY+=t.clientY-prev.y;
+            _mapApplyTransform();
+            touches[t.identifier]={x:t.clientX,y:t.clientY};
+        } else if(ids.length>=2&&e.touches.length>=2){
+            // Двумя пальцами — pinch zoom
+            var t1=e.touches[0],t2=e.touches[1];
+            var dist=Math.hypot(t1.clientX-t2.clientX,t1.clientY-t2.clientY);
+            if(touches._pinchDist){
+                var delta=(dist-touches._pinchDist)*0.004;
+                var cx=(t1.clientX+t2.clientX)/2;
+                var cy=(t1.clientY+t2.clientY)/2;
+                _mapZoom(delta,cx,cy);
+            }
+            touches._pinchDist=dist;
+            // Обновляем позиции
+            touches[t1.identifier]={x:t1.clientX,y:t1.clientY};
+            touches[t2.identifier]={x:t2.clientX,y:t2.clientY};
+        }
+    },{passive:false});
+    vp.addEventListener('touchend',function(e){
+        Array.from(e.changedTouches).forEach(function(t){delete touches[t.identifier];});
+        if(Object.keys(touches).filter(function(k){return k!=='_pinchDist';}).length<2) delete touches._pinchDist;
+    },{passive:true});
 }
 
 function _mapApplyTransform() {
@@ -8131,18 +8188,18 @@ function renderMap(){
     var totalPx=_mapCols*_mapCellPx;
     container.innerHTML=
         '<div style="width:100%;">'+
-        '<div style="position:relative;border-radius:24px;overflow:hidden;margin-bottom:24px;padding:32px 36px;background:linear-gradient(135deg,#0a0a0a 0%,#0e0b00 50%,#0a0a0a 100%);border:1px solid rgba(212,175,55,0.18);">'+
+        '<div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:20px;padding:clamp(16px,4vw,32px) clamp(16px,4vw,36px);background:linear-gradient(135deg,#0a0a0a 0%,#0e0b00 50%,#0a0a0a 100%);border:1px solid rgba(212,175,55,0.18);">'+
             '<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 15% 60%,rgba(212,175,55,0.07) 0%,transparent 55%),radial-gradient(ellipse at 85% 20%,rgba(212,175,55,0.04) 0%,transparent 50%);"></div>'+
             '<div style="position:relative;">'+
                 '<div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;">'+
                     
                     '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#D4AF37;">Карта сервера</span>'+
                 '</div>'+
-                '<div style="display:grid;grid-template-columns:1fr 200px;gap:32px;align-items:start;">'+
+                '<div id="map-hero-grid" style="display:grid;grid-template-columns:1fr;gap:20px;align-items:start;">'+
                     '<div>'+
                         '<h2 style="font-size:26px;font-weight:900;text-transform:uppercase;margin-bottom:10px;color:#fff;line-height:1.1;">Интерактивная карта </h2>'+
                         '<p style="color:#666;font-size:12px;line-height:1.8;margin-bottom:18px;max-width:460px;">Интерактивная карта сервера в масштабе <strong style="color:#D4AF37;">1:4</strong>. Каждый сектор снят вручную. Постройки отмечены маркерами - нажми на любой.</p>'+
-                        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'+
+                        '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">'+
                             '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Масштаб</div><div style="font-size:18px;font-weight:900;color:#D4AF37;">1 : 4</div><div style="font-size:9px;color:#444;margin-top:2px;">4 блока на пиксель</div></div>'+
                             '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Карт</div><div style="font-size:18px;font-weight:900;color:#fff;">1 156</div><div style="font-size:9px;color:#444;margin-top:2px;">34 &times; 34 сектора</div></div>'+
                             '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Площадь</div><div style="font-size:16px;font-weight:900;color:#fff;">17 000 &times; 17 000</div><div style="font-size:9px;color:#444;margin-top:2px;">блоков всего</div></div>'+
@@ -8172,7 +8229,7 @@ function renderMap(){
             '<button onclick="_mapZoom(-0.3)" style="background:#1f1f1f;border:1px solid #333;color:#fff;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-weight:900;">&minus;</button>'+
             '<button onclick="_mapResetView()" style="background:#1f1f1f;border:1px solid #333;color:#888;border-radius:8px;padding:6px 14px;font-size:10px;cursor:pointer;font-weight:700;">СБРОС</button>'+
         '</div>'+
-        '<div id="map-viewport" style="width:100%;overflow:hidden;border-radius:16px;border:1px solid rgba(255,255,255,0.07);background:#0a0a0a;cursor:grab;user-select:none;position:relative;box-shadow:0 24px 64px rgba(0,0,0,0.8);">'+
+        '<div id="map-viewport" style="width:100%;overflow:hidden;border-radius:12px;border:1px solid rgba(255,255,255,0.07);background:#0a0a0a;cursor:grab;user-select:none;position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.8);touch-action:none;">'+
             '<div id="map-stage" style="transform-origin:0 0;will-change:transform;position:relative;width:'+totalPx+'px;height:'+totalPx+'px;line-height:0;font-size:0;">'+
                 '<div id="map-grid" style="display:grid;grid-template-columns:repeat(34,'+_mapCellPx+'px);grid-template-rows:repeat(34,'+_mapCellPx+'px);width:'+totalPx+'px;height:'+totalPx+'px;gap:0;position:absolute;inset:0;"></div>'+
                 '<div id="map-markers-layer" style="position:absolute;inset:0;pointer-events:none;width:'+totalPx+'px;height:'+totalPx+'px;"></div>'+
