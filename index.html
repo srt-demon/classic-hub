@@ -288,6 +288,8 @@ Development by slowdown
             overflow: hidden;
             transition: opacity 0.15s;
         }
+
+        @keyframes _popIn{from{opacity:0;transform:scale(.88) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
     </style>
 </head>
 <body>
@@ -343,6 +345,7 @@ Development by slowdown
                 <a href="#" class="nav-tab">Архив</a>
                 <a href="#" class="nav-tab" id="tab-updates-link">Обновления<span id="updates-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px #4ade80;animation:pulse-dot 1.4s infinite;" title="Новое обновление"></span></a>
                 <a href="#" class="nav-tab" id="nav-tab-shop">Магазин</a>
+                <a href="#" class="nav-tab" id="nav-tab-map">Карта</a>
                 <div class="ml-auto flex items-center gap-2 flex-shrink-0">
                     <span id="mc-status-badge" onclick="_mcStatusOpen()" class="hidden md:inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full whitespace-nowrap" style="background:#0a1520;border:1px solid rgba(96,165,250,0.3);color:#60a5fa;cursor:pointer;transition:border-color .2s;" onmouseover="this.style.borderColor='rgba(96,165,250,0.6)'" onmouseout="this.style.borderColor='rgba(96,165,250,0.3)'">
                         <span id="mc-status-dot" class="w-2 h-2 rounded-full inline-block flex-shrink-0" style="background:#60a5fa;animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;"></span>
@@ -775,7 +778,7 @@ Development by slowdown
                             <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.25em;color:#D4AF37;margin-bottom:2px;">Classic HUB</div>
                             <div style="font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.03em;line-height:1;">Подписка Prime</div>
                         </div>
-                    </div>
+                     </div>
                     <div style="font-size:11px;color:#ffd700;margin-bottom:18px;line-height:1.7;">1 подписка = 1 артефакт на 30 дней - скидка 50%
                     <br><span style="color:#4ade8088;font-size:10px;">3 подписки + набор на ваш выбор - скидка 30%</span>
                     <br><span style="color:#ff6666;font-size:10px;">5 подписок = 5 артефактов сразу - скидка 20% 
@@ -812,7 +815,7 @@ Development by slowdown
                     </div>
                 </div>
 
-                <div style="padding:28px 28px 28px 24px;display:flex;flex-direction:column;gap:14px;">
+                <div style="padding:28px 28px 28px 24px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;max-height:calc(100vh - 64px);scrollbar-width:thin;scrollbar-color:#2a2a2a transparent;">
 
                     <div>
                         <label style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#555;display:block;margin-bottom:8px;">Количество месяцев</label>
@@ -856,7 +859,7 @@ Development by slowdown
                         </div>
 
                         <div style="margin-top:8px;padding:9px 12px;background:#0a0f0a;border:1px solid #4ade8022;border-radius:10px;font-size:10px;color:#555;line-height:1.6;">
-                            👑 <span style="color:#4ade8077;">Накопил 5 подписок?</span> 6-я и каждая следующая - <span style="color:#fff;font-weight:900;">-40%</span>, всего <span style="color:#fff;font-weight:700;">$3</span> за подписку. Скидка применяется автоматически - напиши нам.
+                            👑 <span style="color:#4ade8077;">Накопил 5 подписок?</span> 6-я и каждая следующая - <span style="color:#4ade80;font-weight:900;">-40%</span>, всего <span style="color:#fff;font-weight:700;">$3</span> за подписку. Скидка применяется автоматически - напиши нам.
                         </div>
 
                         <div id="prime-bundle-wrap" style="display:none;margin-top:10px;">
@@ -939,7 +942,7 @@ Development by slowdown
             </div>
         </div>
     </div>
-    <div id="form-overlay" class="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl hidden justify-center items-start p-4 overflow-y-auto">
+    <div id="form-overlay" class="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl hidden justify-center items-start p-4 overflow-y-auto" style="scrollbar-width:thin;scrollbar-color:#2a2a2a transparent;">
         <div class="bg-[#1a1a1a] w-full max-w-2xl m-auto my-8 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
 
             <div class="h-1 w-full bg-gradient-to-r from-[#D4AF37] via-[#f5d77e] to-[#B8860B]"></div>
@@ -1183,7 +1186,7 @@ function loadArtifactIconsFromDB() {
             window._customPetsMap[id] = cfg;
             PET_TYPES_MAP[id] = { name: cfg.name, emoji: cfg.emoji||'🐾', color: cfg.uiColor||'#34d399', camZ: 3.9, camY: 0.55, _custom: true };
         });
-      
+        
         const grid = document.getElementById('shop-grid');
         if (grid) _renderShopGrid(_currentShopFilter || 'Все');
         
@@ -1191,7 +1194,7 @@ function loadArtifactIconsFromDB() {
         if (shopModal && shopModal.style.display !== 'none' && window._smCurrentId === 'pet') {
             _openShopModal('pet');
         }
-       
+        
         var primeModal = document.getElementById('prime-modal');
         if (primeModal && primeModal.style.display !== 'none') {
             var months = window._primeMonths || 1;
@@ -3107,6 +3110,7 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
         if (tabName === 'На сайт') return;
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
+        var _pt=document.getElementById('page-title');if(_pt)_pt.style.display='';
         if (tabName === 'Топ авторов') {
             renderTopAuthors();
         } else if (tabName === 'Достижения') {
@@ -3119,6 +3123,8 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
             renderUpdates();
         } else if (tabName === 'Магазин') {
             renderShop();
+        } else if (tabName === 'Карта') {
+            renderMap();
         } else {
             document.getElementById('page-title').innerText = 'Экспозиция построек';
             renderBuilds('Все', document.getElementById('search-input').value);
@@ -3436,7 +3442,7 @@ function renderInfo() {
                             '<div style="background:#0a0a0a;border:1px solid rgba(212,175,55,0.12);border-radius:12px;padding:12px 14px;">' +
                                 '<div style="font-size:16px;margin-bottom:5px;">Ⅱ</div>' +
                                 '<div style="font-size:11px;font-weight:900;color:#D4AF37;margin-bottom:3px;">Медаль донатера</div>' +
-                                '<div style="font-size:10px;color:#555;line-height:1.5;">Иконка рядом с ником — видна всем в профиле и в Топе авторов.</div>' +
+                                '<div style="font-size:10px;color:#555;line-height:1.5;">Иконка рядом с ником - видна всем в профиле и в Топе авторов.</div>' +
                             '</div>' +
                             '<div style="background:#0a0a0a;border:1px solid rgba(212,175,55,0.12);border-radius:12px;padding:12px 14px;">' +
                                 '<div style="font-size:16px;margin-bottom:5px;">Ⅲ</div>' +
@@ -4153,6 +4159,11 @@ const ARTIFACTS = [
         desc: '3D-зверёк в правом углу твоего профиля. Интерактивный - крути мышкой, анимированный. Свинка, попугай, кот, волк и другие!',
         effect: 'Косметика профиля'
     },
+    {
+        id: 'totem', icon: '🗿', name: 'Тотем бессмертия', tag: 'Медаль', color: '#f59e0b',
+        desc: 'Персональный тотем бессмертия с твоим скином. Загрузи скин или введи ник - получи превью тотема. Выставляется вместо обычной донат-медали.',
+        effect: 'Медаль у ника'
+    },
 ];
 
 function _hasActiveArtifact(authorName, artifactId) {
@@ -4627,7 +4638,7 @@ function _buildPetModel(type) {
         hG.add(bx(0.12, 0.10, 0.08, yw, 0,-0.16, 0.28)); // beak bot
         hG.add(bx(0.11, 0.14, 0.05, blk,-0.14, 0.08,0.27)); // eye L
         hG.add(bx(0.11, 0.14, 0.05, blk, 0.14, 0.08,0.27)); // eye R
-        // Crest feathers
+        
         hG.add(bx(0.08, 0.22, 0.07, rd,   0, 0.32, 0.10,-0.20));
         hG.add(bx(0.07, 0.19, 0.06, yw, -0.10, 0.28, 0.12,-0.30));
         hG.add(bx(0.07, 0.19, 0.06, yw,  0.10, 0.28, 0.12,-0.30));
@@ -4664,7 +4675,7 @@ function _buildPetModel(type) {
         hG.add(bx(0.07, 0.09, 0.04, eg,   0.17, 0.12,0.34)); // glow R
         hG.add(bx(0.20, 0.06, 0.04, ds,   0,-0.15,0.32));   // mouth
         hG.position.set(0, 0.74, 0); G.add(hG); res.headGroup = hG;
-        // Arms stretched forward (zombie pose)
+        
         var aL = new THREE.Group(); aL.add(bx(0.26, 0.78, 0.26, sk)); aL.position.set(-0.45, 0.35, 0); aL.rotation.x = -1.32; G.add(aL); res.armL = aL;
         var aR = new THREE.Group(); aR.add(bx(0.26, 0.78, 0.26, sk)); aR.position.set( 0.45, 0.35, 0); aR.rotation.x = -1.32; G.add(aR); res.armR = aR;
         G.add(bx(0.24, 0.62, 0.24, pn,-0.14,-0.88, 0)); // leg L
@@ -5163,6 +5174,36 @@ function _openShopModal(id) {
                 }).catch(function(){ var g = document.getElementById('sm-medal-gallery-grid'); if(g) g.innerHTML='<div style="color:#555;font-size:11px;">Нет данных</div>'; });
             }
 
+        } else if (id === 'totem') {
+            smExtra.style.display = '';
+            smExtra.innerHTML =
+                '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#444;margin-bottom:10px;">Превью тотема по нику</div>' +
+                '<div style="display:flex;gap:8px;margin-bottom:12px;">' +
+                    '<input id="sm-totem-nick" type="text" placeholder="Введи ник..." ' +
+                        'style="flex:1;background:#0a0a0a;border:1px solid #333;border-radius:8px;padding:7px 10px;color:#fff;font-size:11px;outline:none;font-family:inherit;">' +
+                    '<button onclick="window._smTotemPreview()" style="padding:6px 12px;border-radius:8px;background:#f59e0b18;border:1px solid #f59e0b44;color:#f59e0b;font-size:10px;font-weight:900;cursor:pointer;font-family:inherit;flex-shrink:0;">Показать</button>' +
+                '</div>' +
+                '<div style="display:flex;justify-content:center;gap:24px;margin-bottom:10px;">' +
+                    '<div style="text-align:center;">' +
+                        '<div style="font-size:8px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;">Mini me</div>' +
+                        '<img id="sm-totem-img-mini" src="https://skinmc.net/api/v1/renders/skins/mhf_steve/totem" style="width:64px;height:auto;image-rendering:pixelated;border-radius:6px;background:#111;border:1px solid #f59e0b22;display:block;">' +
+                    '</div>' +
+                    '<div style="text-align:center;">' +
+                        '<div style="font-size:8px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;">Full body</div>' +
+                        '<img id="sm-totem-img-full" src="https://skinmc.net/api/v1/renders/skins/mhf_steve/totem/full" style="width:64px;height:auto;image-rendering:pixelated;border-radius:6px;background:#111;border:1px solid #f59e0b22;display:block;">' +
+                    '</div>' +
+                '</div>' +
+                '<div style="font-size:9px;color:#444;line-height:1.6;">💡 Тотем не подгружается? Зайди на <a href="https://skinmc.net" target="_blank" style="color:#f59e0b;text-decoration:none;">skinmc.net</a>, введи свой ник — скин закешируется.</div>';
+            window._smTotemPreview = function() {
+                var nick = (document.getElementById('sm-totem-nick') || {}).value || '';
+                nick = nick.trim();
+                if (!nick) return;
+                var mini = document.getElementById('sm-totem-img-mini');
+                var full = document.getElementById('sm-totem-img-full');
+                if (mini) mini.src = 'https://skinmc.net/api/v1/renders/skins/' + encodeURIComponent(nick) + '/totem?' + Date.now();
+                if (full) full.src = 'https://skinmc.net/api/v1/renders/skins/' + encodeURIComponent(nick) + '/totem/full?' + Date.now();
+            };
+
         } else {
             if (id === 'profile_bg') details = [
                 { emoji:'🖼️', label:'Фон шапки полного профиля', color:'#4ade80' },
@@ -5209,6 +5250,16 @@ function _buildItemGrid(slotIdx) {
             .filter(([k]) => parseInt(k) !== slotIdx)
             .map(([, v]) => v.id)
     );
+
+    
+    const _MEDAL_MUTEX = ['custom_medal', 'totem'];
+    const allSelectedIds = Object.values(window._primeSlotSelected || {}).map(v => v.id);
+    _MEDAL_MUTEX.forEach(function(mid) {
+        if (allSelectedIds.includes(mid)) {
+            _MEDAL_MUTEX.forEach(function(other) { if (other !== mid) takenIds.add(other); });
+        }
+    });
+
     return arts.filter(a => !(a.id === 'pet' && window._siteFlags && window._siteFlags.showPet === false)).map(a => {
         const sel    = a.id === selectedId;
         const taken  = takenIds.has(a.id);
@@ -5325,7 +5376,11 @@ function _primeSlotCollapse(idx) {
 
 function _openPrimeModal() {
     document.getElementById('prime-nick').value = '';
-    document.getElementById('prime-contact').value = '';
+    
+    var totemContact = (document.getElementById('sm-totem-contact') || {}).value || '';
+    var totemNick    = (document.getElementById('sm-totem-nick') || {}).value || '';
+    document.getElementById('prime-contact').value = totemContact.trim();
+    if (totemNick.trim()) document.getElementById('prime-nick').value = totemNick.trim();
     document.getElementById('prime-err').style.display = 'none';
     document.getElementById('prime-success').style.display = 'none';
     document.getElementById('prime-btn').textContent = '✦ Отправить заявку на Prime';
@@ -5601,7 +5656,7 @@ function _renderPrimeArtConfig(slotIdx, id) {
         ).join('');
         wrap.innerHTML =
             `<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#c084fc;margin-bottom:10px;">⚙ Выбери эффект профиля</div>
-            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:12px;max-height:220px;overflow-y:auto;padding-right:2px;">${efGrid}</div>
+            <div class="pef-effect-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:12px;max-height:220px;overflow-y:auto;padding-right:4px;scrollbar-width:thin;scrollbar-color:#2a2a2a transparent;">${efGrid}</div>
             <input type="hidden" id="prim-cfg-effect-id-${S}">
             <div id="pef-preview-wrap-${S}" style="display:none;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:14px;overflow:hidden;position:relative;height:100px;margin-bottom:10px;">
                 <canvas id="pef-preview-canvas-${S}" style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
@@ -5613,10 +5668,53 @@ function _renderPrimeArtConfig(slotIdx, id) {
             <div style="font-size:9px;color:#555;">Эффект виден в профиле, hover-карточке и Топе авторов.</div>`;
        
         requestAnimationFrame(function() { _startPefTileAnimations(S, null); });
+
+    } else if (id === 'totem') {
+        wrap.style.display = '';
+        wrap.innerHTML =
+            '<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#f59e0b;margin-bottom:10px;">⚙ Тотем с твоим скином</div>' +
+            '<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">' +
+                '<input id="prim-cfg-totem-nick-' + S + '" type="text" placeholder="Введи ник для превью..." ' +
+                    'style="flex:1;background:#0a0a0a;border:1px solid #333;border-radius:8px;padding:7px 10px;color:#fff;font-size:11px;outline:none;font-family:inherit;">' +
+                '<button onclick="_primTotemPreview(' + S + ')" style="padding:6px 10px;border-radius:8px;background:#f59e0b18;border:1px solid #f59e0b44;color:#f59e0b;font-size:10px;font-weight:900;cursor:pointer;font-family:inherit;flex-shrink:0;">Показать</button>' +
+            '</div>' +
+            '<div style="display:flex;justify-content:center;gap:24px;margin-bottom:10px;">' +
+                '<div style="text-align:center;">' +
+                    '<div style="font-size:8px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;">Mini</div>' +
+                    '<img id="prim-totem-mini-' + S + '" src="https://skinmc.net/api/v1/renders/skins/mhf_steve/totem" style="width:55px;height:auto;image-rendering:pixelated;border-radius:6px;background:#111;border:1px solid #f59e0b22;display:block;">' +
+                '</div>' +
+                '<div style="text-align:center;">' +
+                    '<div style="font-size:8px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;">Full</div>' +
+                    '<img id="prim-totem-full-' + S + '" src="https://skinmc.net/api/v1/renders/skins/mhf_steve/totem/full" style="width:55px;height:auto;image-rendering:pixelated;border-radius:6px;background:#111;border:1px solid #f59e0b22;display:block;">' +
+                '</div>' +
+            '</div>' +
+            '<input type="hidden" id="prim-cfg-totem-nick-val-' + S + '" value="">' +
+            '<div style="font-size:9px;color:#555;">Тотем будет выставлен в медаль профиля администратором.</div>';
     }
 }
 
 var _pefPreviewRAF = null;
+
+function _primTotemPreview(si) {
+    var nickEl = document.getElementById('prim-cfg-totem-nick-' + si);
+    var nick = nickEl ? nickEl.value.trim() : '';
+    if (!nick) return;
+    var mini   = document.getElementById('prim-totem-mini-' + si);
+    var full   = document.getElementById('prim-totem-full-' + si);
+    var hidden = document.getElementById('prim-cfg-totem-nick-val-' + si);
+    var t = Date.now();
+    if (mini)   mini.src   = 'https://skinmc.net/api/v1/renders/skins/' + encodeURIComponent(nick) + '/totem?' + t;
+    if (full)   full.src   = 'https://skinmc.net/api/v1/renders/skins/' + encodeURIComponent(nick) + '/totem/full?' + t;
+    if (hidden) hidden.value = nick;
+}
+function _primTotemUpload(si, input) {
+    var file = input.files[0];
+    if (!file) return;
+    var lbl = document.getElementById('prim-totem-fname-' + si);
+    if (lbl) lbl.textContent = file.name;
+    if (!window._primTotemFiles) window._primTotemFiles = {};
+    window._primTotemFiles[si] = file;
+}
 function _selPrimEffect(slotIdx, id, color) {
     var allIds = Object.keys(_PEF_DEFS);
     var hidEl = document.getElementById('prim-cfg-effect-id-' + slotIdx);
@@ -5825,6 +5923,18 @@ function _submitPrimeRequest() {
                 }
                 const pn = PET_TYPES_MAP[pid]?.name || pid;
                 cfg.push(`Зверёк: ${pn} (${pid})`);
+            } else if (itemId === 'totem') {
+                const totemNick = document.getElementById(`prim-cfg-totem-nick-val-${i}`)?.value
+                    || document.getElementById(`prim-cfg-totem-nick-${i}`)?.value || '';
+                const totemFile = (window._primTotemFiles || {})[i];
+                if (!totemNick.trim() && !totemFile) {
+                    errEl.textContent = slotCount > 1
+                        ? `Укажи ник или загрузи скин для тотема (месяц ${i+1})`
+                        : 'Укажи ник или загрузи скин для тотема';
+                    errEl.style.display = ''; return;
+                }
+                if (totemNick.trim()) cfg.push(`Ник для тотема: ${totemNick.trim()}`);
+                if (totemFile) cfg.push(`Скин: ${totemFile.name}`);
             }
 
             const prefix = slotCount > 1 ? `  Месяц ${i+1}: ` : '  ';
@@ -6331,6 +6441,15 @@ if (window._fbReady) {
   #upd-modal::-webkit-scrollbar { width: 4px; }
   #upd-modal::-webkit-scrollbar-track { background: #0a0a0a; border-radius: 2px; }
   #upd-modal::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+  .pef-effect-grid::-webkit-scrollbar { width: 3px; }
+  .pef-effect-grid::-webkit-scrollbar-track { background: transparent; }
+  .pef-effect-grid::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+  #prime-modal .prime-modal-grid > div:last-child::-webkit-scrollbar { width: 3px; }
+  #prime-modal .prime-modal-grid > div:last-child::-webkit-scrollbar-track { background: transparent; }
+  #prime-modal .prime-modal-grid > div:last-child::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+  #form-overlay::-webkit-scrollbar { width: 3px; }
+  #form-overlay::-webkit-scrollbar-track { background: transparent; }
+  #form-overlay::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
   .upd-header {
     position: sticky;
     top: 0;
@@ -7196,7 +7315,7 @@ var _MC_TTL = 60000; //разв60
 function _mcFetch(cb) {
     var now = Date.now();
     if (_mcCache && now - _mcCacheTime < _MC_TTL) { cb(_mcCache); return; }
-    fetch('https://api.mcsrvstat.us/3/' + _MC_HOST)
+    fetch('https://api.mcstatus.io/v2/status/java/' + _MC_HOST)
         .then(function(r){ return r.json(); })
         .then(function(data) {
             _mcCache = data;
@@ -7225,6 +7344,49 @@ function _mcUpdateBadge() {
     });
 }
 
+function _mcCheckAndSavePeak(online) {
+    if (!window._fbDb || !window._fbRef || !window._fbRunTransaction) return;
+    var peakRef = window._fbRef(window._fbDb, 'server_peak');
+    window._fbGet(peakRef).then(function(snap) {
+        var peak = snap.val();
+        if (!peak || online > peak.count) {
+            var now = new Date();
+            var dd = String(now.getDate()).padStart(2,'0');
+            var mm = String(now.getMonth()+1).padStart(2,'0');
+            var yyyy = now.getFullYear();
+            window._fbRunTransaction(peakRef, function() {
+                return { count: online, date: dd + '.' + mm + '.' + yyyy };
+            });
+        }
+    }).catch(function(){});
+}
+
+function _mcGetPeakHtml(online, cb) {
+    var called = false;
+    function done(html) { if (!called) { called = true; cb(html); } }
+    setTimeout(function() { done(''); }, 3000);
+    if (!window._fbDb || !window._fbRef || !window._fbGet) { done(''); return; }
+    try {
+        var peakRef = window._fbRef(window._fbDb, 'server_peak');
+        window._fbGet(peakRef).then(function(snap) {
+            var peak = snap.val();
+            if (!peak) { done(''); return; }
+            var isNew = online >= peak.count;
+            var html = '<div style="margin-top:12px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.04);">' +
+                '<div style="display:flex;align-items:center;gap:5px;">' +
+                    '<span style="font-size:10px;opacity:0.4;">🏆</span>' +
+                    '<span style="font-size:9px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.1em;">Рекорд онлайна:</span>' +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:6px;">' +
+                    '<span style="font-size:10px;font-weight:700;color:#444;">' + peak.count + ' игроков</span>' +
+                    '<span style="font-size:9px;color:#2a2a2a;">' + peak.date + '</span>' +
+                '</div>' +
+            '</div>';
+            done(html);
+        }).catch(function(){ done(''); });
+    } catch(e) { done(''); }
+}
+
 function _mcStatusOpen() {
     var overlay = document.getElementById('mc-modal-overlay');
     if (!overlay) return;
@@ -7244,13 +7406,16 @@ function _mcStatusOpen() {
         var online = (data.players && data.players.online) || 0;
         var max    = (data.players && data.players.max) || 0;
         var list   = (data.players && data.players.list) || [];
+
+        _mcCheckAndSavePeak(online);
+
         var playersHtml = '';
         if (list.length > 0) {
             playersHtml = '<div style="margin-top:14px;">' +
                 '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#60a5fa88;margin-bottom:8px;">Сейчас играют</div>' +
                 '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
                 list.map(function(p) {
-                    var name = (typeof p === 'string') ? p : (p.name || '?');
+                    var name = (typeof p === 'string') ? p : (p.name_clean || p.name || '?');
                     return '<div style="display:flex;align-items:center;gap:5px;background:#112030;border:1px solid #1a3050;border-radius:8px;padding:4px 8px;">' +
                         '<img src="https://visage.surgeplay.com/face/16/' + encodeURIComponent(name) + '" style="width:16px;height:16px;image-rendering:pixelated;border-radius:3px;" onerror="this.style.display=\'none\'">' +
                         '<span style="font-size:10px;font-weight:700;color:#aaa;">' + name + '</span>' +
@@ -7260,17 +7425,21 @@ function _mcStatusOpen() {
         } else if (online > 0) {
             playersHtml = '<div style="margin-top:14px;font-size:10px;color:#555;font-style:italic;">Список игроков скрыт сервером</div>';
         }
-        body.innerHTML =
-            '<div style="width:100%;">' +
-            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
-                '<div style="display:flex;align-items:center;gap:6px;">' +
-                    '<span style="width:9px;height:9px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 8px #4ade8099;"></span>' +
-                    '<span style="font-size:13px;font-weight:900;color:#4ade80;">Онлайн</span>' +
+
+        _mcGetPeakHtml(online, function(peakHtml) {
+            body.innerHTML =
+                '<div style="width:100%;">' +
+                '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+                    '<div style="display:flex;align-items:center;gap:6px;">' +
+                        '<span style="width:9px;height:9px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 8px #4ade8099;"></span>' +
+                        '<span style="font-size:13px;font-weight:900;color:#4ade80;">Онлайн</span>' +
+                    '</div>' +
+                    '<span style="font-size:20px;font-weight:900;color:#fff;">' + online + ' <span style="font-size:11px;color:#555;font-weight:400;">/ ' + max + '</span></span>' +
                 '</div>' +
-                '<span style="font-size:20px;font-weight:900;color:#fff;">' + online + ' <span style="font-size:11px;color:#555;font-weight:400;">/ ' + max + '</span></span>' +
-            '</div>' +
-            playersHtml +
-            '</div>';
+                playersHtml +
+                peakHtml +
+                '</div>';
+        });
     });
 }
 
@@ -7285,7 +7454,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-
+<!-- ════ BUNDLE MODAL ════ -->
 <div id="bundle-modal" onclick="if(event.target===this)_closeBundleModal()"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:600;align-items:center;justify-content:center;padding:16px;">
     <div onclick="event.stopPropagation()"
@@ -7590,6 +7759,278 @@ function _closeBundleModal() {
     document.getElementById('bundle-modal').style.display = 'none';
 }
 
+
+var _mapTiles   = {};  // { "col_row": url }
+var _mapMarkers = {};
+var _mapBuilds  = [];  // { id: { x, z, label, type, color, buildId } }
+var _mapScale = 1;
+var _mapOffX = 0, _mapOffY = 0;
+var _mapCols = 34, _mapRows = 34;
+var _mapCellPx = 128; // px на тайл при scale=1
+
+
+var _MAP_X1 = -5841;   // левый край 
+var _MAP_Z1 =  9523;   // верхний край 
+var _MAP_X2 =  11159;  // правый край  
+var _MAP_Z2 = -7477;   // нижний край  (
+
+var _MAP_TOTAL_PX  = _mapCols * _mapCellPx; // 34*128=4352 px
+var _MAP_BLOCK_W   = _MAP_X2 - _MAP_X1;     // 17000 блоков по X
+var _MAP_BLOCK_H   = _MAP_Z1 - _MAP_Z2;     // 17000 блоков по Z
+
+
+function _mapWorldToPx(wx, wz) {
+    var px = (wx - _MAP_X1) / _MAP_BLOCK_W * _MAP_TOTAL_PX;
+    var py = (_MAP_Z1 - wz) / _MAP_BLOCK_H * _MAP_TOTAL_PX;
+    return { x: px, y: py };
+}
+
+
+function _mapPxToWorld(px, py) {
+    var wx = _MAP_X1 + px / _MAP_TOTAL_PX * _MAP_BLOCK_W;
+    var wz = _MAP_Z1 - py / _MAP_TOTAL_PX * _MAP_BLOCK_H;
+    return { x: Math.round(wx), z: Math.round(wz) };
+}
+
+
+function renderMap() {
+    document.getElementById('page-title').innerText = 'Карта сервера';
+    var container = document.getElementById('builds-container');
+    container.className = '';
+    container.style = '';
+
+    var totalPx = _mapCols * _mapCellPx;
+
+    container.innerHTML =
+        '<div style="width:100%;">' +
+
+            
+            '<div id="map-coord-tip" style="' +
+                'position:fixed;z-index:9999;pointer-events:none;display:none;' +
+                'background:rgba(10,8,0,0.92);border:1px solid rgba(212,175,55,0.25);' +
+                'border-radius:10px;padding:7px 13px;font-size:11px;font-weight:700;' +
+                'color:#D4AF37;backdrop-filter:blur(12px);white-space:nowrap;' +
+                'box-shadow:0 8px 32px rgba(0,0,0,0.7);' +
+            '"></div>' +
+
+            
+            '<div id="map-marker-tip" style="' +
+                'position:fixed;z-index:10000;pointer-events:none;display:none;' +
+                'background:rgba(10,8,0,0.96);border:1px solid rgba(212,175,55,0.4);' +
+                'border-radius:12px;padding:10px 14px;font-size:11px;' +
+                'color:#fff;backdrop-filter:blur(16px);white-space:nowrap;' +
+                'box-shadow:0 8px 32px rgba(0,0,0,0.8);max-width:220px;white-space:normal;' +
+            '"></div>' +
+
+            
+            '<div id="map-viewport" style="' +
+                'width:100%;overflow:hidden;border-radius:16px;' +
+                'border:1px solid rgba(255,255,255,0.07);background:#0a0a0a;' +
+                'cursor:grab;user-select:none;position:relative;' +
+                'box-shadow:0 24px 64px rgba(0,0,0,0.8);' +
+            '">' +
+                '<div id="map-stage" style="' +
+                    'transform-origin:0 0;will-change:transform;position:relative;' +
+                    'width:' + totalPx + 'px;height:' + totalPx + 'px;' +
+                    'line-height:0;font-size:0;' +
+                '">' +
+                    
+                    '<div id="map-grid" style="' +
+                        'display:grid;' +
+                        'grid-template-columns:repeat(34,' + _mapCellPx + 'px);' +
+                        'grid-template-rows:repeat(34,' + _mapCellPx + 'px);' +
+                        'width:' + totalPx + 'px;height:' + totalPx + 'px;' +
+                        'gap:0;position:absolute;inset:0;' +
+                    '"></div>' +
+                    
+                    '<div id="map-markers-layer" style="' +
+                        'position:absolute;inset:0;pointer-events:none;' +
+                        'width:' + totalPx + 'px;height:' + totalPx + 'px;' +
+                    '"></div>' +
+                '</div>' +
+            '</div>' +
+
+            
+            '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:14px;">' +
+                '<div style="font-size:11px;color:#555;">' +
+                    'Зажми и тащи · Колёсико для зума' +
+                '</div>' +
+                '<div style="display:flex;gap:8px;align-items:center;">' +
+                    
+                    '<span style="font-size:10px;color:#555;display:flex;align-items:center;gap:10px;margin-right:8px;">' +
+                        '<span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#D4AF37;display:inline-block;"></span>Постройка</span>' +
+                        '<span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#60a5fa;display:inline-block;"></span>Маркер</span>' +
+                    '</span>' +
+                    '<button onclick="_mapZoom(0.3)" style="background:#1f1f1f;border:1px solid #333;color:#fff;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-weight:900;">+</button>' +
+                    '<button onclick="_mapZoom(-0.3)" style="background:#1f1f1f;border:1px solid #333;color:#fff;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-weight:900;">−</button>' +
+                    '<button onclick="_mapResetView()" style="background:#1f1f1f;border:1px solid #333;color:#888;border-radius:8px;padding:6px 14px;font-size:10px;cursor:pointer;font-weight:700;">СБРОС</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+    _mapLoad();
+    _mapInitViewport();
+}
+
+
+function _mapLoad() {
+    var grid = document.getElementById('map-grid');
+    if (!grid) return;
+    var get=window._fbGet?function(p){return window._fbGet(window._fbRef(window._fbDb,p)).then(function(s){return s.exists()?s.val():null;}).catch(function(){return null;});}:function(){return Promise.resolve(null);};
+    Promise.all([get('config/mapTiles'),get('config/mapMarkers'),get('config/mapConfig'),get('builds')]).then(function(res){
+        _mapTiles=res[0]||{};_mapMarkers=res[1]||{};window._mapConfig=res[2]||{};
+        var raw=res[3]||{};_mapBuilds=[];
+        Object.keys(raw).forEach(function(k){var b=raw[k];if(b&&b.coords)_mapBuilds.push({id:k,_key:k,title:b.title||'',coords:b.coords,desc:b.desc||'',images:b.images||[]});});
+        _mapRenderCells(grid);_mapRenderMarkers();_mapRenderMarkerList();
+    });
+}
+
+
+function _mapRenderCells(grid) {
+    var cells = [];
+    for (var row = 0; row < _mapRows; row++) {
+        for (var col = 0; col < _mapCols; col++) {
+            var key = col + '_' + row;
+            var url = _mapTiles[key] || '';
+            cells.push(
+                '<div data-col="' + col + '" data-row="' + row + '"' +
+                ' style="' +
+                    'width:' + _mapCellPx + 'px;height:' + _mapCellPx + 'px;' +
+                    'position:relative;overflow:hidden;box-sizing:border-box;' +
+                    'background:' + (url ? '#000' : '#0f0f0f') + ';' +
+                    'outline:2px solid rgba(255,255,255,0.10);outline-offset:-1px;' +
+                    'cursor:crosshair;' +
+                '">' +
+                (url
+                    ? '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;display:block;image-rendering:auto;" loading="lazy" onerror="this.parentNode.style.background=\'#1a0a0a\';this.remove();">'
+                    : '<div style="width:100%;height:100%;background:repeating-linear-gradient(45deg,#0d0d0d 0px,#0d0d0d 4px,#111 4px,#111 8px);"></div>'
+                ) +
+                '</div>'
+            );
+        }
+    }
+    grid.innerHTML = cells.join('');
+
+    
+    grid.onmousemove = function(e) {
+        var rect = grid.getBoundingClientRect();
+        var px = (e.clientX - rect.left) / _mapScale;
+        var py = (e.clientY - rect.top)  / _mapScale;
+        var wc = _mapPxToWorld(px, py);
+        var tip = document.getElementById('map-coord-tip');
+        if (tip) {
+            tip.textContent = 'X: ' + wc.x + '   Z: ' + wc.z;
+            tip.style.display = 'block';
+            tip.style.left = (e.clientX + 14) + 'px';
+            tip.style.top  = (e.clientY - 32) + 'px';
+        }
+    };
+    grid.onmouseleave = function() {
+        var tip = document.getElementById('map-coord-tip');
+        if (tip) tip.style.display = 'none';
+    };
+}
+
+
+function _mapRenderMarkers() {
+    var layer = document.getElementById('map-markers-layer');
+    if (!layer) return;
+    layer.innerHTML = '';
+    layer.style.pointerEvents = 'none';
+
+    var buildIcon = (window._mapConfig && window._mapConfig.buildMarkerIcon) || '';
+
+    (_mapBuilds||[]).forEach(function(b){if(!b.coords)return;var parsed=_mapParseCoords(b.coords);if(!parsed)return;var pp=_mapWorldToPx(parsed.x,parsed.z);if(pp.x<0||pp.y<0||pp.x>_MAP_TOTAL_PX||pp.y>_MAP_TOTAL_PX)return;layer.appendChild(_mapMakeMarker(pp.x,pp.y,{icon:buildIcon,color:'#D4AF37',label:b.title||'Постройка',type:'build',id:b._key}));});
+
+    
+    Object.keys(_mapMarkers).forEach(function(id) {
+        var m = _mapMarkers[id];
+        if (!m || m.x === undefined || m.z === undefined) return;
+        var pp = _mapWorldToPx(m.x, m.z);
+        if (pp.x < 0 || pp.y < 0 || pp.x > _MAP_TOTAL_PX || pp.y > _MAP_TOTAL_PX) return;
+        var el = _mapMakeMarker(pp.x, pp.y, {
+            icon:  m.icon  || '',
+            color: m.color || '#60a5fa',
+            label: m.label || '',
+            type:  'custom',
+            id:    id
+        });
+        layer.appendChild(el);
+    });
+}
+
+function _mapMakeMarker(px,py,opts){
+    var color=opts.color||'#D4AF37',icon=opts.icon||'',label=opts.label||'',type=opts.type||'custom',id=opts.id,SIZE=40;
+    var el=document.createElement('div');
+    el.style.cssText='position:absolute;left:'+px+'px;top:'+py+'px;transform:translate(-50%,-100%);pointer-events:all;cursor:pointer;z-index:20;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.9));transition:filter .15s;';
+    el.innerHTML=icon?'<div style="display:flex;flex-direction:column;align-items:center;"><img src="'+_mapEsc(icon)+'" style="width:'+SIZE+'px;height:'+SIZE+'px;object-fit:contain;border-radius:8px;border:2.5px solid '+color+';background:rgba(0,0,0,0.7);box-shadow:0 0 12px '+color+'77;display:block;transition:transform .15s;"><div style="width:5px;height:5px;border-radius:50%;background:'+color+';margin-top:-1px;"></div></div>':_mapFallbackDot(color,SIZE);
+    el.dataset.label=label;el.dataset.type=type;el.dataset.id=String(id||'');
+    el.onmousedown=function(e){e.stopPropagation();};
+    el.onmouseenter=function(e){e.stopPropagation();el.style.filter='drop-shadow(0 4px 10px rgba(0,0,0,0.95)) brightness(1.15)';var img=el.querySelector('img');if(img)img.style.transform='scale(1.18)';var ct=document.getElementById('map-coord-tip');if(ct)ct.style.display='none';var tip=document.getElementById('map-marker-tip');if(tip){tip.innerHTML=(type==='build'?'&#x1F4CD; ':'&#x1F4CD; ')+'<b style="color:'+color+';">'+_mapEsc(label)+'</b><div style="font-size:9px;color:#666;margin-top:2px;">Нажми для подробностей</div>';tip.style.display='block';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-48)+'px';}};
+    el.onmousemove=function(e){e.stopPropagation();var tip=document.getElementById('map-marker-tip');if(tip){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-48)+'px';}};
+    el.onmouseleave=function(){el.style.filter='drop-shadow(0 3px 6px rgba(0,0,0,0.9))';var img=el.querySelector('img');if(img)img.style.transform='';var tip=document.getElementById('map-marker-tip');if(tip)tip.style.display='none';};
+    el.onclick=function(e){e.stopPropagation();var tip=document.getElementById('map-marker-tip');if(tip)tip.style.display='none';if(type==='build'){var bd=(_mapBuilds||[]).find(function(b){return b._key===String(id)||b.id===String(id);});var bFull=(window.builds||[]).find(function(b){return b.id===String(id);});_mapShowPopup({x:e.clientX,y:e.clientY,title:label,subtitle:'Постройка',desc:(bd&&bd.desc)?bd.desc:((bFull&&bFull.desc)?bFull.desc:((bd&&bd.coords)?bd.coords:'')),image:(bd&&bd.images&&bd.images[0])?bd.images[0]:((bFull&&bFull.images&&bFull.images[0])?bFull.images[0]:''),color:color,buildId:id});}else{var m=_mapMarkers[String(id)]||{};_mapShowPopup({x:e.clientX,y:e.clientY,title:label,subtitle:m.subtitle||'Точка интереса',desc:m.desc||'',image:m.image||'',color:color});}};
+    return el;
+}
+function _mapFallbackDot(color,size){var s=size||40;return '<div style="display:flex;flex-direction:column;align-items:center;"><div style="width:'+s+'px;height:'+s+'px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:'+color+';border:2.5px solid rgba(255,255,255,0.25);box-shadow:0 0 12px '+color+'88;"></div></div>';}
+function _mapParseCoords(str) {
+    if (!str) return null;
+    
+    var xm = str.match(/[Xx][:\s]+(-?\d+)/);
+    var zm = str.match(/[Zz][:\s]+(-?\d+)/);
+    if (xm && zm) return { x: parseInt(xm[1]), z: parseInt(zm[1]) };
+   
+    var nums = str.match(/-?\d+/g);
+    if (nums && nums.length >= 3) return { x: parseInt(nums[0]), z: parseInt(nums[2]) };
+    if (nums && nums.length === 2) return { x: parseInt(nums[0]), z: parseInt(nums[1]) };
+    return null;
+}
+
+function _mapEsc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+
+function _mapInitViewport(){
+    var vp=document.getElementById('map-viewport'),stage=document.getElementById('map-stage');
+    if(!vp||!stage)return;
+    _mapScale=Math.min(1,(vp.offsetWidth-2)/(_mapCols*_mapCellPx));_mapOffX=0;_mapOffY=0;
+    vp.style.height=Math.min(window.innerHeight*0.78,720)+'px';_mapApplyTransform();
+    vp.addEventListener('wheel',function(e){e.preventDefault();_mapZoom(e.deltaY>0?-0.1:0.1,e.clientX,e.clientY);},{passive:false});
+    var dragging=false,lastX=0,lastY=0;
+    vp.addEventListener('mousedown',function(e){if(e.target.closest&&e.target.closest('[data-type]'))return;dragging=true;lastX=e.clientX;lastY=e.clientY;vp.style.cursor='grabbing';});
+    window.addEventListener('mousemove',function(e){if(!dragging)return;_mapOffX+=e.clientX-lastX;_mapOffY+=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;_mapApplyTransform();});
+    window.addEventListener('mouseup',function(){dragging=false;if(vp)vp.style.cursor='grab';});
+}
+
+function _mapApplyTransform() {
+    var stage = document.getElementById('map-stage');
+    if (stage) stage.style.transform =
+        'translate(' + _mapOffX + 'px,' + _mapOffY + 'px) scale(' + _mapScale + ')';
+}
+
+function _mapZoom(delta, cx, cy) {
+    var vp = document.getElementById('map-viewport');
+    if (!vp) return;
+    var rect = vp.getBoundingClientRect();
+    var px = (cx !== undefined ? cx : rect.left + rect.width / 2)  - rect.left;
+    var py = (cy !== undefined ? cy : rect.top  + rect.height / 2) - rect.top;
+    var oldScale = _mapScale;
+    _mapScale = Math.max(0.08, Math.min(6, _mapScale + delta));
+    _mapOffX = px - (_mapScale / oldScale) * (px - _mapOffX);
+    _mapOffY = py - (_mapScale / oldScale) * (py - _mapOffY);
+    _mapApplyTransform();
+}
+
+function _mapResetView() {
+    var vp = document.getElementById('map-viewport');
+    var totalPx = _mapCols * _mapCellPx;
+    var vpW = vp ? vp.offsetWidth : 900;
+    _mapScale = Math.min(1, (vpW - 2) / totalPx);
+    _mapOffX = 0; _mapOffY = 0;
+    _mapApplyTransform();
+}
+
 function _submitBundleRequest() {
     var btn = document.getElementById('bm-btn');
     var nick = (document.getElementById('bm-nick').value||'').trim();
@@ -7678,6 +8119,156 @@ function _selectPrimeBundle(bundleId) {
     });
     var bErr = document.getElementById('prime-bundle-err');
     if (bErr) bErr.style.display = 'none';
+}
+</script>
+
+<script>
+
+function renderMap(){
+    var container=document.getElementById('builds-container');
+    container.className='';container.style='';
+    var pt=document.getElementById('page-title');if(pt)pt.style.display='none';
+    var totalPx=_mapCols*_mapCellPx;
+    container.innerHTML=
+        '<div style="width:100%;">'+
+        '<div style="position:relative;border-radius:24px;overflow:hidden;margin-bottom:24px;padding:32px 36px;background:linear-gradient(135deg,#0a0a0a 0%,#0e0b00 50%,#0a0a0a 100%);border:1px solid rgba(212,175,55,0.18);">'+
+            '<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 15% 60%,rgba(212,175,55,0.07) 0%,transparent 55%),radial-gradient(ellipse at 85% 20%,rgba(212,175,55,0.04) 0%,transparent 50%);"></div>'+
+            '<div style="position:relative;">'+
+                '<div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;">'+
+                    
+                    '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#D4AF37;">Карта сервера</span>'+
+                '</div>'+
+                '<div style="display:grid;grid-template-columns:1fr 200px;gap:32px;align-items:start;">'+
+                    '<div>'+
+                        '<h2 style="font-size:26px;font-weight:900;text-transform:uppercase;margin-bottom:10px;color:#fff;line-height:1.1;">Интерактивная карта </h2>'+
+                        '<p style="color:#666;font-size:12px;line-height:1.8;margin-bottom:18px;max-width:460px;">Интерактивная карта сервера в масштабе <strong style="color:#D4AF37;">1:4</strong>. Каждый сектор снят вручную. Постройки отмечены маркерами - нажми на любой.</p>'+
+                        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'+
+                            '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Масштаб</div><div style="font-size:18px;font-weight:900;color:#D4AF37;">1 : 4</div><div style="font-size:9px;color:#444;margin-top:2px;">4 блока на пиксель</div></div>'+
+                            '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Карт</div><div style="font-size:18px;font-weight:900;color:#fff;">1 156</div><div style="font-size:9px;color:#444;margin-top:2px;">34 &times; 34 сектора</div></div>'+
+                            '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Площадь</div><div style="font-size:16px;font-weight:900;color:#fff;">17 000 &times; 17 000</div><div style="font-size:9px;color:#444;margin-top:2px;">блоков всего</div></div>'+
+                            '<div style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Архив</div><div style="font-size:14px;font-weight:900;color:#fff;">После сезона</div><div style="font-size:9px;color:#444;margin-top:2px;">карта сохраняется</div></div>'+
+                        '</div>'+
+                    '</div>'+
+                    '<div style="padding:16px 18px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.07);border-radius:14px;">'+
+                        '<div style="font-size:9px;color:#555;font-weight:900;text-transform:uppercase;letter-spacing:.18em;margin-bottom:12px;">Легенда</div>'+
+                        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'+
+                            '<img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/18/Player_%28texture%29_BE2.png/revision/latest?cb=20210520170746" style="width:24px;height:24px;object-fit:contain;">'+
+                            '<div><div style="font-size:11px;font-weight:700;color:#fff;">Постройка</div><div style="font-size:9px;color:#555;">клик - карточка</div></div>'+
+                        '</div>'+
+                        '<div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:10px;"></div>'+
+                        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'+
+                            '<img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/16/Green_Marker_%28texture%29_BE2.png/revision/latest?cb=20210520171523" style="width:24px;height:24px;object-fit:contain;">'+
+                            '<div><div style="font-size:11px;font-weight:700;color:#fff;">Точка интереса</div><div style="font-size:9px;color:#555;">от администрации</div></div>'+
+                        '</div>'+
+                        '<div style="font-size:9px;color:#444;line-height:1.6;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">Тащи для перемещения.<br>Колёсико - зум.</div>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>'+
+        '<div id="map-coord-tip" style="position:fixed;z-index:9999;pointer-events:none;display:none;background:rgba(10,8,0,0.92);border:1px solid rgba(212,175,55,0.25);border-radius:10px;padding:7px 13px;font-size:11px;font-weight:700;color:#D4AF37;backdrop-filter:blur(12px);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.7);"></div>'+
+        '<div id="map-marker-tip" style="position:fixed;z-index:10000;pointer-events:none;display:none;background:rgba(10,8,0,0.96);border:1px solid rgba(212,175,55,0.4);border-radius:12px;padding:10px 14px;font-size:11px;color:#fff;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,0.8);max-width:220px;"></div>'+
+        '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">'+
+            '<button onclick="_mapZoom(0.3)" style="background:#1f1f1f;border:1px solid #333;color:#fff;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-weight:900;">+</button>'+
+            '<button onclick="_mapZoom(-0.3)" style="background:#1f1f1f;border:1px solid #333;color:#fff;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-weight:900;">&minus;</button>'+
+            '<button onclick="_mapResetView()" style="background:#1f1f1f;border:1px solid #333;color:#888;border-radius:8px;padding:6px 14px;font-size:10px;cursor:pointer;font-weight:700;">СБРОС</button>'+
+        '</div>'+
+        '<div id="map-viewport" style="width:100%;overflow:hidden;border-radius:16px;border:1px solid rgba(255,255,255,0.07);background:#0a0a0a;cursor:grab;user-select:none;position:relative;box-shadow:0 24px 64px rgba(0,0,0,0.8);">'+
+            '<div id="map-stage" style="transform-origin:0 0;will-change:transform;position:relative;width:'+totalPx+'px;height:'+totalPx+'px;line-height:0;font-size:0;">'+
+                '<div id="map-grid" style="display:grid;grid-template-columns:repeat(34,'+_mapCellPx+'px);grid-template-rows:repeat(34,'+_mapCellPx+'px);width:'+totalPx+'px;height:'+totalPx+'px;gap:0;position:absolute;inset:0;"></div>'+
+                '<div id="map-markers-layer" style="position:absolute;inset:0;pointer-events:none;width:'+totalPx+'px;height:'+totalPx+'px;"></div>'+
+            '</div>'+
+        '</div>'+
+        '<div style="margin-top:28px;">'+
+            '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><h3 style="font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin:0;">Маркеры на карте</h3><div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div></div>'+
+            '<div id="map-marker-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;"><div style="color:#444;font-size:12px;padding:16px 0;">Загрузка...</div></div>'+
+        '</div>'+
+        '</div>';
+    _mapLoad();
+    _mapInitViewport();
+}
+
+
+function _mapShowPopup(opts){
+    var ex=document.getElementById('map-popup');if(ex)ex.remove();
+    var color=opts.color||'#D4AF37';
+    var pop=document.createElement('div');pop.id='map-popup';
+    pop.style.cssText='position:fixed;z-index:11000;background:rgba(8,6,0,0.97);border:1px solid '+color+'55;border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.9);backdrop-filter:blur(20px);width:260px;animation:_popIn .18s cubic-bezier(.34,1.56,.64,1);';
+    var imgDiv=opts.image?'<div style="width:100%;height:120px;overflow:hidden;position:relative;"><img src="'+_mapEsc(opts.image)+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentNode.style.display=\'none\'"><div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(8,6,0,.8));"></div></div>':'';
+    var btnHtml=opts.buildId!==undefined?'<button id="map-popup-btn" style="width:100%;background:'+color+';color:#000;border:none;border-radius:8px;padding:8px;font-size:11px;font-weight:900;cursor:pointer;margin-top:10px;text-transform:uppercase;">Открыть постройку</button>':'';
+    pop.innerHTML='<div style="height:3px;background:linear-gradient(90deg,'+color+','+color+'00);"></div>'+imgDiv+'<div style="padding:14px 16px 16px;"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;"><div>'+(opts.subtitle?'<div style="font-size:9px;color:'+color+';font-weight:900;text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;">'+_mapEsc(opts.subtitle)+'</div>':'')+'<div style="font-size:14px;font-weight:900;color:#fff;line-height:1.3;">'+_mapEsc(opts.title||'')+'</div></div><button id="map-popup-close" style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#1a1a1a;border:1px solid #333;color:#666;cursor:pointer;font-size:11px;line-height:1;">x</button></div>'+(opts.desc?'<div style="font-size:11px;color:#888;line-height:1.5;margin-top:4px;">'+_mapEsc(opts.desc)+'</div>':'')+btnHtml+'</div>';
+    document.body.appendChild(pop);
+    var cb=document.getElementById('map-popup-close');if(cb)cb.onclick=function(){pop.remove();};
+    if(opts.buildId!==undefined){var ob=document.getElementById('map-popup-btn');if(ob)ob.onclick=function(){pop.remove();_mapOpenBuild(opts.buildId);};}
+    var pw=260,ph=pop.offsetHeight||220,lft=opts.x+16,top=opts.y-ph/2;
+    if(lft+pw>window.innerWidth-12)lft=opts.x-pw-16;
+    if(top<8)top=8;if(top+ph>window.innerHeight-8)top=window.innerHeight-ph-8;
+    pop.style.left=lft+'px';pop.style.top=top+'px';
+    setTimeout(function(){document.addEventListener('click',function _cp(ev){var p=document.getElementById('map-popup');if(p&&!p.contains(ev.target))p.remove();document.removeEventListener('click',_cp);});},50);
+}
+function _mapOpenBuild(id){
+    var idx=builds.findIndex(function(b){return b.id===String(id);});
+    if(idx>=0)openModal(idx);
+}
+function _mapFlyTo(px,py){
+    var vp=document.getElementById('map-viewport');if(!vp)return;
+    
+    var targetOffX=vp.offsetWidth/2-px*_mapScale;
+    var targetOffY=vp.offsetHeight/2-py*_mapScale;
+    var startX=_mapOffX,startY=_mapOffY,steps=20,step=0;
+    function animate(){
+        step++;
+        var t=step/steps;
+        t=t<0.5?2*t*t:(1-Math.pow(-2*t+2,2)/2); 
+        _mapOffX=startX+(targetOffX-startX)*t;
+        _mapOffY=startY+(targetOffY-startY)*t;
+        _mapApplyTransform();
+        if(step<steps)requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+}
+function _mapRenderMarkerList(){
+    var el=document.getElementById('map-marker-list');if(!el)return;
+    var items=[];
+    (_mapBuilds||[]).forEach(function(b){
+        var parsed=_mapParseCoords(b.coords);if(!parsed)return;
+        items.push({type:'build',id:b._key,label:b.title||'Постройка',color:'#D4AF37',subtitle:'',px:_mapWorldToPx(parsed.x,parsed.z)});
+    });
+    Object.keys(_mapMarkers||{}).forEach(function(id){
+        var m=_mapMarkers[id];if(!m||m.x===undefined)return;
+        items.push({type:'custom',id:id,label:m.label||'Маркер',color:m.color||'#60a5fa',subtitle:m.subtitle||'',px:_mapWorldToPx(m.x,m.z)});
+    });
+    if(!items.length){el.innerHTML='<div style="color:#444;font-size:12px;padding:16px 0;grid-column:1/-1;">Маркеров пока нет</div>';return;}
+    var custom=items.filter(function(i){return i.type==='custom';});
+    var blds=items.filter(function(i){return i.type==='build';});
+    var html='';
+    function appendGroup(container,arr,title,mt){
+        if(!arr.length)return;
+        var hdr=document.createElement('div');
+        hdr.style.cssText='font-size:9px;color:#555;font-weight:900;text-transform:uppercase;letter-spacing:.15em;margin:'+mt+'px 0 8px;grid-column:1/-1;';
+        hdr.textContent=title;
+        container.appendChild(hdr);
+        arr.forEach(function(item){
+            var div=document.createElement('div');
+            div.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:#111;border:1px solid #1f1f1f;cursor:pointer;transition:all .15s;';
+            div.innerHTML='<div style="width:12px;height:12px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:'+item.color+';box-shadow:0 0 6px '+item.color+'88;flex-shrink:0;"></div>'+
+                '<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_mapEsc(item.label)+'</div>'+(item.subtitle?'<div style="font-size:10px;color:#555;margin-top:1px;">'+_mapEsc(item.subtitle)+'</div>':'')+
+                '</div><div style="font-size:12px;color:#444;">&#x2192;</div>';
+            div.onmouseover=function(){this.style.borderColor=item.color+'55';this.style.background='#161616';};
+            div.onmouseout=function(){this.style.borderColor='#1f1f1f';this.style.background='#111';};
+            (function(it){
+                div.onclick=function(){
+                    _mapScale=Math.max(_mapScale,1.5);
+                    var vp=document.getElementById('map-viewport');
+                    if(vp)vp.scrollIntoView({behavior:'smooth',block:'nearest'});
+                    setTimeout(function(){ _mapFlyTo(it.px.x,it.px.y); },300);
+                };
+            })(item);
+            container.appendChild(div);
+        });
+    }
+    el.innerHTML='';
+    appendGroup(el,custom,'Точки интереса',0);
+    appendGroup(el,blds,'Постройки на карте',custom.length?14:0);
 }
 </script>
 </body>
