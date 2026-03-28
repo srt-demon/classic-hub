@@ -415,7 +415,7 @@ Development by slowdown
                 </div>
             </div>
             <div class="mt-12 pt-8 border-t border-white/5 text-[10px] text-gray-600 uppercase tracking-[0.3em] text-center">
-                © 2026 Classic HUB v1.5 | дизайн и разработка <a href="https://slowdown-portfolio.netlify.app" target="_blank" class="gold-accent hover:underline transition">slowdown</a>
+                © 2026 Classic HUB v1.6 | дизайн и разработка <a href="https://slowdown-portfolio.netlify.app" target="_blank" class="gold-accent hover:underline transition">slowdown</a>
             </div>
         </div>
     </footer>
@@ -573,7 +573,7 @@ Development by slowdown
                                     <div id="profile-fav-style" class="font-black gold-accent" style="font-size:11px;"></div>
                                 </div>
                                 <div class="px-3 py-2.5">
-                                    <div class="text-gray-600 uppercase tracking-widest mb-0.5" style="font-size:8px;">На сервере с</div>
+                                    <div class="text-gray-600 uppercase tracking-widest mb-0.5" style="font-size:8px;">На проекте с</div>
                                     <div id="profile-joined" class="font-black text-white" style="font-size:11px;"></div>
                                 </div>
                             </div>
@@ -1011,7 +1011,7 @@ Development by slowdown
 
                     <div>
                         <label class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1.5 block">Discord / Контакт для связи <span class="text-red-400">*</span></label>
-                        <input id="f-contact" type="text" placeholder="Например: username#0000 или @username в Telegram" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-[#D4AF37] transition placeholder-gray-600">
+                        <input id="f-contact" type="text" placeholder="Например: username или @username в Telegram" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-[#D4AF37] transition placeholder-gray-600">
                     </div>
 
                 </div>
@@ -1091,7 +1091,6 @@ function loadSeasonConfigFromDB() {
     window._fbOnValue(dbRef, snap => {
         if (snap.exists()) {
             applySeasonConfig(snap.val());
-            if (_dataLoaded) renderBuilds();
         }
     });
 }
@@ -1295,6 +1294,16 @@ function applySeasonConfig(raw) {
     if (tn) tn.innerText = SEASON_TREND_STYLE;
     const sn = document.getElementById('header-season-name');
     if (sn) sn.innerText = CURRENT_SEASON;
+
+    if (_dataLoaded) {
+        const activeTab = document.querySelector('.nav-tab.active');
+        const tabName = activeTab ? activeTab.innerText.trim() : '';
+        if (tabName === 'Архив') {
+            renderArchive();
+        } else if (!['Топ авторов','Информация','Достижения','Обновления','Магазин','Карта'].includes(tabName)) {
+            renderBuilds('Все', document.getElementById('search-input').value);
+        }
+    }
 }
 
 let _sessionViewedOthers = new Set();
@@ -1470,7 +1479,7 @@ const ACHIEVEMENTS = [
     { id: 'pioneer', tier: 'II', name: 'Первопроходец', desc: 'Опубликовать объект в первую неделю сезона', exp: 200, check: (a, ab) => { const start = new Date(CURRENT_SEASON_START); return ab.some(b => { if (b.season !== CURRENT_SEASON) return false; const diff = (new Date(b.date) - start) / 86400000; return diff >= 0 && diff <= 7; }); } },
     { id: 'season_hero', tier: 'II', name: 'Герой сезона', desc: 'Опубликовать 5 разных объектов в текущем сезоне', exp: 400, check: (a, ab) => ab.filter(b => b.season === CURRENT_SEASON).length >= 5 },
     { id: 'popular_warp', tier: 'II', name: 'Популярный постройка', desc: 'Набрать 200 просмотров на одном объекте текущего сезона', exp: 250, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && getViews(b.id) >= 200) },
-    { id: 'season_style', tier: 'II', name: 'Стиль сезона', desc: `Построить объект в стиле-тренде сезона, сейчас это - (${SEASON_TREND_STYLE})`, exp: 150, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && b.style === SEASON_TREND_STYLE) },
+    { id: 'season_style', tier: 'II', name: 'Стиль сезона', get desc() { return `Построить объект в стиле-тренде сезона, сейчас это — (${SEASON_TREND_STYLE})`; }, exp: 150, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && b.style === SEASON_TREND_STYLE) },
     { id: 'season_closing', tier: 'II', name: 'Закрытие сезона', desc: 'Опубликовать объект за неделю до планируемого вайпа', exp: 200, check: (a, ab) => { const end = new Date(CURRENT_SEASON_END); return ab.some(b => { if (b.season !== CURRENT_SEASON) return false; const diff = (end - new Date(b.date)) / 86400000; return diff >= 0 && diff <= 7; }); } },
     { id: 'active_viewer', tier: 'II', name: 'Активный зритель', desc: 'Открыть 20 чужих работ текущего сезона за одну сессию', exp: 50, check: (a, ab) => _sessionViewedOthers.size >= 20 },
     { id: 'season_collector', tier: 'II', name: 'Коллекционер сезонов', desc: 'Иметь постройки в 3 и более разных сезонах', exp: 500, check: (a, ab) => new Set(ab.map(b => b.season)).size >= 3 },
@@ -2762,7 +2771,7 @@ function renderAchievements(filterTier, searchStr) {
         const imgSrc   = ACH_ICONS[ach.id] || 'https://placehold.co/64x64/252525/555?text=?';
         const matchSearch = !searchStr
             || (isHidden ? false : ach.name.toLowerCase().includes(searchStr))
-            || (isHidden ? false : ach.desc.toLowerCase().includes(searchStr));
+            || (isHidden ? false : (ach.desc || '').toLowerCase().includes(searchStr));
         if (!matchSearch && searchStr) return '';
         
         const allAuthN = [...new Set(builds.flatMap(b => getBuildAuthors(b)))];
@@ -2788,7 +2797,7 @@ function renderAchievements(filterTier, searchStr) {
                     ${isHidden ? '<span class="text-[9px] text-amber-500 flex-shrink-0">🔒</span>' : ''}
                 </div>
                 <p class="text-[10px] text-gray-500 leading-snug mb-2">
-                    ${isHidden ? 'Скрытое достижение - разгадай условие самостоятельно.' : ach.desc}
+                    ${isHidden ? 'Скрытое достижение - разгадай условие самостоятельно.' : (ach.desc || '')}
                 </p>
                 <div class="flex items-center gap-2 flex-wrap">
                     <span class="text-[9px] font-black px-2 py-0.5 rounded inline-block"
@@ -6234,6 +6243,7 @@ function renderArchive() {
 }
 
 function startApp() {
+    loadSeasonConfigFromDB();
     loadAuthorProfilesFromDB();
     loadBuildsFromDB();
     loadCustomAchievementsFromDB();
@@ -6790,7 +6800,7 @@ if (window._fbReady) {
 
 <div id="disc-overlay">
   <div id="disc-modal">
-    <div class="disc-badge">Beta v1.5</div>
+    <div class="disc-badge">Beta v1.6</div>
     <h2>Добро пожаловать в Classic HUB</h2>
     <p class="disc-sub">Пожалуйста, ознакомьтесь перед использованием сайта</p>
 
@@ -7876,11 +7886,175 @@ function _mapLoad() {
     if (!grid) return;
     var get=window._fbGet?function(p){return window._fbGet(window._fbRef(window._fbDb,p)).then(function(s){return s.exists()?s.val():null;}).catch(function(){return null;});}:function(){return Promise.resolve(null);};
     Promise.all([get('config/mapTiles'),get('config/mapMarkers'),get('config/mapConfig'),get('builds')]).then(function(res){
-        _mapTiles=res[0]||{};_mapMarkers=res[1]||{};window._mapConfig=res[2]||{};
-        var raw=res[3]||{};_mapBuilds=[];
-        Object.keys(raw).forEach(function(k){var b=raw[k];if(b&&b.coords)_mapBuilds.push({id:k,_key:k,title:b.title||'',coords:b.coords,desc:b.desc||'',images:b.images||[]});});
-        _mapRenderCells(grid);_mapRenderMarkers();_mapRenderMarkerList();
+        _mapTiles=res[0]||{};
+        _mapMarkers=res[1]||{};
+        window._mapConfig=res[2]||{};
+        var raw=res[3]||{};
+        _mapBuilds=[];
+        
+        Object.keys(raw).forEach(function(k){
+            var b=raw[k];
+            if(b&&b.coords&&b.season===CURRENT_SEASON)
+                _mapBuilds.push({id:k,_key:k,title:b.title||'',coords:b.coords,desc:b.desc||'',images:b.images||[]});
+        });
+        
+        var forceStub = !!(window._mapConfig && window._mapConfig.showStub);
+        var hasTiles  = Object.keys(_mapTiles).length > 0;
+        if (forceStub || !hasTiles) {
+            _mapShowStub();
+        } else {
+            _mapHideStub();
+            _mapRenderCells(grid);
+            _mapRenderMarkers();
+            _mapRenderMarkerList();
+        }
     });
+}
+
+function _mapShowStub() {
+    var vp = document.getElementById('map-viewport');
+    if (vp) vp.style.display = 'none';
+    var markerList = document.getElementById('map-marker-list');
+    if (markerList) markerList.innerHTML = '<div style="color:#444;font-size:12px;padding:8px 0;">Нет маркеров.</div>';
+
+    
+    var get=window._fbGet?function(p){return window._fbGet(window._fbRef(window._fbDb,p)).then(function(s){return s.exists()?s.val():null;}).catch(function(){return null;});}:function(){return Promise.resolve(null);};
+    get('config/mapArchive').then(function(archiveData) {
+        var lastScreenshot = '';
+        var lastLabel = '';
+        if (archiveData) {
+            
+            var entries = Object.values(archiveData);
+            entries.sort(function(a, b) { return (b.archivedAt || 0) - (a.archivedAt || 0); });
+            if (entries[0] && entries[0].screenshot) {
+                lastScreenshot = entries[0].screenshot;
+                lastLabel = entries[0].label || entries[0].season || '';
+            }
+        }
+
+        var stub = document.getElementById('map-stub');
+        if (!stub) {
+            stub = document.createElement('div');
+            stub.id = 'map-stub';
+            stub.style.cssText = 'border-radius:16px;border:1px solid rgba(255,255,255,0.07);background:#0a0a0a;min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;margin-bottom:28px;overflow:hidden;position:relative;';
+            var vp2 = document.getElementById('map-viewport');
+            if (vp2) vp2.parentNode.insertBefore(stub, vp2);
+        }
+        stub.style.display = 'flex';
+
+        if (lastScreenshot) {
+            stub.innerHTML =
+                '<div style="position:absolute;inset:0;background:url(' + lastScreenshot.replace(/'/g,'%27') + ') center/cover no-repeat;filter:blur(2px) brightness(0.28);"></div>'
+                + '<div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;">'
+                + '<div style="font-size:36px;">🗺</div>'
+                + '<div style="font-size:14px;font-weight:900;color:#fff;text-transform:uppercase;">Карта нового сезона в процессе заполнения</div>'
+                + '<div style="font-size:11px;color:#aaa;max-width:300px;line-height:1.7;">Тайлы загружаются.Загляни позже - карта появится здесь.</div>'
+                + (lastLabel ? '<div style="font-size:10px;color:#D4AF37;font-weight:700;margin-top:4px;background:rgba(0,0,0,0.5);padding:3px 10px;border-radius:20px;border:1px solid rgba(212,175,55,0.3);">← последний архив: ' + lastLabel + '</div>' : '')
+                + '</div>';
+        } else {
+            stub.innerHTML =
+                '<div style="font-size:40px;">🗺</div>'
+                + '<div style="font-size:14px;font-weight:900;color:#fff;text-transform:uppercase;">Карта в процессе заполнения</div>'
+                + '<div style="font-size:11px;color:#555;text-align:center;max-width:280px;line-height:1.7;">Тайлы нового сезона ещё загружаются. <br>Загляни позже - карта появится здесь.</div>';
+        }
+    });
+}
+
+function _mapHideStub() {
+    var stub = document.getElementById('map-stub');
+    if (stub) stub.style.display = 'none';
+    var vp = document.getElementById('map-viewport');
+    if (vp) vp.style.display = '';
+}
+
+
+function _mapLoadArchive(archiveKey, seasonName) {
+    var grid = document.getElementById('map-grid');
+    if (!grid) return;
+    var get=window._fbGet?function(p){return window._fbGet(window._fbRef(window._fbDb,p)).then(function(s){return s.exists()?s.val():null;}).catch(function(){return null;});}:function(){return Promise.resolve(null);};
+    get('config/mapArchive/' + archiveKey).then(function(data) {
+        if (!data) return;
+        _mapTiles   = data.tiles   || {};
+        
+        _mapMarkers = data.markers || {};
+        
+        var raw = builds || [];
+        _mapBuilds = [];
+        raw.forEach(function(b) {
+            if (b && b.coords && b.season === seasonName)
+                _mapBuilds.push({id:b.id,_key:b.id,title:b.title||'',coords:b.coords,desc:b.desc||'',images:b.images||[]});
+        });
+        var hasTiles = Object.keys(_mapTiles).length > 0;
+        if (!hasTiles) {
+            _mapShowStub();
+        } else {
+            _mapHideStub();
+            _mapRenderCells(grid);
+            _mapRenderMarkers();
+            _mapRenderMarkerList();
+        }
+    });
+}
+
+
+function _mapLoadSeasonSwitcher() {
+    var btnsEl = document.getElementById('map-season-btns');
+    if (!btnsEl) return;
+    var get=window._fbGet?function(p){return window._fbGet(window._fbRef(window._fbDb,p)).then(function(s){return s.exists()?s.val():null;}).catch(function(){return null;});}:function(){return Promise.resolve(null);};
+    get('config/mapArchive').then(function(archiveData) {
+        var seasons = [];
+        
+        seasons.push({ key: '__current__', label: CURRENT_SEASON || 'Текущий', season: CURRENT_SEASON, current: true });
+        
+        if (archiveData) {
+            Object.keys(archiveData).sort().reverse().forEach(function(k) {
+                var a = archiveData[k];
+                seasons.push({ key: k, label: a.label || a.season || k, season: a.season || k, current: false });
+            });
+        }
+
+        if (seasons.length <= 1) {
+            
+            var sw = document.getElementById('map-season-switcher');
+            if (sw) sw.style.display = 'none';
+            return;
+        }
+
+        btnsEl.innerHTML = seasons.map(function(s, i) {
+            var isActive = i === 0;
+            var base = 'font-size:11px;font-weight:900;padding:6px 14px;border-radius:20px;cursor:pointer;border:1px solid;transition:all .15s;white-space:nowrap;';
+            var style = isActive
+                ? base + 'background:#D4AF3720;color:#D4AF37;border-color:#D4AF3760;'
+                : base + 'background:transparent;color:#555;border-color:#222;';
+            
+            var lbl = s.current ? ('★ ' + s.label) : s.label;
+            return '<button id="map-sbtn-' + i + '" style="' + style + '" onclick="_mapSwitchSeason(' + i + ',\'' + s.key + '\',\'' + s.label.replace(/'/g,"\\'") + '\',\'' + s.season.replace(/'/g,"\\'") + '\',' + s.current + ',' + seasons.length + ')">' + lbl + '</button>';
+        }).join('');
+    });
+}
+
+function _mapSwitchSeason(idx, key, label, season, isCurrent, total) {
+    
+    for (var i = 0; i < total; i++) {
+        var btn = document.getElementById('map-sbtn-' + i);
+        if (!btn) continue;
+        var active = i === idx;
+        btn.style.background  = active ? '#D4AF3720' : 'transparent';
+        btn.style.color       = active ? '#D4AF37'   : '#555';
+        btn.style.borderColor = active ? '#D4AF3760' : '#222';
+    }
+    
+    var banner = document.getElementById('map-archive-banner');
+    var bannerText = document.getElementById('map-archive-banner-text');
+    if (banner) banner.style.display = isCurrent ? 'none' : 'flex';
+    if (bannerText && !isCurrent) bannerText.textContent = '🗂 Архивная карта: ' + label + ' - только для просмотра';
+    
+    _mapResetView();
+    if (isCurrent) {
+        _mapLoad();
+    } else {
+        _mapLoadArchive(key, season);
+    }
 }
 
 
@@ -8169,6 +8343,18 @@ function renderMap(){
             '</div>'+
         '</div>'+
     '</div>'+
+    
+    '<div id="map-season-switcher" style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'+
+        '<span style="font-size:10px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.12em;flex-shrink:0;">Сезон карты:</span>'+
+        '<div id="map-season-btns" style="display:flex;gap:6px;flex-wrap:wrap;">'+
+            '<div style="font-size:11px;color:#444;">Загрузка...</div>'+
+        '</div>'+
+    '</div>'+
+    
+    '<div id="map-archive-banner" style="display:none;margin-bottom:12px;padding:10px 16px;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:10px;display:flex;align-items:center;gap:10px;">'+
+        '<span style="font-size:16px;">🗂</span>'+
+        '<div style="font-size:11px;color:#D4AF37;font-weight:700;" id="map-archive-banner-text">Архивная карта — только для просмотра</div>'+
+    '</div>'+
 '<div id="map-coord-tip" style="position:fixed;z-index:9999;pointer-events:none;display:none;background:rgba(10,8,0,0.92);border:1px solid rgba(212,175,55,0.25);border-radius:10px;padding:7px 13px;font-size:11px;font-weight:700;color:#D4AF37;backdrop-filter:blur(12px);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.7);"></div>'+
         '<div id="map-marker-tip" style="position:fixed;z-index:10000;pointer-events:none;display:none;background:rgba(10,8,0,0.96);border:1px solid rgba(212,175,55,0.4);border-radius:12px;padding:10px 14px;font-size:11px;color:#fff;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,0.8);max-width:220px;"></div>'+
         '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">'+
@@ -8189,6 +8375,7 @@ function renderMap(){
         '</div>';
     _mapLoad();
     _mapInitViewport();
+    _mapLoadSeasonSwitcher();
 }
 
 
