@@ -290,6 +290,9 @@ Development by slowdown
         }
 
         @keyframes _popIn{from{opacity:0;transform:scale(.88) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}} @keyframes _popInUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+        @keyframes _siPanelIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+        .style-skill-btn:hover { border-color: rgba(212,175,55,0.25) !important; background: rgba(212,175,55,0.04) !important; }
+        .style-skill-btn.active { border-color: rgba(212,175,55,0.5) !important; background: rgba(212,175,55,0.07) !important; box-shadow: 0 0 14px rgba(212,175,55,0.12); }
     </style>
 </head>
 <body>
@@ -415,7 +418,7 @@ Development by slowdown
                 </div>
             </div>
             <div class="mt-12 pt-8 border-t border-white/5 text-[10px] text-gray-600 uppercase tracking-[0.3em] text-center">
-                © 2026 Classic HUB v1.7 | дизайн и разработка <a href="https://slowdown-portfolio.netlify.app" target="_blank" class="gold-accent hover:underline transition">slowdown</a>
+                © 2026 Classic HUB v1.8 | дизайн и разработка <a href="https://slowdown-portfolio.netlify.app" target="_blank" class="gold-accent hover:underline transition">slowdown</a>
             </div>
         </div>
     </footer>
@@ -466,12 +469,12 @@ Development by slowdown
 
                     <div class="flex justify-between items-center py-2 text-[9px]">
                         <span class="text-gray-400 uppercase">Координаты</span>
-                        <span id="modal-coords" class="font-black gold-accent tracking-widest uppercase">—</span>
+                        <span id="modal-coords" class="font-black gold-accent tracking-widest uppercase">-</span>
                     </div>
 
                    <div class="flex justify-between items-center text-[9px]">
                         <span class="text-gray-400 uppercase">Просмотры</span>
-                        <span id="modal-views" class="text-white font-bold">—</span>
+                        <span id="modal-views" class="text-white font-bold">-</span>
                     </div> 
                 </div>
 
@@ -517,7 +520,7 @@ Development by slowdown
                     <div id="profile-prime-row" style="display:none;margin-bottom:10px;">
                         <span id="profile-prime-badge" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;padding:3px 10px;border-radius:20px;background:linear-gradient(90deg,rgba(212,175,55,0.18),rgba(212,175,55,0.06));border:1px solid rgba(212,175,55,0.35);color:#D4AF37;letter-spacing:.05em;cursor:default;position:relative;"
                             onmouseenter="_showPrimeTip(this)" onmouseleave="_hidePrimeTip()">
-                            ✦ PRIME — <span id="profile-prime-since"></span>
+                            ✦ PRIME - <span id="profile-prime-since"></span>
                         </span>
                         <span id="profile-prime-count" style="margin-left:8px;font-size:9px;color:#555;font-weight:700;"></span>
                     </div>
@@ -550,11 +553,11 @@ Development by slowdown
                         <div class="text-gray-600 uppercase tracking-widest mt-0.5" style="font-size:8px;">В топе</div>
                     </div>
                     <div class="rounded-xl p-3 border text-center" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);">
-                        <div id="profile-views" class="font-black text-blue-300" style="font-size:1.3rem;">—</div>
+                        <div id="profile-views" class="font-black text-blue-300" style="font-size:1.3rem;">-</div>
                         <div class="text-gray-600 uppercase tracking-widest mt-0.5" style="font-size:8px;">Просмотров</div>
                     </div>
                     <div class="rounded-xl p-3 border text-center" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);">
-                        <div id="profile-ach-count" class="font-black text-purple-300" style="font-size:1.3rem;">—</div>
+                        <div id="profile-ach-count" class="font-black text-purple-300" style="font-size:1.3rem;">-</div>
                         <div class="text-gray-600 uppercase tracking-widest mt-0.5" style="font-size:8px;">Ачивок</div>
                     </div>
                 </div>
@@ -975,14 +978,14 @@ Development by slowdown
                         <label class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1.5 block">Стиль постройки <span class="text-red-400">*</span></label>
                         <select id="f-style" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-[#D4AF37] transition text-white cursor-pointer">
                             <option value="" disabled selected>Выбери стиль...</option>
-                            <option value="GOTHIC">⛪ Gothic — Готика</option>
-                            <option value="MODERN">🏙 Modern — Современный</option>
-                            <option value="MEDIEVAL">🏰 Medieval — Средневековье</option>
-                            <option value="FANTASY">🧙 Fantasy — Фэнтези</option>
-                            <option value="JAPANESE">⛩ Japanese — Японский</option>
-                            <option value="STEAMPUNK">⚙️ Steampunk — Стимпанк</option>
-                            <option value="CITY">🏘 City — Город</option>
-                            <option value="SETTLEMENT">🌿 Settlement — Поселение</option>
+                            <option value="GOTHIC">⛪ Gothic - Готика</option>
+                            <option value="MODERN">🏙 Modern - Современный</option>
+                            <option value="MEDIEVAL">🏰 Medieval - Средневековье</option>
+                            <option value="FANTASY">🧙 Fantasy - Фэнтези</option>
+                            <option value="JAPANESE">⛩ Japanese - Японский</option>
+                            <option value="STEAMPUNK">⚙️ Steampunk - Стимпанк</option>
+                            <option value="CITY">🏘 City - Город</option>
+                            <option value="SETTLEMENT">🌿 Settlement - Поселение</option>
                         </select>
                          <p class="text-[10px] text-gray-600 mt-1.5">Подробнее о стилях можно прочитать в разделе "Информация"</p>
                     </div>
@@ -1395,7 +1398,7 @@ const SKILL_THRESHOLDS = [0, 1, 3, 6, 10, 15];
 
 const SKILL_EXP_BONUS = { 0: 0, 1: 100, 2: 200, 3: 350, 4: 500, 5: 750 };
 
-const SKILL_LEVEL_NAMES = ['—', 'Ученик', 'Ремесленник', 'Мастер', 'Гроссмейстер', 'Легенда'];
+const SKILL_LEVEL_NAMES = ['-', 'Ученик', 'Ремесленник', 'Мастер', 'Гроссмейстер', 'Легенда'];
 
 function getAuthorSkills(authorName) {
     const ab = builds.filter(b => getBuildAuthors(b).includes(authorName));
@@ -1479,7 +1482,7 @@ const ACHIEVEMENTS = [
     { id: 'pioneer', tier: 'II', name: 'Первопроходец', desc: 'Опубликовать объект в первую неделю сезона', exp: 200, check: (a, ab) => { const start = new Date(CURRENT_SEASON_START); return ab.some(b => { if (b.season !== CURRENT_SEASON) return false; const diff = (new Date(b.date) - start) / 86400000; return diff >= 0 && diff <= 7; }); } },
     { id: 'season_hero', tier: 'II', name: 'Герой сезона', desc: 'Опубликовать 5 разных объектов в текущем сезоне', exp: 400, check: (a, ab) => ab.filter(b => b.season === CURRENT_SEASON).length >= 5 },
     { id: 'popular_warp', tier: 'II', name: 'Популярный постройка', desc: 'Набрать 200 просмотров на одном объекте текущего сезона', exp: 250, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && getViews(b.id) >= 200) },
-    { id: 'season_style', tier: 'II', name: 'Стиль сезона', get desc() { return `Построить объект в стиле-тренде сезона, сейчас это — (${SEASON_TREND_STYLE})`; }, exp: 150, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && b.style === SEASON_TREND_STYLE) },
+    { id: 'season_style', tier: 'II', name: 'Стиль сезона', get desc() { return `Построить объект в стиле-тренде сезона, сейчас это - (${SEASON_TREND_STYLE})`; }, exp: 150, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && b.style === SEASON_TREND_STYLE) },
     { id: 'season_closing', tier: 'II', name: 'Закрытие сезона', desc: 'Опубликовать объект за неделю до планируемого вайпа', exp: 200, check: (a, ab) => { const end = new Date(CURRENT_SEASON_END); return ab.some(b => { if (b.season !== CURRENT_SEASON) return false; const diff = (end - new Date(b.date)) / 86400000; return diff >= 0 && diff <= 7; }); } },
     { id: 'active_viewer', tier: 'II', name: 'Активный зритель', desc: 'Открыть 20 чужих работ текущего сезона за одну сессию', exp: 50, check: (a, ab) => _sessionViewedOthers.size >= 20 },
     { id: 'season_collector', tier: 'II', name: 'Коллекционер сезонов', desc: 'Иметь постройки в 3 и более разных сезонах', exp: 500, check: (a, ab) => new Set(ab.map(b => b.season)).size >= 3 },
@@ -1568,7 +1571,7 @@ function getRankProgress(authorName) {
     for (const r of RANKS) { if (exp >= r.minExp) rank = r; }
     const idx = RANKS.indexOf(rank);
     const nextRank = RANKS[idx + 1] || null;
-    if (!nextRank) return { pct: 100, label: `${exp} EXP — Легенда (Макс.)`, color: '#D4AF37', exp };
+    if (!nextRank) return { pct: 100, label: `${exp} EXP - Легенда (Макс.)`, color: '#D4AF37', exp };
     const pct = ((exp - rank.minExp) / (nextRank.minExp - rank.minExp)) * 100;
     return { pct, label: `${exp} / ${nextRank.minExp} EXP до ${nextRank.name}`, color: '#D4AF37', exp };
 }
@@ -1653,7 +1656,7 @@ function openModal(index) {
     document.getElementById('modal-desc').innerText   = item.desc;
     document.getElementById('modal-season').innerText = item.season;
     document.getElementById('modal-style').innerText  = item.style;
-    document.getElementById('modal-coords').innerText = item.coords || '—';
+    document.getElementById('modal-coords').innerText = item.coords || '-';
 
     const authors = getBuildAuthors(item);
     const authorsList = document.getElementById('modal-authors-list');
@@ -1731,7 +1734,7 @@ function openAuthorProfile(nameOverride) {
     const rankData    = getAuthorRank(authorName);
     const progress    = getRankProgress(authorName);
     const authorBuilds = builds.filter(b => getBuildAuthors(b).includes(authorName));
-    const profile     = authorProfiles[authorName] || { joined: '—' };
+    const profile     = authorProfiles[authorName] || { joined: '-' };
     const unlockedAch = getAuthorAchievements(authorName);
 
     const allAuthorNames = [...new Set(builds.flatMap(b => getBuildAuthors(b)))];
@@ -1743,11 +1746,11 @@ function openAuthorProfile(nameOverride) {
     authorBuilds.forEach(b => {
         getBuildStyles(b).forEach(s => { styleCount[s] = (styleCount[s] || 0) + 1; });
     });
-    const favStyle = Object.entries(styleCount).sort((a,b) => b[1]-a[1])[0]?.[0] || '—';
+    const favStyle = Object.entries(styleCount).sort((a,b) => b[1]-a[1])[0]?.[0] || '-';
 
-    const joinedFormatted = profile.joined && profile.joined !== '—'
+    const joinedFormatted = profile.joined && profile.joined !== '-'
         ? new Date(profile.joined).toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' })
-        : '—';
+        : '-';
 
     const totalViews = authorBuilds.reduce((s, b) => s + getViews(b.id), 0);
 
@@ -2692,7 +2695,7 @@ function _renderTopAuthorsList(filtered, authorsData) {
             const topSkills = Object.entries(skills).filter(([,s])=>s.level>0).sort((a,b)=>b[1].level-a[1].level).slice(0,3);
             const skillBadges = topSkills.map(([style, s]) => {
                 const sc = STYLE_COLORS_MAP[style] || '#D4AF37';
-                return `<span style="font-size:8px;font-weight:900;padding:1px 6px;border-radius:10px;background:${sc}18;color:${sc};border:1px solid ${sc}33;" title="${style} — Уровень ${s.level}">${SKILL_NAMES[style]||style} ${s.level}★</span>`;
+                return `<span style="font-size:8px;font-weight:900;padding:1px 6px;border-radius:10px;background:${sc}18;color:${sc};border:1px solid ${sc}33;" title="${style} - Уровень ${s.level}">${SKILL_NAMES[style]||style} ${s.level}★</span>`;
             }).join('');
 
             inner += `<div class="rounded-2xl border overflow-hidden transition-all hover:border-[#D4AF37]/25" style="${cardStyle};border:1px solid rgba(255,255,255,0.05);">
@@ -3204,7 +3207,7 @@ function renderInfo() {
                     '</div>' +
                     '<span class="rank-badge rank-demiurg self-start mb-1.5 filter blur-sm select-none" style="margin-left:0;font-size:8px;padding:2px 10px;">⬛ ???</span>' +
                     '<div class="text-[10px] text-white font-bold filter blur-sm">??? EXP</div>' +
-                    '<div class="text-[9px] text-gray-500 filter blur-sm">— скрытый порог</div>' +
+                    '<div class="text-[9px] text-gray-500 filter blur-sm">- скрытый порог</div>' +
                     '<div class="text-[9px] text-gray-600 mt-1 filter blur-sm">→ ???</div>' +
                 '</div>';
             }
@@ -3218,14 +3221,74 @@ function renderInfo() {
     '</div>';
 
     var STYLE_DEFS = [
-        {icon:'⛪', en:'Gothic',     ru:'Готика',        desc:'Замки, соборы, шпили'},
-        {icon:'🏙', en:'Modern',     ru:'Современный',   desc:'Стекло, бетон, минимализм'},
-        {icon:'🏰', en:'Medieval',   ru:'Средневековье', desc:'Крепости, таверны, брусчатка'},
-        {icon:'🧙', en:'Fantasy',    ru:'Фэнтези',       desc:'Магия, парящие острова'},
-        {icon:'⛩', en:'Japanese',   ru:'Японский',      desc:'Пагоды, тории, сады'},
-        {icon:'⚙️', en:'Steampunk',  ru:'Стимпанк',      desc:'Медь, шестерёнки, пар'},
-        {icon:'🏘', en:'City',       ru:'Город',         desc:'Кварталы, улицы, районы'},
-        {icon:'🌿', en:'Settlement', ru:'Поселение',     desc:'Деревни, фермы, общины'},
+        {
+            icon:'⛪', en:'Gothic', ru:'Готика',
+            desc:'Замки, соборы, шпили',
+            full:'Готический стиль - это монументальные сооружения с заострёнными шпилями, тёмным камнем и витражными окнами. Крепости, церкви, мрачные замки с башнями и подземельями. Характерны вертикальные линии, арочные проёмы и атмосфера таинственности.',
+            tags:['Тёмный камень','Шпили','Арки','Башни'],
+            color:'#9b59b6',
+            examples:[
+                '',
+            ]
+        },
+        {
+            icon:'🏙', en:'Modern', ru:'Современный',
+            desc:'Стекло, бетон, минимализм',
+            full:'Современный стиль вдохновлён реальной городской архитектурой XXI века. Стекло и бетон, чистые линии, открытые планировки. Небоскрёбы, офисные здания, жилые комплексы с большими окнами и минималистичным декором.',
+            tags:['Стекло','Бетон','Минимализм','Небоскрёбы'],
+            color:'#60a5fa',
+            examples:[
+                ''
+            ]
+        },
+        {
+            icon:'🏰', en:'Medieval', ru:'Средневековье',
+            desc:'Крепости, таверны, брусчатка',
+            full:'Средневековый стиль - это эпоха рыцарей и магии. Каменные крепости с бойницами, брусчатые улочки, таверны, рынки и деревянные мосты. Использование камня, дерева, соломы. Атмосфера средневековых европейских городов.',
+            tags:['Крепости','Брусчатка','Таверны','Рыцари'],
+            color:'#d97706',
+            examples:[]
+        },
+        {
+            icon:'🧙', en:'Fantasy', ru:'Фэнтези',
+            desc:'Магия, парящие острова',
+            full:'Фэнтезийный стиль выходит за рамки реального мира. Парящие острова, кристаллические башни, порталы, магические леса и руины древних цивилизаций. Приветствуется всё невозможное: нестандартные формы, светящиеся блоки, сказочные пейзажи.',
+            tags:['Парящие острова','Магия','Кристаллы','Руины'],
+            color:'#a78bfa',
+            examples:[]
+        },
+        {
+            icon:'⛩', en:'Japanese', ru:'Японский',
+            desc:'Пагоды, тории, сады',
+            full:'Японский стиль воспроизводит архитектуру и эстетику традиционной Японии. Многоярусные пагоды, красные тории, сады камней и воды, чайные домики. Характерны изогнутые крыши, симметрия и гармония с природой.',
+            tags:['Пагоды','Тории','Сады','Симметрия'],
+            color:'#f87171',
+            examples:[]
+        },
+        {
+            icon:'⚙️', en:'Steampunk', ru:'Стимпанк',
+            desc:'Медь, шестерёнки, пар',
+            full:'Стимпанк - это альтернативная викторианская эпоха с паровыми машинами вместо электричества. Медные трубы, огромные шестерёнки, дирижабли, заводские цеха с паровыми котлами. Смесь ретро-эстетики и фантастических механизмов.',
+            tags:['Медь','Шестерёнки','Дирижабли','Пар'],
+            color:'#fb923c',
+            examples:[]
+        },
+        {
+            icon:'🏘', en:'City', ru:'Город',
+            desc:'Кварталы, улицы, районы',
+            full:'Городской стиль предполагает создание масштабных городских пространств: жилые кварталы, торговые улицы, площади, транспортные развязки. Акцент на деталях — вывески, скамейки, фонари, тротуары. Полноценный город в миниатюре.',
+            tags:['Кварталы','Улицы','Площади','Детали'],
+            color:'#34d399',
+            examples:[]
+        },
+        {
+            icon:'🌿', en:'Settlement', ru:'Поселение',
+            desc:'Деревни, фермы, общины',
+            full:'Стиль поселения - это уютные деревушки, фермерские угодья и небольшие общины вдали от цивилизации. Деревянные домики, огороды, амбары, мельницы и колодцы. Органичное вписывание в природный ландшафт - леса, реки, холмы.',
+            tags:['Деревни','Фермы','Природа','Уют'],
+            color:'#86efac',
+            examples:[]
+        },
     ];
     function _styleIcon(en, emoji, size) {
         var url = (styleIcons || {})[en] || '';
@@ -3338,7 +3401,7 @@ function renderInfo() {
             '<div class="p-6 border-b border-white/5">' +
                 '<div class="text-[9px] gold-accent font-black tracking-[0.25em] uppercase mb-1">Прогресс автора</div>' +
                 '<h3 class="text-base font-black uppercase mb-1">Система навыков</h3>' +
-                '<p class="text-gray-500 text-[10px]">Публикуй постройки в одном стиле — прокачивай мастерство и получай бонус EXP к каждой новой постройке этого стиля.</p>' +
+                '<p class="text-gray-500 text-[10px]">Публикуй постройки в одном стиле - прокачивай мастерство и получай бонус EXP к каждой новой постройке этого стиля.</p>' +
             '</div>' +
             '<div class="grid grid-cols-1 md:grid-cols-2 gap-0 divide-y md:divide-y-0 md:divide-x divide-white/5">' +
 
@@ -3361,18 +3424,38 @@ function renderInfo() {
                 '</div>' +
             '</div>' +
 
-            '<div class="p-6">' +
+            '<div class="p-6" id="styles-leveling-panel">' +
                 '<div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">Стили для прокачки</div>' +
-                '<div class="grid grid-cols-4 gap-2">' +
-                    STYLE_DEFS.map(function(s) {
-                        return '<div class="bg-black/30 rounded-xl p-2.5 border border-white/5 text-center hover:border-yellow-500/30 transition cursor-default">' +
-                            '<div style="margin-bottom:3px;display:flex;justify-content:center">' + _skillIcon(s.en, s.icon, 20) + '</div>' +
-                            '<div class="text-[8px] font-black text-white uppercase">' + s.en + '</div>' +
-                            '<div class="text-[7px] text-gray-500">' + s.ru + '</div>' +
-                        '</div>';
-                    }).join('') +
+                '<div style="display:flex;gap:12px;align-items:flex-start;">' +
+                    // сетка стилей
+                    '<div class="grid grid-cols-4 gap-2" style="flex-shrink:0;" id="styles-grid">' +
+                        STYLE_DEFS.map(function(s, idx) {
+                            return '<div class="style-skill-btn bg-black/30 rounded-xl p-2.5 border border-white/5 text-center transition-all duration-200 cursor-pointer" style="border-color:rgba(255,255,255,0.05)" data-style-idx="' + idx + '">' +
+                                '<div style="margin-bottom:3px;display:flex;justify-content:center">' + _skillIcon(s.en, s.icon, 20) + '</div>' +
+                                '<div class="text-[8px] font-black text-white uppercase">' + s.en + '</div>' +
+                                '<div class="text-[7px] text-gray-500">' + s.ru + '</div>' +
+                            '</div>';
+                        }).join('') +
+                    '</div>' +
+                    // панель детальной информации
+                    '<div id="style-info-panel" style="flex:1;min-width:0;display:none;animation:_siPanelIn .18s cubic-bezier(.34,1.56,.64,1);">' +
+                        '<div style="background:#0a0a0a;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;">' +
+                            '<div id="sip-accent-bar" style="height:2px;background:linear-gradient(90deg,#D4AF37,transparent);"></div>' +
+                            '<div style="padding:12px 14px;">' +
+                                '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">' +
+                                    '<div id="sip-icon" style="width:36px;height:36px;border-radius:10px;background:#111;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;"></div>' +
+                                    '<div style="flex:1;min-width:0;">' +
+                                        '<div id="sip-en" style="font-size:13px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.05em;line-height:1;"></div>' +
+                                        '<div id="sip-ru" style="font-size:10px;font-weight:700;color:#D4AF37;margin-top:2px;"></div>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<p id="sip-desc" style="font-size:10px;color:#aaa;line-height:1.6;margin-bottom:10px;"></p>' +
+                                '<div id="sip-tags" style="display:flex;flex-wrap:wrap;gap:4px;"></div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
                 '</div>' +
-                '<p class="text-gray-600 text-[9px] mt-3 leading-relaxed">Навыки прокачиваются автоматически - просто публикуй постройки в любимом стиле. Бонус суммируется к базовым 500 EXP за постройку. Максимальный уровень — Легенда (15+ построек одного стиля).</p>' +
+                '<p class="text-gray-600 text-[9px] mt-3 leading-relaxed">Навыки прокачиваются автоматически - просто публикуй постройки в любимом стиле. Бонус суммируется к базовым 500 EXP за постройку. Максимальный уровень - Легенда (15+ построек одного стиля).</p>' +
             '</div>' +
 
             '</div>' +
@@ -3474,7 +3557,7 @@ function renderInfo() {
                         '<div class="flex-grow">' +
                             '<div class="text-xs font-black" style="color:#60a5fa">Сезонные</div>' +
                             '<div class="text-[9px] text-gray-500">Активность в текущем сезоне, даты публикаций</div>' +
-                            '<div class="text-[9px] mt-0.5" style="color:#60a5fa77">+150 — +600 EXP</div>' +
+                            '<div class="text-[9px] mt-0.5" style="color:#60a5fa77">+150 - +600 EXP</div>' +
                         '</div>' +
                         '<div class="text-right flex-shrink-0"><div class="text-sm font-black" style="color:#60a5fa">' + ACHIEVEMENTS.filter(a=>a.tier==='II').length + '</div><div class="text-[9px] text-gray-600">ачивок</div></div>' +
                     '</div>' +
@@ -3486,7 +3569,7 @@ function renderInfo() {
                         '<div class="flex-grow">' +
                             '<div class="text-xs font-black" style="color:#f59e0b">Легендарные 🔒</div>' +
                             '<div class="text-[9px] text-gray-500">Секретные - условия не раскрываются</div>' +
-                            '<div class="text-[9px] mt-0.5" style="color:#f59e0b77">+500 — +2 500 EXP</div>' +
+                            '<div class="text-[9px] mt-0.5" style="color:#f59e0b77">+500 - +2 500 EXP</div>' +
                         '</div>' +
                         '<div class="text-right flex-shrink-0"><div class="text-sm font-black" style="color:#f59e0b">' + ACHIEVEMENTS.filter(a=>a.tier==='III').length + '</div><div class="text-[9px] text-gray-600">ачивок</div></div>' +
                     '</div>' +
@@ -3538,7 +3621,7 @@ function renderInfo() {
                             '<div style="background:#0a0a0a;border:1px solid rgba(212,175,55,0.12);border-radius:12px;padding:12px 14px;">' +
                                 '<div style="font-size:16px;margin-bottom:5px;">Ⅳ</div>' +
                                 '<div style="font-size:11px;font-weight:900;color:#D4AF37;margin-bottom:3px;">Витрина снаряжения</div>' +
-                                '<div style="font-size:10px;color:#555;line-height:1.5;">5 слотов в профиле с активными артефактами — видно всем посетителям.</div>' +
+                                '<div style="font-size:10px;color:#555;line-height:1.5;">5 слотов в профиле с активными артефактами - видно всем посетителям.</div>' +
                             '</div>' +
                         '</div>' +
                         '<div style="background:#0a0a0a;border:1px solid rgba(212,175,55,0.12);border-radius:12px;padding:14px 16px;margin-bottom:20px;">' +
@@ -3630,6 +3713,64 @@ function renderInfo() {
         '</div>' +
 
         '</div>';
+
+    
+    requestAnimationFrame(function() { _initStylesPanel(STYLE_DEFS, _skillIcon); });
+}
+
+function _initStylesPanel(STYLE_DEFS, _skillIcon) {
+    var btns = document.querySelectorAll('.style-skill-btn');
+    var panel = document.getElementById('style-info-panel');
+    if (!btns.length || !panel) return;
+
+    function showStyle(idx) {
+        var s = STYLE_DEFS[idx];
+        if (!s) return;
+
+        
+        btns.forEach(function(b) { b.classList.remove('active'); });
+        btns[idx].classList.add('active');
+
+        
+        var bar = document.getElementById('sip-accent-bar');
+        if (bar) bar.style.background = 'linear-gradient(90deg,' + s.color + ',transparent)';
+
+        
+        var iconEl = document.getElementById('sip-icon');
+        if (iconEl) {
+            iconEl.style.borderColor = s.color + '44';
+            iconEl.innerHTML = _skillIcon(s.en, s.icon, 22);
+        }
+
+        document.getElementById('sip-en').textContent = s.en;
+        document.getElementById('sip-en').style.color = '#fff';
+        document.getElementById('sip-ru').textContent = s.ru;
+        document.getElementById('sip-ru').style.color = s.color;
+        document.getElementById('sip-desc').textContent = s.full;
+
+        
+        var tagsEl = document.getElementById('sip-tags');
+        if (tagsEl) {
+            tagsEl.innerHTML = (s.tags || []).map(function(t) {
+                return '<span style="display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;background:' + s.color + '18;color:' + s.color + ';border:1px solid ' + s.color + '33;">' + t + '</span>';
+            }).join('');
+        }
+
+        
+        panel.style.display = 'block';
+        
+        panel.style.animation = 'none';
+        panel.offsetHeight; // reflow
+        panel.style.animation = '_siPanelIn .18s cubic-bezier(.34,1.56,.64,1)';
+    }
+
+    btns.forEach(function(btn) {
+        var idx = parseInt(btn.getAttribute('data-style-idx'));
+        btn.addEventListener('mouseenter', function() { showStyle(idx); });
+    });
+
+    
+    showStyle(0);
 }
 
 
@@ -4170,7 +4311,7 @@ function renderShop() {
                         🎒 Наборы стилей
                         <span style="font-size:9px;font-weight:900;padding:3px 10px;border-radius:20px;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.3);color:#D4AF37;text-transform:uppercase;letter-spacing:.1em;">x3 Prime</span>
                     </div>
-                    <div style="font-size:11px;color:#444;margin-top:5px;max-width:480px;line-height:1.6;">Тематический набор из трёх артефактов под твой стиль. Три подписки сразу — скидка 30%.</div>
+                    <div style="font-size:11px;color:#444;margin-top:5px;max-width:480px;line-height:1.6;">Тематический набор из трёх артефактов под твой стиль. Три подписки сразу - скидка 30%.</div>
                 </div>
                 <div style="flex-shrink:0;">
                     <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:10px;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.15);color:#D4AF37;font-weight:900;font-size:11px;">✦ 3 подписки = 3 артефакта</span>
@@ -5010,7 +5151,7 @@ function _openShopModal(id) {
         
         var smExtra = document.getElementById('sm-extra');
         smExtra.style.display = '';
-        smExtra.innerHTML = '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#444;margin-bottom:8px;">Доступные эффекты — нажми для превью</div>' +
+        smExtra.innerHTML = '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#444;margin-bottom:8px;">Доступные эффекты - нажми для превью</div>' +
             '<div style="display:flex;flex-wrap:wrap;gap:5px;max-height:90px;overflow-y:auto;padding-bottom:2px;">' +
             efKeys.map(function(k, i) {
                 var ef = _PEF_DEFS[k];
@@ -5104,7 +5245,7 @@ function _openShopModal(id) {
         if (id === 'golden_frame') {
             
             smExtra.innerHTML =
-                '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#444;margin-bottom:10px;">Выбери стиль рамки — кликни для выбора</div>' +
+                '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#444;margin-bottom:10px;">Выбери стиль рамки - кликни для выбора</div>' +
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="sm-frame-grid">' +
                   '<div id="sm-frame-opt-gold" style="padding:12px;border-radius:12px;border:2px solid #D4AF37;background:#D4AF3712;text-align:center;cursor:pointer;transition:all .15s;">' +
                     '<div style="position:relative;width:50px;height:50px;margin:0 auto 7px;border-radius:10px;overflow:hidden;border:2px solid #D4AF37;box-shadow:0 0 14px rgba(212,175,55,0.7);">' +
@@ -5152,10 +5293,10 @@ function _openShopModal(id) {
         } else if (id === 'custom_medal') {
             
             smExtra.innerHTML =
-                '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#444;margin-bottom:8px;">Нажми на медаль — увидишь как выглядит рядом с ником</div>' +
+                '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#444;margin-bottom:8px;">Нажми на медаль - увидишь как выглядит рядом с ником</div>' +
                 '<div id="sm-medal-gallery-grid" style="display:flex;flex-wrap:wrap;gap:6px;min-height:44px;margin-bottom:10px;"><div style="font-size:11px;color:#555;font-style:italic;padding:4px;">Загрузка...</div></div>' +
                 '<div id="sm-medal-nick-preview" style="display:none;background:#0e0e0e;border:1px solid #fb923c33;border-radius:10px;padding:10px 14px;">' +
-                  '<div style="font-size:9px;color:#fb923c;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Превью — как у ника</div>' +
+                  '<div style="font-size:9px;color:#fb923c;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Превью - как у ника</div>' +
                   '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
                     '<img id="sm-medal-preview-img" class="donor-img" src="" style="width:22px;height:22px;border-radius:5px;object-fit:cover;display:block;">' +
                     '<span style="font-size:13px;font-weight:900;color:#fff;">Ваш_Ник</span>' +
@@ -5279,7 +5420,7 @@ function _openShopModal(id) {
                         '<img id="sm-totem-img-full" src="https://skinmc.net/api/v1/renders/skins/mhf_steve/totem/full" style="width:64px;height:auto;image-rendering:pixelated;border-radius:6px;background:#111;border:1px solid #f59e0b22;display:block;">' +
                     '</div>' +
                 '</div>' +
-                '<div style="font-size:9px;color:#444;line-height:1.6;">💡 Тотем не подгружается? Зайди на <a href="https://skinmc.net" target="_blank" style="color:#f59e0b;text-decoration:none;">skinmc.net</a>, введи свой ник — скин закешируется.</div>';
+                '<div style="font-size:9px;color:#444;line-height:1.6;">💡 Тотем не подгружается? Зайди на <a href="https://skinmc.net" target="_blank" style="color:#f59e0b;text-decoration:none;">skinmc.net</a>, введи свой ник - скин закешируется.</div>';
             window._smTotemPreview = function() {
                 var nick = (document.getElementById('sm-totem-nick') || {}).value || '';
                 nick = nick.trim();
@@ -5541,7 +5682,7 @@ function _primSelectItem(slotIdx, id, color) {
 }
 
 const _DONOR_EFFECT_OPTS = [
-    {v:'',     l:'— без эффекта —'},
+    {v:'',     l:'- без эффекта -'},
     {v:'pulse',    l:'✦ Пульсация'},
     {v:'flicker',  l:'⚡ Мерцание'},
     {v:'rainbow',  l:'🌈 Радуга'},
@@ -5579,7 +5720,7 @@ function _renderPrimeArtConfig(slotIdx, id) {
             </div>
             <input type="hidden" id="prim-cfg-medal-id-${S}">
             <div id="prim-medal-preview-${S}" style="display:none;background:#0e0e0e;border:1px solid #fb923c33;border-radius:10px;padding:12px;margin-bottom:10px;">
-                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#fb923c;margin-bottom:8px;">Превью — как будет смотреться у ника</div>
+                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#fb923c;margin-bottom:8px;">Превью - как будет смотреться у ника</div>
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
                     <div id="prim-medal-live-wrap-${S}" style="flex-shrink:0;">
                         <img id="prim-medal-live-img-${S}" class="donor-img" src="" style="width:24px;height:24px;border-radius:5px;object-fit:cover;display:block;">
@@ -5644,7 +5785,7 @@ function _renderPrimeArtConfig(slotIdx, id) {
             fld('Фон карточки в Топе авторов', inp('prim-cfg-bg-top','https://...')) +
             `<div style="background:#1a2e0a;border:1px solid #4ade8033;border-radius:10px;padding:10px 12px;margin-top:8px;">
                 <div style="font-size:10px;font-weight:900;color:#4ade80;margin-bottom:4px;">⚠ Важно</div>
-                <div style="font-size:10px;color:#86efac;line-height:1.6;">Фон профиля можно менять <strong>1 раз в неделю</strong> — через обращение в поддержку. Выбирай осознанно!</div>
+                <div style="font-size:10px;color:#86efac;line-height:1.6;">Фон профиля можно менять <strong>1 раз в неделю</strong> - через обращение в поддержку. Выбирай осознанно!</div>
             </div>`;
 
     } else if (id === 'build_glow') {
@@ -5697,7 +5838,7 @@ function _renderPrimeArtConfig(slotIdx, id) {
             '</div>' +
             '</div>' +
             '<input type="hidden" id="prim-cfg-pet-type-'+S+'" value="">' +
-            '<div style="font-size:9px;color:#555;">3D-зверёк в профиле. Интерактивный — можно крутить мышкой!</div>';
+            '<div style="font-size:9px;color:#555;">3D-зверёк в профиле. Интерактивный - можно крутить мышкой!</div>';
 
     } else if (id === 'profile_effect') {
         wrap.style.display = '';
@@ -5748,7 +5889,7 @@ function _renderPrimeArtConfig(slotIdx, id) {
                 <canvas id="pef-preview-canvas-${S}" style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
                 <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:4px;">
                     <span id="pef-preview-label-${S}" style="font-size:13px;font-weight:900;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,1);z-index:2;letter-spacing:.05em;"></span>
-                    <span style="font-size:9px;color:#555;z-index:2;">— предпросмотр эффекта —</span>
+                    <span style="font-size:9px;color:#555;z-index:2;">- предпросмотр эффекта -</span>
                 </div>
             </div>
             <div style="font-size:9px;color:#555;">Эффект виден в профиле, hover-карточке и Топе авторов.</div>`;
@@ -6036,9 +6177,9 @@ function _submitPrimeRequest() {
         ...(selectedBundle.contents || []).map(c => `  ↳ ${c.icon} ${c.label}: ${c.name}`)
     ] : [];
     const text = [
-        `✦ <b>Заявка на подписку Prime — Classic HUB</b>`,
+        `✦ <b>Заявка на подписку Prime - Classic HUB</b>`,
         ``,
-        `📦 <b>Месяцев:</b> ${months}${isMulti ? ' (×5 — скидка 20%)' : ''}${isBundle3 ? ' (×3 — набор стиля, скидка 30%)' : ''}`,
+        `📦 <b>Месяцев:</b> ${months}${isMulti ? ' (×5 - скидка 20%)' : ''}${isBundle3 ? ' (×3 - набор стиля, скидка 30%)' : ''}`,
         `⚗️ <b>Артефакты:</b>`,
         ...slotLines,
         ...bundleLines,
@@ -6080,7 +6221,7 @@ function _closeShopModal() {
     if (window._smCanvasRAF) { cancelAnimationFrame(window._smCanvasRAF); window._smCanvasRAF = null; }
     _destroyPetPreview('sm-pet-preview-canvas');
 }
-function _submitShopRequest() { /* removed — покупка через Prime */ }
+function _submitShopRequest() { /* removed - покупка через Prime */ }
 
 
 function _buildUpdatesHtml(list) {
@@ -6800,7 +6941,7 @@ if (window._fbReady) {
 
 <div id="disc-overlay">
   <div id="disc-modal">
-    <div class="disc-badge">Beta v1.7</div>
+    <div class="disc-badge">Beta v1.8</div>
     <h2>Добро пожаловать в Classic HUB</h2>
     <p class="disc-sub">Пожалуйста, ознакомьтесь перед использованием сайта</p>
 
@@ -8331,14 +8472,14 @@ function renderMap(){
                     '<div style="font-size:9px;color:#555;font-weight:900;text-transform:uppercase;letter-spacing:.18em;margin-bottom:12px;">Легенда</div>'+
                     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'+
                         '<img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/18/Player_%28texture%29_BE2.png/revision/latest?cb=20210520170746" style="width:24px;height:24px;object-fit:contain;">'+
-                        '<div><div style="font-size:11px;font-weight:700;color:#fff;">Постройка</div><div style="font-size:9px;color:#555;">клик — карточка</div></div>'+
+                        '<div><div style="font-size:11px;font-weight:700;color:#fff;">Постройка</div><div style="font-size:9px;color:#555;">клик - карточка</div></div>'+
                     '</div>'+
                     '<div style="height:1px;background:rgba(255,255,255,0.05);margin-bottom:10px;"></div>'+
                     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'+
                         '<img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/16/Green_Marker_%28texture%29_BE2.png/revision/latest?cb=20210520171523" style="width:24px;height:24px;object-fit:contain;">'+
                         '<div><div style="font-size:11px;font-weight:700;color:#fff;">Точка интереса</div><div style="font-size:9px;color:#555;">от администрации</div></div>'+
                     '</div>'+
-                    '<div style="font-size:9px;color:#444;line-height:1.6;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">Тащи для перемещения.<br>Колёсико — зум.</div>'+
+                    '<div style="font-size:9px;color:#444;line-height:1.6;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">Тащи для перемещения.<br>Колёсико - зум.</div>'+
                 '</div>'+
             '</div>'+
         '</div>'+
@@ -8353,7 +8494,7 @@ function renderMap(){
     
     '<div id="map-archive-banner" style="display:none;margin-bottom:12px;padding:10px 16px;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:10px;display:flex;align-items:center;gap:10px;">'+
         '<span style="font-size:16px;">🗂</span>'+
-        '<div style="font-size:11px;color:#D4AF37;font-weight:700;" id="map-archive-banner-text">Архивная карта — только для просмотра</div>'+
+        '<div style="font-size:11px;color:#D4AF37;font-weight:700;" id="map-archive-banner-text">Архивная карта - только для просмотра</div>'+
     '</div>'+
 '<div id="map-coord-tip" style="position:fixed;z-index:9999;pointer-events:none;display:none;background:rgba(10,8,0,0.92);border:1px solid rgba(212,175,55,0.25);border-radius:10px;padding:7px 13px;font-size:11px;font-weight:700;color:#D4AF37;backdrop-filter:blur(12px);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.7);"></div>'+
         '<div id="map-marker-tip" style="position:fixed;z-index:10000;pointer-events:none;display:none;background:rgba(10,8,0,0.96);border:1px solid rgba(212,175,55,0.4);border-radius:12px;padding:10px 14px;font-size:11px;color:#fff;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,0.8);max-width:220px;"></div>'+
