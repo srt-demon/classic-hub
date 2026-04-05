@@ -669,71 +669,72 @@ Development by slowdown
     </div>
 
     <div id="question-overlay" onclick="toggleQuestion(false)"
-         class="fixed inset-0 bg-black/80 z-[115] backdrop-blur-md hidden justify-center items-start" style="overflow-y:auto;padding:16px;">
-        <div style="background:#111;width:100%;max-width:420px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);overflow:hidden;margin:auto;"
+         class="fixed inset-0 bg-black/90 z-[115] backdrop-blur-xl hidden justify-center items-center" style="overflow-y:auto;padding:16px;">
+        <div style="background:#1a1a1a;width:100%;max-width:440px;border-radius:18px;border:1px solid rgba(255,255,255,0.1);overflow:hidden;margin:auto;box-shadow:0 32px 80px rgba(0,0,0,0.85);max-height:calc(100vh - 32px);display:flex;flex-direction:column;"
              onclick="event.stopPropagation()">
-            <div class="h-1 w-full bg-gradient-to-r from-[#D4AF37] via-[#f5d77e] to-[#B8860B]"></div>
-            <div style="padding:20px;position:relative;">
+            <div class="h-1 w-full bg-gradient-to-r from-[#D4AF37] via-[#f5d77e] to-[#B8860B]" style="flex-shrink:0;"></div>
+            <div style="padding:22px;position:relative;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a2a2a transparent;">
                 <button onclick="toggleQuestion(false)"
-                        style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);color:#888;cursor:pointer;font-size:12px;line-height:1;">✕</button>
+                        style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);color:#888;cursor:pointer;font-size:12px;line-height:1;transition:all .15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">✕</button>
 
-                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.2em;color:#D4AF37;margin-bottom:4px;">Тех. поддержка</div>
-                <h3 style="font-size:15px;font-weight:900;text-transform:uppercase;margin-bottom:16px;padding-right:36px;color:#fff;">Нашли баг? Есть идея?</h3>
+                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.2em;color:#D4AF37;margin-bottom:3px;">Classic HUB</div>
+                <h3 style="font-size:17px;font-weight:900;text-transform:uppercase;margin-bottom:4px;padding-right:36px;color:#fff;">Тех. поддержка</h3>
+                <p style="font-size:11px;color:#555;margin-bottom:18px;">Нашли баг, есть идея или вопрос?</p>
 
-                <div style="background:#0a0a0a;border:1px solid #1f1f1f;border-radius:14px;padding:14px;margin-bottom:12px;">
-                    <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#555;margin-bottom:10px;">Написать администратору</div>
+                <div style="background:#111;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;margin-bottom:14px;">
+                    <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#444;margin-bottom:12px;">Написать администратору</div>
 
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:12px;">
                         <div onclick="_supportType('bug')" id="stype-bug"
-                             style="border-radius:9px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:7px 4px;text-align:center;cursor:pointer;transition:all .15s;">
+                             style="border-radius:10px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:8px 4px;text-align:center;cursor:pointer;transition:all .15s;">
                             <div style="font-size:16px;margin-bottom:2px;">🐛</div>
-                            <div style="font-size:8px;font-weight:900;color:#777;">Баг</div>
+                            <div style="font-size:8px;font-weight:900;color:#666;text-transform:uppercase;letter-spacing:.06em;">Баг</div>
                         </div>
                         <div onclick="_supportType('idea')" id="stype-idea"
-                             style="border-radius:9px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:7px 4px;text-align:center;cursor:pointer;transition:all .15s;">
+                             style="border-radius:10px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:8px 4px;text-align:center;cursor:pointer;transition:all .15s;">
                             <div style="font-size:16px;margin-bottom:2px;">💡</div>
-                            <div style="font-size:8px;font-weight:900;color:#777;">Идея</div>
+                            <div style="font-size:8px;font-weight:900;color:#666;text-transform:uppercase;letter-spacing:.06em;">Идея</div>
                         </div>
                         <div onclick="_supportType('question')" id="stype-question"
-                             style="border-radius:9px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:7px 4px;text-align:center;cursor:pointer;transition:all .15s;">
+                             style="border-radius:10px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:8px 4px;text-align:center;cursor:pointer;transition:all .15s;">
                             <div style="font-size:16px;margin-bottom:2px;">❓</div>
-                            <div style="font-size:8px;font-weight:900;color:#777;">Вопрос</div>
+                            <div style="font-size:8px;font-weight:900;color:#666;text-transform:uppercase;letter-spacing:.06em;">Вопрос</div>
                         </div>
                     </div>
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
                         <div>
-                            <div style="font-size:9px;color:#444;margin-bottom:4px;font-weight:700;">Ник (необязательно)</div>
+                            <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#555;margin-bottom:4px;">Ник (необязательно)</div>
                             <input id="support-nick" type="text" placeholder="NikName"
-                                   style="width:100%;background:#161616;border:1px solid #252525;border-radius:8px;padding:7px 9px;color:#fff;font-size:11px;outline:none;font-family:inherit;box-sizing:border-box;"
-                                   onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#252525'">
+                                   style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 10px;color:#fff;font-size:11px;outline:none;font-family:inherit;box-sizing:border-box;transition:border .2s;"
+                                   onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
                         </div>
                         <div>
-                            <div style="font-size:9px;color:#444;margin-bottom:4px;font-weight:700;">Контакт (TG / DC)</div>
+                            <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#555;margin-bottom:4px;">Контакт (TG / DC)</div>
                             <input id="support-contact" type="text" placeholder="@username"
-                                   style="width:100%;background:#161616;border:1px solid #252525;border-radius:8px;padding:7px 9px;color:#fff;font-size:11px;outline:none;font-family:inherit;box-sizing:border-box;"
-                                   onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#252525'">
+                                   style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 10px;color:#fff;font-size:11px;outline:none;font-family:inherit;box-sizing:border-box;transition:border .2s;"
+                                   onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
                         </div>
                     </div>
-                    <div style="margin-bottom:10px;">
-                        <div style="font-size:9px;color:#444;margin-bottom:4px;font-weight:700;">Сообщение *</div>
+                    <div style="margin-bottom:12px;">
+                        <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#555;margin-bottom:4px;">Сообщение <span style="color:#f87171;">*</span></div>
                         <textarea id="support-msg" placeholder="Опишите проблему или идею подробно..." rows="3"
-                               style="width:100%;background:#161616;border:1px solid #252525;border-radius:8px;padding:7px 9px;color:#fff;font-size:11px;outline:none;font-family:inherit;resize:vertical;box-sizing:border-box;"
-                               onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#252525'"></textarea>
+                               style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 10px;color:#fff;font-size:11px;outline:none;font-family:inherit;resize:vertical;box-sizing:border-box;transition:border .2s;"
+                               onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
                     </div>
 
-                    <div id="support-err" style="display:none;font-size:10px;color:#f87171;margin-bottom:8px;"></div>
+                    <div id="support-err" style="display:none;font-size:10px;color:#f87171;margin-bottom:8px;padding:8px 10px;background:rgba(185,28,28,0.1);border:1px solid rgba(185,28,28,0.25);border-radius:8px;"></div>
                     <div id="support-ok"  style="display:none;font-size:10px;color:#4ade80;font-weight:700;margin-bottom:8px;text-align:center;padding:8px;background:#0a1a0a;border-radius:8px;border:1px solid rgba(74,222,128,.2);">✓ Отправлено! Спасибо за обращение.</div>
 
                     <button id="support-send-btn" onclick="_submitSupportMsg()"
-                            style="width:100%;background:linear-gradient(90deg,#D4AF37,#c49b20);border:2px solid #e8c84a;color:#000;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;padding:9px;border-radius:9px;cursor:pointer;font-family:inherit;box-shadow:0 0 0 1px rgba(212,175,55,0.3);"
-                            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-                        ✦ Отправить обращение
+                            style="width:100%;background:#D4AF37;border:none;color:#000;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;padding:11px;border-radius:10px;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 4px 18px rgba(212,175,55,0.35);"
+                            onmouseover="this.style.filter='brightness(1.12)';this.style.boxShadow='0 6px 24px rgba(212,175,55,0.5)'" onmouseout="this.style.filter='brightness(1)';this.style.boxShadow='0 4px 18px rgba(212,175,55,0.35)'">
+                        Отправить обращение →
                     </button>
                 </div>
 
-                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#333;margin-bottom:4px;">Прямая связь</div>
-                <div style="font-size:9px;color:#3a3a3a;margin-bottom:8px;line-height:1.4;">Только для критических ситуаций, требующих незамедлительного вмешательства</div>
+                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#555;margin-bottom:4px;">Прямая связь</div>
+                <div style="font-size:9px;color:#444;margin-bottom:8px;line-height:1.4;">Только для критических ситуаций, требующих незамедлительного вмешательства</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
                     <a href="https://t.me/melochniy1" target="_blank"
                        style="display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(34,158,217,.08);border:1px solid rgba(34,158,217,.2);border-radius:10px;padding:8px 4px;text-decoration:none;"
@@ -945,19 +946,19 @@ Development by slowdown
             </div>
         </div>
     </div>
-    <div id="form-overlay" class="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl hidden justify-center items-start p-4 overflow-y-auto" style="scrollbar-width:thin;scrollbar-color:#2a2a2a transparent;">
-        <div class="bg-[#1a1a1a] w-full max-w-2xl m-auto my-8 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
+    <div id="form-overlay" class="fixed inset-0 bg-black/90 z-[100] backdrop-blur-xl hidden justify-center items-center p-4" style="overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a2a2a transparent;">
+        <div class="bg-[#1a1a1a] w-full max-w-2xl m-auto rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden" style="max-height:calc(100vh - 32px);display:flex;flex-direction:column;">
 
-            <div class="h-1 w-full bg-gradient-to-r from-[#D4AF37] via-[#f5d77e] to-[#B8860B]"></div>
+            <div class="h-1 w-full bg-gradient-to-r from-[#D4AF37] via-[#f5d77e] to-[#B8860B]" style="flex-shrink:0;"></div>
 
-            <div class="p-8">
+            <div class="p-6" style="overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a2a2a transparent;">
                 <button onclick="toggleForm(false)" class="absolute top-5 right-5 bg-black/60 text-gray-400 hover:text-white w-8 h-8 rounded-full flex items-center justify-center border border-white/10 transition">✕</button>
 
-                <div class="text-[10px] gold-accent font-black tracking-widest uppercase mb-2">Classic HUB</div>
-                <h2 class="text-2xl font-black uppercase tracking-tight mb-1">Заявить о постройке</h2>
-                <p class="text-gray-500 text-xs mb-8">Заполни форму и после успешной проверки модератором постройка появится в галерее в течении 48 часов</p>
+                <div class="text-[10px] gold-accent font-black tracking-widest uppercase mb-1.5">Classic HUB</div>
+                <h2 class="text-xl font-black uppercase tracking-tight mb-1">Заявить о постройке</h2>
+                <p class="text-gray-500 text-[11px] mb-6">Заполни форму - постройка появится в галерее в течение 48 часов после проверки модератором</p>
 
-                <div class="space-y-5">
+                <div class="space-y-4">
 
                     <div>
                         <label class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1.5 block">Название постройки <span class="text-red-400">*</span></label>
@@ -1019,9 +1020,9 @@ Development by slowdown
 
                 </div>
 
-                <div class="mt-8 flex flex-col gap-3">
+                <div class="mt-6 flex flex-col gap-3">
                     <button onclick="submitToGoogleForm()"
-                            class="w-full bg-[#D4AF37] text-black font-black py-4 rounded-xl hover:brightness-110 active:scale-95 transition uppercase text-xs tracking-widest shadow-lg">
+                            class="w-full bg-[#D4AF37] text-black font-black py-3 rounded-xl hover:brightness-110 active:scale-95 transition uppercase text-[11px] tracking-widest shadow-lg">
                         Отправить заявку →
                     </button>
                     <p class="text-center text-[10px] text-gray-600">Заявка придёт администратору напрямую - никуда переходить не нужно</p>
@@ -2385,7 +2386,7 @@ function _submitSupportMsg() {
             btn.style.background='#16a34a'; btn.style.color='#fff';
         } else { throw new Error(data.description||'Ошибка'); }
     }).catch(function(err){
-        btn.disabled=false; btn.textContent='✦ Отправить обращение';
+        btn.disabled=false; btn.textContent='Отправить обращение →';
         btn.style.background=''; btn.style.color='';
         errEl.textContent='Ошибка отправки: '+err.message; errEl.style.display='';
     });
@@ -3355,7 +3356,7 @@ function renderInfo() {
                     '<li class="flex gap-2"><span class="gold-accent font-black flex-shrink-0">5.</span> Жди проверки от 12 до 48 часов</li>' +
                     '<li class="flex gap-2 items-start mt-2 pt-2 border-t border-white/5"><span style="font-size:9px;padding:2px 7px;border-radius:5px;background:rgba(74,222,128,0.12);color:#4ade80;font-weight:900;border:1px solid rgba(74,222,128,0.25);flex-shrink:0;white-space:nowrap;margin-top:1px;">✓ Авто</span><span style="color:rgba(74,222,128,0.75);font-size:10px;line-height:1.5;">Профиль регистрируется автоматически при отправке заявки - никакая отдельная регистрация и сторонние сервисы не нужны.</span></li>' +
                 '</ol>' +
-                '<button onclick="toggleForm(true)" class="mt-4 w-full bg-[#D4AF37] text-black font-black py-2 rounded-xl text-xs uppercase tracking-widest hover:brightness-110 transition active:scale-95"> Заявить о постройке</button>' +
+                '<button onclick="toggleForm(true)" class="mt-4 w-full bg-[#D4AF37] text-black font-black py-2.5 rounded-xl text-xs uppercase tracking-widest hover:brightness-110 transition active:scale-95 flex items-center justify-center gap-2"><span>🏗</span> Заявить о постройке <span style="font-size:14px;line-height:1;">→</span></button>' +
             '</div>' +
 
             // инфа по просмотрам
@@ -7477,18 +7478,24 @@ function _selGoldenFrame(slotIdx, style) {
 </script>
 
 <div id="mc-modal-overlay" onclick="if(event.target===this)_mcStatusClose()"
-     style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;">
-    <div onclick="event.stopPropagation()" style="background:#0d1520;border:1px solid rgba(96,165,250,0.3);border-radius:20px;width:100%;max-width:360px;padding:24px;position:relative;box-shadow:0 0 40px rgba(96,165,250,0.12);">
-        <button onclick="_mcStatusClose()" style="position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;background:#1f2a3a;border:1px solid #2a3a4a;color:#60a5fa88;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;">✕</button>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-            <div style="font-size:1.4rem;">⛏</div>
-            <div>
-                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.2em;color:#60a5fa88;margin-bottom:1px;">Minecraft</div>
-                <div style="font-size:14px;font-weight:900;color:#fff;">Сервер <span style="color:#D4AF37;">Classic</span></div>
+     style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:16px;">
+    <div onclick="event.stopPropagation()" style="background:#1c1c22;border:1px solid rgba(255,255,255,0.09);border-radius:22px;width:100%;max-width:370px;position:relative;box-shadow:0 32px 80px rgba(0,0,0,0.85);overflow:hidden;">
+        <!-- Subtle top accent -->
+        <div style="height:2px;width:100%;background:linear-gradient(90deg,#D4AF3700,#D4AF3788 40%,#D4AF3700);"></div>
+        <div style="padding:20px 22px 22px;">
+            <button onclick="_mcStatusClose()" style="position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#888;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,0.12)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='#888'">✕</button>
+            <!-- Header -->
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+                <div style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">⛏</div>
+                <div>
+                    <div style="font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.22em;color:#666;margin-bottom:2px;">Minecraft</div>
+                    <div style="font-size:15px;font-weight:900;color:#fff;line-height:1;">Сервер <span style="color:#D4AF37;">Classic</span></div>
+                </div>
             </div>
-        </div>
-        <div id="mc-modal-body" style="min-height:60px;display:flex;align-items:center;justify-content:center;">
-            <div style="color:#555;font-size:11px;">Загрузка...</div>
+            <!-- Body -->
+            <div id="mc-modal-body" style="min-height:60px;">
+                <div style="color:#555;font-size:11px;text-align:center;padding:16px 0;">Загрузка...</div>
+            </div>
         </div>
     </div>
 </div>
@@ -7600,14 +7607,15 @@ function _mcGetPeakHtml(online, cb) {
             var peak = snap.val();
             if (!peak) { done(''); return; }
             var isNew = online >= peak.count;
-            var html = '<div style="margin-top:12px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.04);">' +
-                '<div style="display:flex;align-items:center;gap:5px;">' +
-                    '<span style="font-size:10px;opacity:0.4;">🏆</span>' +
-                    '<span style="font-size:9px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.1em;">Рекорд онлайна:</span>' +
+            var html = '<div style="margin-top:6px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;">' +
+                '<div style="display:flex;align-items:center;gap:6px;">' +
+                    '<span style="font-size:13px;opacity:0.7;">🏆</span>' +
+                    '<span style="font-size:9px;font-weight:900;color:#555;text-transform:uppercase;letter-spacing:.1em;">Рекорд онлайна</span>' +
                 '</div>' +
                 '<div style="display:flex;align-items:center;gap:6px;">' +
-                    '<span style="font-size:10px;font-weight:700;color:#444;">' + peak.count + ' игроков</span>' +
-                    '<span style="font-size:9px;color:#2a2a2a;">' + peak.date + '</span>' +
+                    '<span style="font-size:15px;font-weight:900;color:#D4AF37;">' + peak.count + '</span>' +
+                    '<span style="font-size:9px;color:#444;font-weight:700;">игроков</span>' +
+                    '<span style="font-size:9px;color:#555;margin-left:2px;">' + peak.date + '</span>' +
                 '</div>' +
             '</div>';
             done(html);
@@ -7639,33 +7647,37 @@ function _mcStatusOpen() {
 
         var playersHtml = '';
         if (list.length > 0) {
-            playersHtml = '<div style="margin-top:14px;">' +
-                '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#60a5fa88;margin-bottom:8px;">Сейчас играют</div>' +
-                '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
+            playersHtml = '<div style="margin-bottom:14px;">' +
+                '<div style="font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.16em;color:#444;margin-bottom:8px;">Сейчас играют</div>' +
+                '<div style="display:flex;flex-wrap:wrap;gap:5px;">' +
                 list.map(function(p) {
                     var name = (typeof p === 'string') ? p : (p.name_clean || p.name || '?');
-                    return '<div style="display:flex;align-items:center;gap:5px;background:#112030;border:1px solid #1a3050;border-radius:8px;padding:4px 8px;">' +
-                        '<img src="https://visage.surgeplay.com/face/16/' + encodeURIComponent(name) + '" style="width:16px;height:16px;image-rendering:pixelated;border-radius:3px;" onerror="this.style.display=\'none\'">' +
-                        '<span style="font-size:10px;font-weight:700;color:#aaa;">' + name + '</span>' +
+                    return '<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:4px 9px;">' +
+                        '<img src="https://visage.surgeplay.com/face/14/' + encodeURIComponent(name) + '" style="width:14px;height:14px;image-rendering:pixelated;border-radius:3px;" onerror="this.style.display=\'none\'">' +
+                        '<span style="font-size:11px;font-weight:600;color:#ccc;">' + name + '</span>' +
                         '</div>';
                 }).join('') +
                 '</div></div>';
         } else if (online > 0) {
-            playersHtml = '<div style="margin-top:14px;font-size:10px;color:#555;font-style:italic;">Список игроков скрыт сервером</div>';
+            playersHtml = '<div style="margin-bottom:14px;font-size:10px;color:#444;font-style:italic;">Список игроков скрыт сервером</div>';
         }
 
         _mcGetPeakHtml(online, function(peakHtml) {
             body.innerHTML =
                 '<div style="width:100%;">' +
-                '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
-                    '<div style="display:flex;align-items:center;gap:6px;">' +
-                        '<span style="width:9px;height:9px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 8px #4ade8099;"></span>' +
-                        '<span style="font-size:13px;font-weight:900;color:#4ade80;">Онлайн</span>' +
+                    // Status row
+                    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">' +
+                        '<div style="display:flex;align-items:center;gap:7px;">' +
+                            '<span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 10px #4ade8088;flex-shrink:0;"></span>' +
+                            '<span style="font-size:11px;font-weight:900;color:#4ade80;text-transform:uppercase;letter-spacing:.14em;">Онлайн</span>' +
+                        '</div>' +
+                        '<div style="font-size:11px;font-weight:900;color:#fff;">' +
+                            '<span style="font-size:28px;font-weight:900;line-height:1;">' + online + '</span>' +
+                            '<span style="font-size:11px;color:#444;font-weight:500;"> / ' + max + '</span>' +
+                        '</div>' +
                     '</div>' +
-                    '<span style="font-size:20px;font-weight:900;color:#fff;">' + online + ' <span style="font-size:11px;color:#555;font-weight:400;">/ ' + max + '</span></span>' +
-                '</div>' +
-                playersHtml +
-                peakHtml +
+                    playersHtml +
+                    peakHtml +
                 '</div>';
         });
     });
