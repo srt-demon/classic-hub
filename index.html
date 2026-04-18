@@ -182,6 +182,9 @@ Development by slowdown
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-left: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
         .rank-novice      { background: #3a3a3a; color: #aaa; }
         .rank-adept       { background: #2d6a4f; color: #95d5b2; }
@@ -291,8 +294,47 @@ Development by slowdown
 
         @keyframes _popIn{from{opacity:0;transform:scale(.88) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}} @keyframes _popInUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
         @keyframes _siPanelIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes _siPanelInDown{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         .style-skill-btn:hover { border-color: rgba(212,175,55,0.25) !important; background: rgba(212,175,55,0.04) !important; }
         .style-skill-btn.active { border-color: rgba(212,175,55,0.5) !important; background: rgba(212,175,55,0.07) !important; box-shadow: 0 0 14px rgba(212,175,55,0.12); }
+        /* mobile fix: stack styles panel vertically */
+        @media (max-width: 767px) {
+            .styles-inner-flex { flex-direction: column !important; }
+            .styles-inner-flex #styles-grid { width: 100% !important; flex-shrink: 1 !important; }
+            .styles-inner-flex #style-info-panel { width: 100% !important; }
+            #style-info-panel { animation-name: _siPanelInDown !important; }
+        }
+        /* rank icon 3d hover on info page */
+        .rank-info-icon-wrap {
+            display:inline-flex;align-items:center;justify-content:center;
+            cursor:default;
+            transition: transform 0.08s ease;
+            transform-style: preserve-3d;
+            border-radius: 9px;
+        }
+        /* rank icon image */
+        .rank-icon {
+            width:13px;height:13px;border-radius:2px;object-fit:cover;
+            display:inline-block;vertical-align:middle;flex-shrink:0;
+            image-rendering:auto;
+        }
+        .rank-icon-lg {
+            width:22px;height:22px;border-radius:4px;object-fit:cover;
+            display:inline-block;vertical-align:middle;flex-shrink:0;
+        }
+        /* rank medals tooltip */
+        #rank-medals-tip {
+            position:fixed;z-index:99999;pointer-events:none;
+            background:rgba(10,8,0,0.95);border:1px solid rgba(212,175,55,0.25);
+            border-radius:14px;padding:12px 14px;
+            backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+            box-shadow:0 16px 48px rgba(0,0,0,0.85),0 4px 16px rgba(0,0,0,0.6);
+            display:none;min-width:200px;max-width:260px;
+        }
+        .rank-medal-wrap {
+            display:inline-flex;align-items:center;gap:4px;cursor:pointer;
+            position:relative;flex-shrink:0;
+        }
     </style>
 </head>
 <body>
@@ -305,6 +347,30 @@ Development by slowdown
         </div>
     </div>
     <div style="font-size:9px;color:#555;border-top:1px solid rgba(255,255,255,0.06);padding-top:6px;">Особый статус · Classic HUB</div>
+</div>
+
+<div id="rank-medals-tip">
+    <div style="font-size:9px;font-weight:900;color:#D4AF37;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;">Ранги архитектора</div>
+    <div id="rank-medals-list" style="display:flex;flex-direction:column;gap:5px;"></div>
+    <div style="font-size:8px;color:#555;border-top:1px solid rgba(255,255,255,0.06);padding-top:7px;margin-top:8px;">Нажми - перейти к описанию рангов</div>
+</div>
+
+<div id="rank-single-tip" style="position:fixed;z-index:99999;pointer-events:none;display:none;
+     background:rgba(10,8,0,0.96);border:1px solid rgba(212,175,55,0.3);
+     border-radius:16px;padding:16px 20px;
+     backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+     box-shadow:0 20px 60px rgba(0,0,0,0.9),0 4px 20px rgba(212,175,55,0.15);
+     text-align:center;min-width:120px;">
+    <div style="perspective:320px;perspective-origin:50% 50%;margin-bottom:10px;">
+        <img id="rank-single-tip-img" src="" alt=""
+             style="width:64px;height:64px;border-radius:10px;object-fit:cover;display:block;margin:0 auto;
+                    transform-style:preserve-3d;
+                    box-shadow:0 8px 28px rgba(0,0,0,0.7);
+                    transition:transform 0.08s ease,box-shadow 0.08s ease;"
+             id="rank-single-tip-img">
+    </div>
+    <div id="rank-single-tip-name" style="font-size:9px;font-weight:900;color:#D4AF37;text-transform:uppercase;letter-spacing:.12em;"></div>
+    <div id="rank-single-tip-exp" style="font-size:8px;color:#555;margin-top:3px;"></div>
 </div>
 
     <header class="pt-8 sticky top-0 z-50 shadow-2xl border-b border-white/5" style="background:rgba(15,15,15,0.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
@@ -418,7 +484,7 @@ Development by slowdown
                 </div>
             </div>
             <div class="mt-12 pt-8 border-t border-white/5 text-[10px] text-gray-600 uppercase tracking-[0.3em] text-center">
-                © 2026 Classic HUB v1.8 | дизайн и разработка <a href="https://slowdown-portfolio.netlify.app" target="_blank" class="gold-accent hover:underline transition">slowdown</a>
+                © 2026 Classic HUB v1.9.1 | дизайн и разработка <a href="https://slowdown-portfolio.netlify.app" target="_blank" class="gold-accent hover:underline transition">slowdown</a>
             </div>
         </div>
     </footer>
@@ -1482,10 +1548,10 @@ const ACHIEVEMENTS = [
     { id: 'real_estate', tier: 'I', name: 'Магнат недвижимости', desc: 'Иметь 10 опубликованных построек', exp: 500, check: (a, ab) => ab.length >= 10 },
     { id: 'pioneer', tier: 'II', name: 'Первопроходец', desc: 'Опубликовать объект в первую неделю сезона', exp: 200, check: (a, ab) => { const start = new Date(CURRENT_SEASON_START); return ab.some(b => { if (b.season !== CURRENT_SEASON) return false; const diff = (new Date(b.date) - start) / 86400000; return diff >= 0 && diff <= 7; }); } },
     { id: 'season_hero', tier: 'II', name: 'Герой сезона', desc: 'Опубликовать 5 разных объектов в текущем сезоне', exp: 400, check: (a, ab) => ab.filter(b => b.season === CURRENT_SEASON).length >= 5 },
-    { id: 'popular_warp', tier: 'II', name: 'Популярный постройка', desc: 'Набрать 200 просмотров на одном объекте текущего сезона', exp: 250, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && getViews(b.id) >= 200) },
+    { id: 'popular_warp', tier: 'II', name: 'Популярная постройка', desc: 'Набрать 200 просмотров на одном объекте текущего сезона', exp: 250, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && getViews(b.id) >= 200) },
     { id: 'season_style', tier: 'II', name: 'Стиль сезона', get desc() { return `Построить объект в стиле-тренде сезона, сейчас это - (${SEASON_TREND_STYLE})`; }, exp: 150, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && b.style === SEASON_TREND_STYLE) },
     { id: 'season_closing', tier: 'II', name: 'Закрытие сезона', desc: 'Опубликовать объект за неделю до планируемого вайпа', exp: 200, check: (a, ab) => { const end = new Date(CURRENT_SEASON_END); return ab.some(b => { if (b.season !== CURRENT_SEASON) return false; const diff = (end - new Date(b.date)) / 86400000; return diff >= 0 && diff <= 7; }); } },
-    { id: 'active_viewer', tier: 'II', name: 'Активный зритель', desc: 'Открыть 20 чужих работ текущего сезона за одну сессию', exp: 50, check: (a, ab) => _sessionViewedOthers.size >= 20 },
+    { id: 'active_viewer', tier: 'II', name: 'Активный зритель', desc: 'Просматривать все постройки на протяжении месяца', exp: 50, check: (a, ab) => _sessionViewedOthers.size >= 20 },
     { id: 'season_collector', tier: 'II', name: 'Коллекционер сезонов', desc: 'Иметь постройки в 3 и более разных сезонах', exp: 500, check: (a, ab) => new Set(ab.map(b => b.season)).size >= 3 },
     { id: 'veteran', tier: 'II', name: 'Ветеран Архива', desc: 'Иметь постройки минимум в трёх разных сезонах', exp: 300, check: (a, ab) => new Set(ab.map(b => b.season)).size >= 3 },
     { id: 'historian', tier: 'II', name: 'Хранитель истории', desc: 'Опубликовал постройку из самого старого сезона (Сезон 1)', exp: 200, check: (a, ab) => ab.some(b => b.season === 'Сезон 1') },
@@ -1611,7 +1677,7 @@ function renderBuilds(filterStyle = 'Все', searchQuery = '') {
                             <span class="text-[9px] text-gray-500 uppercase tracking-widest flex-shrink-0">Автор:</span>
                             ${(function(){ var p=authorProfiles[getBuildAuthors(item)[0]]||{}; var cm=_getArtifactConfig(getBuildAuthors(item)[0],'custom_medal'); var out=''; if(cm&&cm.icon){out+='<span class="donor-wrap" onmouseenter="_donorTipShow(this)" onmouseleave="_donorTipHide()"><img src="'+cm.icon+'" class="donor-img" data-glow="'+(cm.glow||'#fb923c')+'" data-effect="'+(cm.effect||'')+'" data-medal-name="'+(cm.name||'')+'" style="width:14px;height:14px;border-radius:3px;object-fit:cover;display:block;"></span>';} if(p.donor){var ic=p.donorIcon||''; out+=ic ? '<span class="donor-wrap" onmouseenter="_donorTipShow(this)" onmouseleave="_donorTipHide()"><img src="'+ic+'" class="donor-img" data-glow="'+(p.donorGlowColor||'#D4AF37')+'" data-effect="'+(p.donorEffect||'')+'" data-medal-name="'+(p.donorMedalName||'')+'" style="width:14px;height:14px;border-radius:3px;object-fit:cover;display:block;"></span>' : '<span style="font-size:11px;flex-shrink:0;filter:drop-shadow(0 0 4px #D4AF37aa)" title="Донатер">🪙</span>';} return out; })()}
                             <span class="text-[10px] text-white font-bold truncate max-w-[110px]">${getBuildAuthors(item).join(', ')}</span>
-                            <span class="rank-badge ${rank.class} flex-shrink-0" title="${rank.next}" style="font-size:7px;padding:1px 5px;">${rank.name}</span>
+                            <span class="rank-badge ${rank.class} flex-shrink-0" title="${rank.next}" style="font-size:7px;padding:1px 5px;">${getRankIconHtml(rank.class)}${rank.name}</span>
                         </div>
                         <div id="card-views-${item.id}" class="text-[10px] text-gray-400 font-bold flex items-center gap-1 flex-shrink-0">👁 ${getViews(item.id)}</div>
                     </div>
@@ -1669,7 +1735,7 @@ function openModal(index) {
             const customMedalHtml = (_cmD && _cmD.icon) ? `<span class="donor-wrap" onmouseenter="_donorTipShow(this)" onmouseleave="_donorTipHide()"><img src="${_cmD.icon}" class="donor-img" data-glow="${_cmD.glow||'#fb923c'}" data-effect="${_cmD.effect||''}" data-medal-name="${_cmD.name||''}" style="width:15px;height:15px;border-radius:3px;object-fit:cover;display:block;"></span>` : '';
             const donorHtml = (p.donor ? (p.donorIcon ? `<span class="donor-wrap" onmouseenter="_donorTipShow(this)" onmouseleave="_donorTipHide()"><img src="${p.donorIcon}" class="donor-img" data-glow="${p.donorGlowColor||'#D4AF37'}" data-effect="${p.donorEffect||''}" data-medal-name="${p.donorMedalName||''}" style="width:15px;height:15px;border-radius:3px;object-fit:cover;display:block;"></span>` : '<span style="font-size:12px;filter:drop-shadow(0 0 4px #D4AF37aa)">🪙</span>') : '');
             return `<button class="flex items-center gap-1.5 hover:text-[#D4AF37] transition-colors group" onclick="openAuthorProfile('${name.replace(/'/g,"\\'")}')">
-                <span class="rank-badge ${r.class}" style="font-size:7px;padding:1px 6px;">${r.name}</span>
+                <span class="rank-badge ${r.class}" style="font-size:7px;padding:1px 6px;">${getRankIconHtml(r.class)}${r.name}</span>
                 ${customMedalHtml}${donorHtml}
                 <span class="font-bold text-white text-sm group-hover:text-[#D4AF37]">${name}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-gray-600 group-hover:text-[#D4AF37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -1680,7 +1746,7 @@ function openModal(index) {
     const authorNameEl = document.getElementById('author-name');
     if (authorNameEl) authorNameEl.innerText = authors.join(', ');
     const authorRankEl = document.getElementById('author-rank');
-    if (authorRankEl) authorRankEl.innerHTML = `<span class="rank-badge ${rank.class}">${rank.name}</span>`;
+    if (authorRankEl) authorRankEl.innerHTML = `<span class="rank-badge ${rank.class}">${getRankIconHtml(rank.class)}${rank.name}</span>`;
 
     const galleryGrid = document.getElementById('modal-gallery-grid');
     galleryGrid.innerHTML = '';
@@ -1835,7 +1901,7 @@ function openAuthorProfile(nameOverride) {
     }
    
     _renderPet(authorName);
-    document.getElementById('profile-rank-badge').innerHTML = `<span class="rank-badge ${rankData.class}">${rankData.name}</span>`;
+    document.getElementById('profile-rank-badge').innerHTML = `<span class="rank-medal-wrap" onmouseenter="_rankMedalTipShow(event,'${rankData.class}')" onmouseleave="_rankMedalTipHide()" onclick="_rankMedalTipClick()" style="cursor:pointer;"><span class="rank-badge ${rankData.class}">${getRankIconHtml(rankData.class)}${rankData.name}</span></span>`;
     document.getElementById('profile-rank-next').innerText = rankData.next;
     document.getElementById('profile-exp-label').innerText = progress.label;
     document.getElementById('profile-builds-count').innerText = authorBuilds.length;
@@ -2190,7 +2256,7 @@ function _showAuthorCard(event, name) {
         }
     }
     document.getElementById('ahc-name').innerText = name;
-    document.getElementById('ahc-rank').innerHTML = `<span class="rank-badge ${rankData.class}" style="font-size:7px;">${rankData.name}</span>`;
+    document.getElementById('ahc-rank').innerHTML = `<span class="rank-badge ${rankData.class}" style="font-size:7px;">${getRankIconHtml(rankData.class)}${rankData.name}</span>`;
     const donorEl = document.getElementById('ahc-donor');
     if (donorEl) {
         donorEl.style.display = profile.donor ? 'inline-block' : 'none';
@@ -2716,7 +2782,9 @@ function _renderTopAuthorsList(filtered, authorsData) {
                         <div class="flex items-center gap-2 flex-wrap mb-0.5">
                             ${customMedalBadge}${donorBadge}
                             <span class="font-black text-base cursor-pointer hover:text-[#D4AF37] transition-colors" onclick="openAuthorProfile('${author.name}')">${author.name}</span>
-                            <span class="rank-badge ${author.rank.class}" style="font-size:7px;padding:1px 8px;">${author.rank.name}</span>
+                            <span class="rank-medal-wrap" onmouseenter="_rankMedalTipShow(event,'${author.rank.class}')" onmouseleave="_rankMedalTipHide()" onclick="_rankMedalTipClick()">
+                                <span class="rank-badge ${author.rank.class}" style="font-size:7px;padding:1px 8px;">${RANK_ICONS[author.rank.class] ? '<img src="'+RANK_ICONS[author.rank.class]+'" style="width:13px;height:13px;border-radius:2px;object-fit:cover;margin-right:3px;flex-shrink:0;" alt="" onerror="this.style.display=\'none\'">' : ''}${author.rank.name}</span>
+                            </span>
                         </div>
                         <div class="text-[10px] text-gray-600 mb-2">${author.rank.next}</div>
                         <div class="flex flex-wrap gap-1 items-center">
@@ -3198,7 +3266,7 @@ function renderInfo() {
             var isDemiurg = r.minExp === 45000;
             var demiurgUnlocked = isDemiurg && allAuthorNames.some(function(n){return getAuthorExp(n) >= 45000;});
             if (isDemiurg && !demiurgUnlocked) {
-                return '<div class="col-span-2 sm:col-span-3 bg-black/30 rounded-xl p-3 border border-white/5 relative overflow-hidden flex flex-col">' +
+                return '<div class="col-span-2 sm:col-span-3 bg-black/30 rounded-xl border border-white/5 relative overflow-hidden" style="padding:12px 14px;">' +
                     '<div class="absolute inset-0 backdrop-blur-sm bg-black/55 z-10 flex items-center justify-center gap-3 rounded-xl">' +
                         '<span class="text-lg">🔒</span>' +
                         '<div>' +
@@ -3206,17 +3274,29 @@ function renderInfo() {
                             '<div class="text-[9px] text-gray-500">Откроется при достижении определенного порога опыта</div>' +
                         '</div>' +
                     '</div>' +
-                    '<span class="rank-badge rank-demiurg self-start mb-1.5 filter blur-sm select-none" style="margin-left:0;font-size:8px;padding:2px 10px;">⬛ ???</span>' +
-                    '<div class="text-[10px] text-white font-bold filter blur-sm">??? EXP</div>' +
-                    '<div class="text-[9px] text-gray-500 filter blur-sm">- скрытый порог</div>' +
-                    '<div class="text-[9px] text-gray-600 mt-1 filter blur-sm">→ ???</div>' +
+                    '<div style="display:flex;align-items:flex-start;gap:12px;filter:blur(4px);user-select:none;">' +
+                    (RANK_ICONS['rank-demiurg']
+                        ? '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;"><img src="' + RANK_ICONS['rank-demiurg'] + '" style="width:40px;height:40px;border-radius:9px;object-fit:cover;display:block;" alt=""><span class="rank-badge rank-demiurg" style="margin-left:0;font-size:6px;padding:1px 5px;white-space:nowrap;">⬛ ???</span></div>'
+                        : '') +
+                    '<div style="min-width:0;flex:1;">' +
+                        '<div style="font-size:12px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:3px;">??? EXP</div>' +
+                        '<div style="font-size:9px;color:#555;margin-bottom:2px;">скрытый порог</div>' +
+                        '<div style="font-size:9px;color:#555;">→ ???</div>' +
+                    '</div>' +
+                    '</div>' +
                 '</div>';
             }
-            return '<div class="bg-black/30 rounded-xl p-3 border border-white/5 flex flex-col">' +
-                '<span class="rank-badge ' + r.class + ' self-start mb-1.5" style="margin-left:0;font-size:8px;padding:2px 10px;">' + r.name + '</span>' +
-                '<div class="text-[10px] text-white font-bold">' + fromLabel + '</div>' +
-                '<div class="text-[9px] text-gray-500">' + toLabel + '</div>' +
-                arrow +
+            return '<div class="bg-black/30 rounded-xl border border-white/5 relative overflow-hidden" style="padding:12px 14px;cursor:default;transform-style:preserve-3d;transition:transform 0.08s ease;" onmouseenter="_rankSingleTipShow(event,\''+r.class+'\',\''+r.name+'\','+r.minExp+')" onmouseleave="_rankSingleTipHide();_rankCardTiltReset(this);" onmousemove="_rankCardTilt(event,this);_rankSingleTipMove(event);">' +
+                '<div style="display:flex;align-items:center;gap:0;">' +
+                (RANK_ICONS[r.class]
+                    ? '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;margin-right:14px;"><span class="rank-info-icon-wrap"><img src="' + RANK_ICONS[r.class] + '" style="width:40px;height:40px;border-radius:9px;object-fit:cover;display:block;" alt="" onerror="this.parentNode.parentNode.style.display=\'none\'"></span><span class="rank-badge ' + r.class + '" style="margin-left:0;font-size:6px;padding:1px 5px;white-space:nowrap;">' + r.name + '</span></div>'
+                    : '<span class="rank-badge ' + r.class + '" style="margin-left:0;font-size:7px;padding:2px 8px;margin-right:14px;">' + r.name + '</span>') +
+                '<div style="flex:1;">' +
+                    '<div style="font-size:12px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:3px;">' + fromLabel + '</div>' +
+                    '<div style="font-size:9px;color:#555;margin-bottom:2px;">' + toLabel + '</div>' +
+                    arrow +
+                '</div>' +
+                '</div>' +
             '</div>';
         }).join('') +
     '</div>';
@@ -3427,7 +3507,7 @@ function renderInfo() {
 
             '<div class="p-6" id="styles-leveling-panel">' +
                 '<div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">Стили для прокачки</div>' +
-                '<div style="display:flex;gap:12px;align-items:flex-start;">' +
+                '<div class="styles-inner-flex" style="display:flex;gap:12px;align-items:flex-start;">' +
                     // сетка стилей
                     '<div class="grid grid-cols-4 gap-2" style="flex-shrink:0;" id="styles-grid">' +
                         STYLE_DEFS.map(function(s, idx) {
@@ -3768,6 +3848,8 @@ function _initStylesPanel(STYLE_DEFS, _skillIcon) {
     btns.forEach(function(btn) {
         var idx = parseInt(btn.getAttribute('data-style-idx'));
         btn.addEventListener('mouseenter', function() { showStyle(idx); });
+        btn.addEventListener('touchstart', function(e) { e.preventDefault(); showStyle(idx); }, { passive: false });
+        btn.addEventListener('click', function() { showStyle(idx); });
     });
 
     
@@ -4196,6 +4278,241 @@ function _donorTipHide() {
     var tip = document.getElementById('donor-tooltip');
     if (tip) tip.style.display = 'none';
     if (_donorTipEl) { _donorTipEl.removeEventListener('mousemove', _donorTipMove); _donorTipEl = null; }
+}
+
+var _rankMedalTipTimer = null;
+var _rankMedalCurrentEl = null;
+
+
+var RANK_MEDAL_ICONS = {
+    'rank-novice':      '🪨',
+    'rank-adept':       '🌿',
+    'rank-expert':      '🔮',
+    'rank-master':      '⚔️',
+    'rank-grandmaster': '🛡️',
+    'rank-legend':      '🌟',
+    'rank-architect':   '📐',
+    'rank-creator':     '🎨',
+    'rank-absolute':    '🔥',
+    'rank-demiurg':     '👑',
+};
+
+function _getRankMedalEmoji(rankClass) {
+    return RANK_MEDAL_ICONS[rankClass] || '🏅';
+}
+
+const RANK_ICONS = {
+'rank-novice':      'https://static.wikia.nocookie.net/minecraft_gamepedia/images/d/d7/Music_Disc_11_JE2_BE2.png/revision/latest?cb=20190717080013',
+    'rank-adept':       'https://static.planetminecraft.com/files/image/minecraft/texture-pack/2024/798/18213694-image_xl.webp',
+    'rank-expert':      'https://external-preview.redd.it/minevinyl-create-custom-music-disc-resource-packs-v0-9VNF9pIioxfdza9vvaDzs6_pUcFOovrA4KzaoZ5yH_I.png?width=640&crop=smart&auto=webp&s=3ce8445d7cb7bc9d5b3bb3f3b9fbedbced6f6565',
+    'rank-master':      'https://static.planetminecraft.com/files/image/minecraft/texture-pack/2021/737/14142366_xl.webp',
+    'rank-grandmaster': 'https://i.namu.wiki/i/kN37VGPeQVhssLOUjleWtdU2iHUQwXGhddY-_9Hi9bgA2Kdd-RBJ4M-U-DulPhTM5xi46TJhuwDkbyjK5trkfg.png',
+    'rank-legend':      'https://media.forgecdn.net/avatars/thumbnails/342/574/256/256/637486690270287164.png',
+    'rank-architect':   'https://minecraft-max.net/upload/iblock/4cd/cqdo2ummm8x47pwkievrca7jox701i79.png',
+    'rank-creator':     'https://media.forgecdn.net/avatars/thumbnails/1604/986/256/256/639036551651954575.png',
+    'rank-absolute':    'https://media.forgecdn.net/avatars/thumbnails/962/569/256/256/638459641745095768.png',
+    'rank-demiurg':     'https://static.wikia.nocookie.net/minecraft_gamepedia/images/0/09/Music_Disc_5_JE1.png/revision/latest?cb=20230320031918',
+};
+
+function getRankIconHtml(rankClass, size) {
+    var url = RANK_ICONS[rankClass];
+    if (!url) return '';
+    var cls = (size === 'lg') ? 'rank-icon-lg' : 'rank-icon';
+    return '<img src="' + url + '" class="' + cls + '" alt="" onerror="this.style.display=\'none\'">';
+}
+
+function _buildRankMedalList() {
+    var RANKS_LOCAL = [
+        { name: 'Новичок',     cls: 'rank-novice',      minExp: 0     },
+        { name: 'Адепт',       cls: 'rank-adept',        minExp: 2200  },
+        { name: 'Эксперт',     cls: 'rank-expert',       minExp: 4500  },
+        { name: 'Мастер',      cls: 'rank-master',       minExp: 7000  },
+        { name: 'Грандмастер', cls: 'rank-grandmaster',  minExp: 9800  },
+        { name: 'Легенда',     cls: 'rank-legend',       minExp: 13000 },
+        { name: 'Архитектор',  cls: 'rank-architect',    minExp: 16500 },
+        { name: 'Творец',      cls: 'rank-creator',      minExp: 20500 },
+        { name: 'Абсолют',     cls: 'rank-absolute',     minExp: 25000 },
+        { name: 'Демиург',     cls: 'rank-demiurg',      minExp: 45000 },
+    ];
+    var el = document.getElementById('rank-medals-list');
+    if (!el || el.children.length) return;
+    RANKS_LOCAL.forEach(function(r) {
+        var isDemiurg = r.cls === 'rank-demiurg';
+        if (isDemiurg) return; // скрыто пока
+        var row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:8px;';
+        var iconHtml = RANK_ICONS[r.cls]
+            ? '<img src="' + RANK_ICONS[r.cls] + '" style="width:16px;height:16px;border-radius:3px;object-fit:cover;flex-shrink:0;" alt="" onerror="this.style.display=\'none\'">'
+            : '<span style="font-size:14px;line-height:1;width:16px;text-align:center;flex-shrink:0;">' + (RANK_MEDAL_ICONS[r.cls] || '🏅') + '</span>';
+        row.innerHTML =
+            iconHtml +
+            '<span class="rank-badge ' + r.cls + '" style="margin-left:0;font-size:7px;padding:1px 7px;white-space:nowrap;">' + r.name + '</span>' +
+            '<span style="font-size:8px;color:#555;margin-left:auto;white-space:nowrap;">' + (r.minExp > 0 ? r.minExp.toLocaleString() + ' EXP' : 'Старт') + '</span>';
+        el.appendChild(row);
+    });
+}
+
+function _rankMedalTipShow(evt, activeClass) {
+    _buildRankMedalList();
+    var tip = document.getElementById('rank-medals-tip');
+    if (!tip) return;
+
+    
+    var rows = tip.querySelectorAll('#rank-medals-list > div');
+    rows.forEach(function(row) {
+        var badge = row.querySelector('.rank-badge');
+        row.style.opacity = '1';
+        if (badge && badge.classList.contains(activeClass)) {
+            row.style.background = 'rgba(212,175,55,0.07)';
+            row.style.borderRadius = '8px';
+            row.style.padding = '2px 4px';
+            row.style.margin = '0 -4px';
+        } else {
+            row.style.background = '';
+            row.style.padding = '';
+            row.style.margin = '';
+        }
+    });
+
+    tip.style.display = 'block';
+    _rankMedalCurrentEl = evt.currentTarget;
+    _rankMedalCurrentEl.addEventListener('mousemove', _rankMedalTipMove);
+    _rankMedalTipMove(evt);
+}
+
+function _rankMedalTipMove(evt) {
+    var tip = document.getElementById('rank-medals-tip');
+    if (!tip) return;
+    var tw = tip.offsetWidth || 220;
+    var th = tip.offsetHeight || 280;
+    var x = evt.clientX + 14;
+    var y = evt.clientY - th / 2;
+    if (x + tw > window.innerWidth - 10) x = evt.clientX - tw - 14;
+    if (y < 8) y = 8;
+    if (y + th > window.innerHeight - 8) y = window.innerHeight - th - 8;
+    tip.style.left = x + 'px';
+    tip.style.top  = y + 'px';
+}
+
+function _rankMedalTipHide() {
+    var tip = document.getElementById('rank-medals-tip');
+    if (tip) tip.style.display = 'none';
+    if (_rankMedalCurrentEl) {
+        _rankMedalCurrentEl.removeEventListener('mousemove', _rankMedalTipMove);
+        _rankMedalCurrentEl = null;
+    }
+}
+
+function _rankCardTilt(evt, el) {
+    var rect = el.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+    var dx = (evt.clientX - cx) / (rect.width / 2);
+    var dy = (evt.clientY - cy) / (rect.height / 2);
+    var rotY =  dx * 10;
+    var rotX = -dy * 10;
+    el.style.transform = 'perspective(600px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg)';
+    
+    var tipImg = document.getElementById('rank-single-tip-img');
+    if (tipImg) {
+        tipImg.style.transform = 'rotateX(' + (rotX * 2.2) + 'deg) rotateY(' + (rotY * 2.2) + 'deg) scale(1.06)';
+        tipImg.style.boxShadow = '0 ' + (8 + Math.abs(dy)*12) + 'px ' + (28 + Math.abs(dx)*18) + 'px rgba(0,0,0,0.8)';
+    }
+}
+
+function _rankCardTiltReset(el) {
+    el.style.transform = '';
+    var tipImg = document.getElementById('rank-single-tip-img');
+    if (tipImg) {
+        tipImg.style.transform = '';
+        tipImg.style.boxShadow = '0 8px 28px rgba(0,0,0,0.7)';
+    }
+}
+
+function _rankInfoIconTilt(evt, el) {
+    var rect = el.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+    var dx = (evt.clientX - cx) / (rect.width / 2);
+    var dy = (evt.clientY - cy) / (rect.height / 2);
+    var rotY = dx * 28;
+    var rotX = -dy * 28;
+    el.style.transform = 'perspective(220px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale(1.18)';
+    el.style.filter = 'brightness(1.3) drop-shadow(0 0 8px rgba(212,175,55,0.7))';
+    
+    var tipImg = document.getElementById('rank-single-tip-img');
+    if (tipImg) {
+        tipImg.style.transform = 'rotateX(' + (rotX * 0.7) + 'deg) rotateY(' + (rotY * 0.7) + 'deg) scale(1.06)';
+        tipImg.style.boxShadow = '0 ' + (8 + Math.abs(dy)*10) + 'px ' + (28 + Math.abs(dx)*20) + 'px rgba(0,0,0,0.8)';
+    }
+    
+    _rankSingleTipMove(evt);
+}
+
+var _rankSingleTipRankClass = null;
+
+function _rankSingleTipShow(evt, rankClass, rankName, minExp) {
+    _rankSingleTipRankClass = rankClass;
+    var tip = document.getElementById('rank-single-tip');
+    var img = document.getElementById('rank-single-tip-img');
+    var nameEl = document.getElementById('rank-single-tip-name');
+    var expEl = document.getElementById('rank-single-tip-exp');
+    if (!tip || !img) return;
+    img.src = RANK_ICONS[rankClass] || '';
+    img.style.transform = '';
+    img.style.boxShadow = '0 8px 28px rgba(0,0,0,0.7)';
+    nameEl.textContent = rankName;
+    expEl.textContent = minExp > 0 ? minExp.toLocaleString() + ' EXP' : 'Начальный ранг';
+    tip.style.display = 'block';
+    _rankSingleTipMove(evt);
+}
+
+function _rankSingleTipMove(evt) {
+    var tip = document.getElementById('rank-single-tip');
+    if (!tip || tip.style.display === 'none') return;
+    var tw = tip.offsetWidth || 140;
+    var th = tip.offsetHeight || 130;
+    var x = evt.clientX + 18;
+    var y = evt.clientY - th / 2;
+    if (x + tw > window.innerWidth - 10) x = evt.clientX - tw - 18;
+    if (y < 8) y = 8;
+    if (y + th > window.innerHeight - 8) y = window.innerHeight - th - 8;
+    tip.style.left = x + 'px';
+    tip.style.top  = y + 'px';
+}
+
+function _rankSingleTipHide() {
+    var tip = document.getElementById('rank-single-tip');
+    if (tip) tip.style.display = 'none';
+    _rankSingleTipRankClass = null;
+}
+
+
+function _rankMedalTipClick() {
+    _rankMedalTipHide();
+    
+    var tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(function(t) { t.classList.remove('active'); });
+    var infoTab = Array.prototype.find.call(tabs, function(t) { return t.innerText.trim() === 'Информация'; });
+    if (infoTab) infoTab.classList.add('active');
+    renderInfo();
+    window.scrollTo(0, 0);
+    
+    setTimeout(function() {
+        var rankSection = document.querySelector('.grid.grid-cols-2.sm\\:grid-cols-3');
+        if (!rankSection) {
+            
+            var allDivs = document.querySelectorAll('*');
+            for (var i = 0; i < allDivs.length; i++) {
+                if (allDivs[i].textContent.trim() === 'Путь архитектора') {
+                    allDivs[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    break;
+                }
+            }
+        } else {
+            rankSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 450);
 }
 
 if (window._fbReady) {
@@ -6362,7 +6679,7 @@ function renderArchive() {
                     '<h3 class="text-sm font-extrabold mb-3 leading-tight uppercase">' + item.title + '</h3>' +
                     '<p class="text-[10px] text-gray-400 mt-auto font-medium italic uppercase tracking-wider">' +
                         '<span class="text-[10px] text-gray-500 uppercase tracking-widest">Автор: </span><span class="text-white font-bold text-[10px]">' + item.author + '</span>' +
-                        '<span class="rank-badge ' + rank.class + '" style="font-size:7px;padding:1px 5px;margin-left:5px;">' + rank.name + '</span>' +
+                        '<span class="rank-badge ' + rank.class + '" style="font-size:7px;padding:1px 5px;margin-left:5px;">' + getRankIconHtml(rank.class) + rank.name + '</span>' +
                     '</p>' +
                 '</div>' +
             '</div>';
@@ -6942,7 +7259,7 @@ if (window._fbReady) {
 
 <div id="disc-overlay">
   <div id="disc-modal">
-    <div class="disc-badge">Beta v1.8</div>
+    <div class="disc-badge">Beta v1.9.1</div>
     <h2>Добро пожаловать в Classic HUB</h2>
     <p class="disc-sub">Пожалуйста, ознакомьтесь перед использованием сайта</p>
 
