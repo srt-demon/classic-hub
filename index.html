@@ -47,11 +47,10 @@ Development by slowdown
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Classic HUB | Галерея шедевров</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, runTransaction, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-        const firebaseConfig = {
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script>
+        firebase.initializeApp({
             apiKey: "AIzaSyCFX-EmzMhI0VTHYxPhABo-tat1kfGoQsI",
             authDomain: "classichub-9ae97.firebaseapp.com",
             databaseURL: "https://classichub-9ae97-default-rtdb.europe-west1.firebasedatabase.app",
@@ -59,16 +58,24 @@ Development by slowdown
             storageBucket: "classichub-9ae97.firebasestorage.app",
             messagingSenderId: "864966183665",
             appId: "1:864966183665:web:2fb23e130af12f64f13750"
+        });
+
+        var _fbCompat = firebase.database();
+
+        
+        window._fbDb  = _fbCompat;
+        window._fbRef = function(db, path) { return _fbCompat.ref(path); };
+        window._fbGet = function(ref) { return ref.once('value'); };
+        window._fbOnValue = function(ref, cb, err) { ref.on('value', cb, err); };
+        window._fbRunTransaction = function(ref, updateFn) {
+            return new Promise(function(resolve, reject) {
+                ref.transaction(updateFn, function(err, committed, snap) {
+                    if (err) reject(err);
+                    else resolve({ committed: committed, snapshot: snap });
+                });
+            });
         };
-
-        const app = initializeApp(firebaseConfig);
-        const db  = getDatabase(app);
-
-        window._fbDb  = db;
-        window._fbRef = ref;
-        window._fbRunTransaction = runTransaction;
-        window._fbOnValue = onValue;
-        window._fbGet = get;
+        window._fbSet = function(ref, val) { return ref.set(val); };
         window._fbReady = true;
         document.dispatchEvent(new Event('firebase-ready'));
     </script>
@@ -238,7 +245,7 @@ Development by slowdown
             line-height: 1;
         }
         .ach-tier-I    { border-top: 3px solid #4ade80; }
-        .ach-tier-II   { border-top: 3px solid #60a5fa; }
+        .ach-tier-II   { border-top: 3px solid #f87171; }
         .ach-tier-III  { border-top: 3px solid #f59e0b; }
 
         #author-progress-bar {
@@ -352,7 +359,7 @@ Development by slowdown
 <div id="rank-medals-tip">
     <div style="font-size:9px;font-weight:900;color:#D4AF37;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;">Ранги архитектора</div>
     <div id="rank-medals-list" style="display:flex;flex-direction:column;gap:5px;"></div>
-    <div style="font-size:8px;color:#555;border-top:1px solid rgba(255,255,255,0.06);padding-top:7px;margin-top:8px;">Нажми - перейти к описанию рангов</div>
+    <div style="font-size:8px;color:#555;border-top:1px solid rgba(255,255,255,0.06);padding-top:7px;margin-top:8px;">Нажми — перейти к описанию рангов</div>
 </div>
 
 <div id="rank-single-tip" style="position:fixed;z-index:99999;pointer-events:none;display:none;
@@ -415,23 +422,131 @@ Development by slowdown
                 <a href="#" class="nav-tab" id="tab-updates-link">Обновления<span id="updates-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px #4ade80;animation:pulse-dot 1.4s infinite;" title="Новое обновление"></span></a>
                 <a href="#" class="nav-tab" id="nav-tab-shop">Магазин</a>
                 <a href="#" class="nav-tab" id="nav-tab-map">Карта</a>
+                <a href="#" class="nav-tab" id="nav-tab-cases">Кейсы</a>
                 <div class="ml-auto flex items-center gap-2 flex-shrink-0">
-                    <span id="mc-status-badge" onclick="_mcStatusOpen()" class="hidden md:inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full whitespace-nowrap" style="background:#0a1520;border:1px solid rgba(96,165,250,0.3);color:#60a5fa;cursor:pointer;transition:border-color .2s;" onmouseover="this.style.borderColor='rgba(96,165,250,0.6)'" onmouseout="this.style.borderColor='rgba(96,165,250,0.3)'">
-                        <span id="mc-status-dot" class="w-2 h-2 rounded-full inline-block flex-shrink-0" style="background:#60a5fa;animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;"></span>
-                        На сервере: <span id="mc-online-count">...</span>
+                    <!-- Badge: Online -->
+                    <span id="mc-status-badge" onclick="_mcStatusOpen()" class="nav-exp-badge hidden md:inline-flex" style="background:#1a1400;border:1px solid rgba(212,175,55,0.35);color:#D4AF37;cursor:pointer;">
+                        <span class="nav-exp-dot" style="background:#D4AF37;animation:pulse-dot 2s cubic-bezier(0.4,0,0.6,1) infinite;"></span>
+                        <span class="nav-short"><span id="mc-online-count">...</span></span>
+                        <span class="nav-full">На сервере:&nbsp;<span class="nav-full-val" data-src="mc-online-count">...</span></span>
                     </span>
-                    <span id="header-trend-badge" class="hidden md:inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full whitespace-nowrap" style="background:#D4AF3712;border:1px solid #D4AF3730;color:#D4AF37;">
-                        <span class="w-2 h-2 rounded-full inline-block flex-shrink-0" style="background:#D4AF37;animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;"></span>
-                        Текущий стиль: <span id="header-trend-name">GOTHIC</span>
+                    <!-- Badge: Trend -->
+                    <span id="header-trend-badge" class="nav-exp-badge hidden md:inline-flex" style="background:#1f0505;border:1px solid rgba(239,68,68,0.5);color:#f87171;">
+                        <span class="nav-exp-dot" style="background:#ef4444;animation:pulse-dot 2s cubic-bezier(0.4,0,0.6,1) infinite;box-shadow:0 0 6px #ef444488;"></span>
+                        <span class="nav-short"><span id="header-trend-name">GOTHIC</span></span>
+                        <span class="nav-full">Текущий стиль:&nbsp;<span class="nav-full-val" data-src="header-trend-name">GOTHIC</span></span>
                     </span>
-                    <span class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full whitespace-nowrap" style="background:#0d1f0d;border:1px solid rgba(74,222,128,0.3);color:#4ade80;">
-                        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block flex-shrink-0"></span>
-                        <span class="hidden sm:inline">Сейчас проходит:</span> <span id="header-season-name">...</span>
+                    <!-- Badge: Season -->
+                    <span class="nav-exp-badge inline-flex" style="background:#0d1f0d;border:1px solid rgba(74,222,128,0.3);color:#4ade80;">
+                        <span class="nav-exp-dot" style="background:#4ade80;animation:pulse-dot 2s cubic-bezier(0.4,0,0.6,1) infinite;"></span>
+                        <span class="nav-short"><span id="header-season-name">...</span></span>
+                        <span class="nav-full">Сейчас проходит:&nbsp;<span class="nav-full-val" data-src="header-season-name">...</span></span>
                     </span>
+
+                    <!-- Кнопка достижений с тултипом -->
+                    <div style="position:relative;flex-shrink:0;" id="ach-feed-wrap">
+                        <span onclick="event.stopPropagation();_achFeedToggle(this)" id="ach-medal-btn" style="
+                            display:inline-flex;align-items:center;justify-content:center;
+                            width:32px;height:32px;border-radius:50%;
+                            background:rgba(212,175,55,0.07);border:1px solid rgba(212,175,55,0.25);
+                            cursor:pointer;user-select:none;font-size:15px;line-height:1;
+                            transition:background .15s,border-color .15s;
+                        "
+                        onmouseover="this.style.background='rgba(212,175,55,0.18)';this.style.borderColor='rgba(212,175,55,0.5)';document.getElementById('ach-medal-tip').style.opacity='1'"
+                        onmouseout="this.style.background='rgba(212,175,55,0.07)';this.style.borderColor='rgba(212,175,55,0.25)';document.getElementById('ach-medal-tip').style.opacity='0'"><img src="https://media.forgecdn.net/avatars/thumbnails/195/535/256/256/636879664591858480.png" style="width:20px;height:20px;object-fit:contain;"></span>
+                        <div id="ach-medal-tip" style="
+                            position:fixed;
+                            background:#111;border:1px solid rgba(212,175,55,0.4);
+                            border-radius:8px;padding:5px 12px;
+                            font-size:10px;font-weight:700;color:#D4AF37;
+                            white-space:nowrap;pointer-events:none;
+                            opacity:0;transition:opacity 0.15s;
+                            z-index:9999;letter-spacing:.04em;
+                        ">ПОСЛЕДНИЕ ДОСТИЖЕНИЯ</div>
+                    </div>
                 </div>
             </nav>
         </div>
     </header>
+
+    <style>
+        
+        .nav-exp-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            white-space: nowrap;
+            cursor: default;
+        }
+        .nav-exp-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .nav-short {
+            opacity: 1;
+            max-width: 80px;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: opacity 0.2s ease, max-width 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        .nav-full {
+            opacity: 0;
+            max-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            display: inline-block;
+            vertical-align: middle;
+            transition: opacity 0.25s ease, max-width 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        
+        .nav-exp-badge:hover .nav-short { opacity: 0; max-width: 0; }
+        .nav-exp-badge:hover .nav-full  { opacity: 1; max-width: 220px; }
+
+        
+        .has-tip { position: relative; }
+        .nav-tip {
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111;
+            border: 1px solid rgba(167,139,250,0.4);
+            border-radius: 7px;
+            padding: 4px 9px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #c4b5fd;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            z-index: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+            text-transform: none;
+            letter-spacing: .03em;
+        }
+        .has-tip:hover .nav-tip { opacity: 1; }
+
+        #ach-feed-drop::-webkit-scrollbar { width: 3px; }
+        #ach-feed-drop::-webkit-scrollbar-track { background: transparent; }
+        #ach-feed-drop::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+        .ach-feed-row {
+            display:flex;align-items:center;gap:10px;
+            padding:8px 14px;border-bottom:1px solid rgba(255,255,255,0.04);
+            cursor:pointer;transition:background .12s;
+        }
+        .ach-feed-row:last-child { border-bottom:none; }
+        .ach-feed-row:hover { background:rgba(212,175,55,0.05); }
+    </style>
+
 
     <div id="ach-cursor-tip">
         <div style="display:flex;gap:11px;align-items:flex-start">
@@ -439,7 +554,10 @@ Development by slowdown
             <div>
                 <div id="act-name" style="font-size:12px;font-weight:900;color:#fff;margin-bottom:4px;line-height:1.3"></div>
                 <div id="act-desc" style="font-size:10px;color:#888;line-height:1.5;margin-bottom:8px"></div>
-                <span id="act-exp" style="font-size:10px;font-weight:900;padding:2px 10px;border-radius:20px;"></span>
+                <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+                    <span id="act-exp" style="font-size:10px;font-weight:900;padding:2px 10px;border-radius:20px;"></span>
+                    <span id="act-date" style="font-size:9px;color:#555;display:none;"></span>
+                </div>
             </div>
         </div>
     </div>
@@ -484,7 +602,7 @@ Development by slowdown
                 </div>
             </div>
             <div class="mt-12 pt-8 border-t border-white/5 text-[10px] text-gray-600 uppercase tracking-[0.3em] text-center">
-                © 2026 Classic HUB v1.9.1 | дизайн и разработка <a href="https://slowdown-portfolio.netlify.app" target="_blank" class="gold-accent hover:underline transition">slowdown</a>
+                © 2026 Classic HUB v2.1 | дизайн и разработка <a href="https://slowdown-portfolio.netlify.app" target="_blank" class="gold-accent hover:underline transition">slowdown</a>
             </div>
         </div>
     </footer>
@@ -1084,6 +1202,14 @@ Development by slowdown
                         <input id="f-contact" type="text" placeholder="Например: username или @username в Telegram" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-[#D4AF37] transition placeholder-gray-600">
                     </div>
 
+                    <label style="display:flex;align-items:flex-start;gap:12px;background:rgba(212,175,55,0.04);border:1px solid rgba(212,175,55,0.18);border-radius:14px;padding:14px 16px;cursor:pointer;">
+                        <input type="checkbox" id="f-heritage" style="width:16px;height:16px;accent-color:#D4AF37;flex-shrink:0;margin-top:1px;">
+                        <div>
+                            <div style="font-size:11px;font-weight:900;color:#D4AF37;margin-bottom:3px;">Постройка из Наследия</div>
+                            <div style="font-size:10px;color:#666;line-height:1.5;">Отметь, если постройка была построена <span style="color:#aaa;font-weight:700;">до версии Classic v1.21.1</span>. Это поможет администратору поставить правильную метку при добавлении.</div>
+                        </div>
+                    </label>
+
                 </div>
 
                 <div class="mt-6 flex flex-col gap-3">
@@ -1178,6 +1304,11 @@ function loadAuthorProfilesFromDB() {
                 authorProfiles[child.key] = child.val();
             });
         }
+        if (_dataLoaded) {
+            var track = document.getElementById('ach-ticker-track');
+            if (track) track.innerHTML = '';
+            _initAchTicker();
+        }
     });
 }
 
@@ -1205,6 +1336,11 @@ function loadCustomAchievementsFromDB() {
     const dbRef = window._fbRef(window._fbDb, 'config/customAchievements');
     window._fbOnValue(dbRef, snap => {
         customAchievements = snap.exists() ? snap.val() : {};
+        if (_dataLoaded && Object.keys(authorProfiles).length) {
+            var track = document.getElementById('ach-ticker-track');
+            if (track) track.innerHTML = '';
+            _initAchTicker();
+        }
     });
 }
 
@@ -1347,6 +1483,11 @@ const ACH_ICONS = {
     obt_member:      'https://ccvaults.com/assets/50.%20Icons/Cool_Down.png',
     april_fool:      'https://ccvaults.com/assets/50.%20Icons/Conduit_Counter.png',
     new_year:        'https://ccvaults.com/assets/50.%20Icons/Freezing.png',
+    //наследие
+    heritage_pioneer: 'https://ccvaults.com/assets/50.%20Icons/Explorer.png',
+    heritage_guardian:'https://ccvaults.com/assets/50.%20Icons/Committed.png',
+    heritage_keeper:  'https://ccvaults.com/assets/50.%20Icons/Pain_Cycle.png',
+    heritage_legend:  'https://ccvaults.com/assets/50.%20Icons/Gravity.png',
 };
 
 let CURRENT_SEASON        = 'Сезон 1';
@@ -1548,10 +1689,10 @@ const ACHIEVEMENTS = [
     { id: 'real_estate', tier: 'I', name: 'Магнат недвижимости', desc: 'Иметь 10 опубликованных построек', exp: 500, check: (a, ab) => ab.length >= 10 },
     { id: 'pioneer', tier: 'II', name: 'Первопроходец', desc: 'Опубликовать объект в первую неделю сезона', exp: 200, check: (a, ab) => { const start = new Date(CURRENT_SEASON_START); return ab.some(b => { if (b.season !== CURRENT_SEASON) return false; const diff = (new Date(b.date) - start) / 86400000; return diff >= 0 && diff <= 7; }); } },
     { id: 'season_hero', tier: 'II', name: 'Герой сезона', desc: 'Опубликовать 5 разных объектов в текущем сезоне', exp: 400, check: (a, ab) => ab.filter(b => b.season === CURRENT_SEASON).length >= 5 },
-    { id: 'popular_warp', tier: 'II', name: 'Популярная постройка', desc: 'Набрать 200 просмотров на одном объекте текущего сезона', exp: 250, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && getViews(b.id) >= 200) },
+    { id: 'popular_warp', tier: 'II', name: 'Популярный постройка', desc: 'Набрать 200 просмотров на одном объекте текущего сезона', exp: 250, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && getViews(b.id) >= 200) },
     { id: 'season_style', tier: 'II', name: 'Стиль сезона', get desc() { return `Построить объект в стиле-тренде сезона, сейчас это - (${SEASON_TREND_STYLE})`; }, exp: 150, check: (a, ab) => ab.some(b => b.season === CURRENT_SEASON && b.style === SEASON_TREND_STYLE) },
     { id: 'season_closing', tier: 'II', name: 'Закрытие сезона', desc: 'Опубликовать объект за неделю до планируемого вайпа', exp: 200, check: (a, ab) => { const end = new Date(CURRENT_SEASON_END); return ab.some(b => { if (b.season !== CURRENT_SEASON) return false; const diff = (end - new Date(b.date)) / 86400000; return diff >= 0 && diff <= 7; }); } },
-    { id: 'active_viewer', tier: 'II', name: 'Активный зритель', desc: 'Просматривать все постройки на протяжении месяца', exp: 50, check: (a, ab) => _sessionViewedOthers.size >= 20 },
+    { id: 'active_viewer', tier: 'II', name: 'Активный зритель', desc: 'Открыть 20 чужих работ текущего сезона за одну сессию', exp: 50, check: (a, ab) => _sessionViewedOthers.size >= 20 },
     { id: 'season_collector', tier: 'II', name: 'Коллекционер сезонов', desc: 'Иметь постройки в 3 и более разных сезонах', exp: 500, check: (a, ab) => new Set(ab.map(b => b.season)).size >= 3 },
     { id: 'veteran', tier: 'II', name: 'Ветеран Архива', desc: 'Иметь постройки минимум в трёх разных сезонах', exp: 300, check: (a, ab) => new Set(ab.map(b => b.season)).size >= 3 },
     { id: 'historian', tier: 'II', name: 'Хранитель истории', desc: 'Опубликовал постройку из самого старого сезона (Сезон 1)', exp: 200, check: (a, ab) => ab.some(b => b.season === 'Сезон 1') },
@@ -1565,7 +1706,7 @@ const ACHIEVEMENTS = [
     { id: 'classic_keeper', tier: 'III', name: 'Хранитель классики', desc: 'Найти и опубликовать постройка из самого первого сезона', exp: 500, hidden: true, check: (a, ab) => ab.some(b => b.season === 'Сезон 1') },
     { id: 'shadow_magnate', tier: 'III', name: 'Теневой магнат', desc: 'Построил Gothic-объект в подземном биоме', exp: 150, hidden: true, check: (a, ab) => ab.some(b => b.style === 'GOTHIC' && (b.desc.toLowerCase().includes('подзем') || b.desc.toLowerCase().includes('катакомб') || b.desc.toLowerCase().includes('пещер'))) },
 
-    // те шо добавил в 1.4-1т
+    
     { id: 'samurai_path',  tier: 'I',   name: 'Путь Самурая',         desc: 'Опубликовать 3 объекта в стиле JAPANESE',                                                            exp: 300,  check: (a, ab) => ab.filter(b => b.style === 'JAPANESE').length >= 3 },
     { id: 'void_engineer', tier: 'I',   name: 'Инженер пустоты',      desc: 'Опубликовать объект в стиле STEAMPUNK',                                                              exp: 150,  check: (a, ab) => ab.some(b => b.style === 'STEAMPUNK') },
     { id: 'urbanist',      tier: 'I',   name: 'Урбанист',             desc: 'Иметь в профиле одновременно постройки CITY и SETTLEMENT',                                           exp: 250,  check: (a, ab) => ab.some(b => b.style === 'CITY') && ab.some(b => b.style === 'SETTLEMENT') },
@@ -1600,7 +1741,13 @@ const ACHIEVEMENTS = [
     { id: 'year_on_site',  tier: 'II', name: 'Год на сайте',     desc: 'Зарегистрирован на сайте не менее 365 дней',  exp: 2000, hidden: false, check: (a, ab) => { const p = authorProfiles[a]; if (!p || !p.joined) return false; return (Date.now() - new Date(p.joined)) >= 365*24*3600*1000; } },
     { id: 'obt_member',   tier: 'II', name: 'Участник ОБТ',           desc: 'Зарегистрировался на сайте в период открытого бета-тестирования', exp: 350, check: (a, ab) => { const p = authorProfiles[a]; if (!p || !p.joined) return false; return new Date(p.joined) < new Date('2026-04-01'); } },
     { id: 'april_fool',   tier: 'II', name: 'Апрельский приколист',  desc: 'Опубликовал постройку 1 апреля - умеет веселиться!',                                  exp: 200, check: (a, ab) => ab.some(b => { const d = new Date(b.date); return d.getMonth() === 3 && d.getDate() === 1; }) },
-    { id: 'new_year',     tier: 'II', name: 'Новогодний чудило',     desc: 'Опубликовал постройку 31 декабря - встречает Новый год со стилем!',                    exp: 350, check: (a, ab) => ab.some(b => { const d = new Date(b.date); return d.getMonth() === 11 && d.getDate() === 31; }) }
+    { id: 'new_year',     tier: 'II', name: 'Новогодний чудило',     desc: 'Опубликовал постройку 31 декабря - встречает Новый год со стилем!',                    exp: 350, check: (a, ab) => ab.some(b => { const d = new Date(b.date); return d.getMonth() === 11 && d.getDate() === 31; }) },
+
+    
+    { id: 'heritage_pioneer',  tier: 'I',   name: 'Хранитель наследия',   desc: 'Опубликовать 1 постройку из эпохи Наследия (до Classic v1.21.1)',   exp: 150,  check: (a, ab) => ab.some(b => !!b.heritage) },
+    { id: 'heritage_guardian', tier: 'I',   name: 'Страж прошлого',        desc: 'Опубликовать 3 постройки из эпохи Наследия (до Classic v1.21.1)',   exp: 400,  check: (a, ab) => ab.filter(b => !!b.heritage).length >= 3 },
+    { id: 'heritage_keeper',   tier: 'III', name: 'Летописец наследия',    desc: 'Опубликовать 5 построек из эпохи Наследия (до Classic v1.21.1)',    exp: 900,  hidden: true, check: (a, ab) => ab.filter(b => !!b.heritage).length >= 5 },
+    { id: 'heritage_legend',   tier: 'III', name: 'Легенда эпохи',         desc: 'Опубликовать 10 построек из эпохи Наследия (до Classic v1.21.1)',   exp: 2000, hidden: true, check: (a, ab) => ab.filter(b => !!b.heritage).length >= 10 }
 
 ];
 
@@ -1610,15 +1757,24 @@ function getAuthorAchievements(authorName) {
         ACHIEVEMENTS.filter(ach => ach.check(authorName, authorBuilds)).map(a => a.id)
     );
     const profile = authorProfiles[authorName] || {};
-    const manualUnlocked = new Set(Object.keys(profile.unlockedAchievements || {}));
-    const standard = ACHIEVEMENTS.filter(ach => autoUnlocked.has(ach.id) || manualUnlocked.has(ach.id));
+    const manualUnlocked = profile.unlockedAchievements || {};
+    const manualSet = new Set(Object.keys(manualUnlocked));
+    const standard = ACHIEVEMENTS.filter(ach => autoUnlocked.has(ach.id) || manualSet.has(ach.id)).map(ach => {
+        const ts = typeof manualUnlocked[ach.id] === 'number' ? manualUnlocked[ach.id] : 0;
+        return { ...ach, ts };
+    });
     const unlockedCustom = profile.unlockedCustomAchievements || {};
     const custom = Object.entries(customAchievements)
-        .filter(([key]) => unlockedCustom[key])
-        .map(([key, ca]) => ({
-            id: 'custom_' + key, tier: ca.tier, name: ca.name, desc: ca.desc, exp: ca.exp || 0,
-            icon: ca.icon, isCustom: true, _key: key
-        }));
+        .filter(([key]) => unlockedCustom[key] !== undefined)
+        .map(([key, ca]) => {
+            const val = unlockedCustom[key];
+            const ts = typeof val === 'number' ? val
+                     : (val && typeof val === 'object' && val.ts) ? val.ts : 0;
+            return {
+                id: 'custom_' + key, tier: ca.tier, name: ca.name, desc: ca.desc, exp: ca.exp || 0,
+                icon: ca.icon, isCustom: true, _key: key, ts
+            };
+        });
     return [...standard, ...custom];
 }
 
@@ -1666,7 +1822,7 @@ function renderBuilds(filterStyle = 'Все', searchQuery = '') {
             <div class="build-card fade-in-up" id="bcard-${item.id}" onclick="openModalById('${item.id}')" style="animation-delay: 0.1s;">
                 <div class="relative h-52 overflow-hidden">
                     <img src="${item.images[0]}" class="w-full h-full object-cover">
-                    <div class="absolute top-3 left-3 bg-black/70 backdrop-blur-sm text-[10px] font-bold px-3 py-1 rounded border border-[#D4AF37]/30 uppercase tracking-widest">${item.season}</div>
+                    <div class="absolute top-3 left-3 bg-black/70 backdrop-blur-sm text-[10px] font-bold px-3 py-1 rounded border border-[#D4AF37]/30 uppercase tracking-widest">${item.heritage ? 'Наследие' : item.season}</div>
 
                 </div>
                 <div class="p-5 flex flex-col flex-grow">
@@ -1721,7 +1877,7 @@ function openModal(index) {
 
     document.getElementById('modal-title').innerText  = item.title;
     document.getElementById('modal-desc').innerText   = item.desc;
-    document.getElementById('modal-season').innerText = item.season;
+    document.getElementById('modal-season').innerText = item.heritage ? 'Наследие' : item.season;
     document.getElementById('modal-style').innerText  = item.style;
     document.getElementById('modal-coords').innerText = item.coords || '-';
 
@@ -2122,7 +2278,7 @@ function openAuthorProfile(nameOverride) {
         const rest = achWithRarity.slice(5);
 
         showcase.innerHTML = top5.map(a => {
-            const tc  = a.tier==='I' ? '#4ade80' : a.tier==='II' ? '#60a5fa' : '#c084fc';
+            const tc  = a.tier==='I' ? '#4ade80' : a.tier==='II' ? '#f87171' : '#c084fc';
             const en  = (a.name||'').replace(/'/g,"\\'");
             const ed  = (a.desc||'').replace(/'/g,"\\'");
             const rarityLabel = a.pct === 0 ? '✦ Уник.' : `${a.pct}%`;
@@ -2134,7 +2290,7 @@ function openAuthorProfile(nameOverride) {
                 : `<img src="${ACH_ICONS[a.id]||'https://placehold.co/52x52/1a1a1a/555?text=?'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/52x52/1a1a1a/555?text=?'">`;
             const iconArg = (a.isCustom && a.icon) ? a.icon : '';
             return `<div class="flex flex-col items-center gap-1 cursor-default group"
-                 onmouseenter="_achTipShow(event,'${a.id}','${en}','${ed}',${a.exp},'${tc}','${iconArg}')" onmouseleave="_achTipHide()">
+                 onmouseenter="_achTipShow(event,'${a.id}','${en}','${ed}',${a.exp},'${tc}','${iconArg}',${a.ts||0})" onmouseleave="_achTipHide()">
                 <div class="w-full rounded-xl overflow-hidden border-2 group-hover:scale-105 transition-transform"
                      style="aspect-ratio:1;border-color:${tc}55;box-shadow:0 0 8px ${tc}22;background:#151515;">
                     ${inner}
@@ -2144,7 +2300,7 @@ function openAuthorProfile(nameOverride) {
         }).join('');
 
         restEl.innerHTML = rest.map(a => {
-            const tc  = a.tier==='I' ? '#4ade80' : a.tier==='II' ? '#60a5fa' : '#c084fc';
+            const tc  = a.tier==='I' ? '#4ade80' : a.tier==='II' ? '#f87171' : '#c084fc';
             const en  = (a.name||'').replace(/'/g,"\\'");
             const ed  = (a.desc||'').replace(/'/g,"\\'");
             if (a.isCustom) {
@@ -2152,17 +2308,17 @@ function openAuthorProfile(nameOverride) {
                 if (isIconUrlRest) {
                     return `<img src="${a.icon}" class="w-7 h-7 rounded-lg object-cover cursor-default hover:scale-110 transition-transform"
                          style="border:1px solid ${tc};opacity:0.85;"
-                         onmouseenter="_achTipShow(event,'${a.id}','${en}','${ed}',${a.exp},'${tc}','${a.icon}')" onmouseleave="_achTipHide()"
+                         onmouseenter="_achTipShow(event,'${a.id}','${en}','${ed}',${a.exp},'${tc}','${a.icon}',${a.ts||0})" onmouseleave="_achTipHide()"
                          onerror="this.style.display='none'">`;
                 }
                 return `<div class="w-7 h-7 rounded-lg cursor-default hover:scale-110 transition-transform flex items-center justify-center"
                      style="border:1px solid ${tc};opacity:0.85;background:#151515;font-size:16px;"
-                     onmouseenter="_achTipShow(event,'${a.id}','${en}','${ed}',${a.exp},'${tc}','')" onmouseleave="_achTipHide()">${a.icon||'🏆'}</div>`;
+                     onmouseenter="_achTipShow(event,'${a.id}','${en}','${ed}',${a.exp},'${tc}','',${a.ts||0})" onmouseleave="_achTipHide()">${a.icon||'🏆'}</div>`;
             }
             const src = ACH_ICONS[a.id] || 'https://placehold.co/28x28/1a1a1a/555?text=?';
             return `<img src="${src}" class="w-7 h-7 rounded-lg object-cover cursor-default hover:scale-110 transition-transform"
                  style="border:1px solid ${tc};opacity:0.85;"
-                 onmouseenter="_achTipShow(event,'${a.id}','${en}','${ed}',${a.exp},'${tc}')" onmouseleave="_achTipHide()"
+                 onmouseenter="_achTipShow(event,'${a.id}','${en}','${ed}',${a.exp},'${tc}','',${a.ts||0})" onmouseleave="_achTipHide()"
                  onerror="this.src='https://placehold.co/28x28/1a1a1a/555?text=?'">`;
         }).join('');
 
@@ -2189,8 +2345,7 @@ function openAuthorProfile(nameOverride) {
 function closeAuthorProfile() {
     document.getElementById('author-overlay').style.display = 'none';
     if (!document.getElementById('modal-overlay').classList.contains('is-open')) {
-        var _cb3 = document.getElementById('contest-banner');
-        if (_cb3) _cb3.style.visibility = '';
+        _contestBannerRestore();
     }
     _destroyPet();
     document.querySelectorAll('[id^="pef-big-"],[id^="pef-sm-"]').forEach(function(c){ c.remove(); });
@@ -2328,7 +2483,7 @@ function _showAuthorCard(event, name) {
     document.getElementById('ahc-achs').innerHTML = achs.length
         ? achs.slice(0,12).map(a => {
             const src = ACH_ICONS[a.id] || 'https://placehold.co/28x28/1a1a1a/555?text=?';
-            const tc = a.tier==='I' ? '#4ade8055' : a.tier==='II' ? '#60a5fa55' : '#f59e0b88';
+            const tc = a.tier==='I' ? '#4ade8055' : a.tier==='II' ? '#f8717155' : '#f59e0b88';
             return `<img src="${src}" title="${a.name}" style="width:28px;height:28px;border-radius:7px;border:1px solid ${tc};object-fit:cover;" onerror="this.src='https://placehold.co/28x28/1a1a1a/555?text=?'">`;
         }).join('')
         : '<span style="font-size:10px;color:#444;font-style:italic;">Нет достижений</span>';
@@ -2515,6 +2670,8 @@ function resetForm() {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
+    const heritageEl = document.getElementById('f-heritage');
+    if (heritageEl) heritageEl.checked = false;
     const styleEl = document.getElementById('f-style');
     if (styleEl) styleEl.value = '';
     const list = document.getElementById('authors-list');
@@ -2585,6 +2742,8 @@ function submitToGoogleForm() {
         ? `${authorInputs[0].value.trim()}, ${coAuthors.join(', ')}`
         : authorInputs[0].value.trim();
 
+    const isHeritage = document.getElementById('f-heritage')?.checked;
+
     const text = [
         `🏛 <b>Новая заявка в Архив Classic</b>`,
         ``,
@@ -2595,11 +2754,42 @@ function submitToGoogleForm() {
         `👤 <b>Авторы:</b> ${escapeHtml(authorsText)}`,
         `🖼 <b>Альбом:</b> ${escapeHtml(album)}`,
         `💬 <b>Контакт:</b> ${escapeHtml(contact)}`,
-    ].join('\n');
+        isHeritage ? `\n<b>Наследие (до v1.21.1)</b> - поставить флаг heritage при добавлении` : ``,
+    ].filter(s => s !== '').join('\n');
 
     const btn = document.querySelector('#form-overlay button[onclick="submitToGoogleForm()"]');
     btn.disabled = true;
     btn.textContent = 'Отправляем...';
+
+    
+    const mainAuthor = authorInputs[0].value.trim();
+    var _spinGrantResult = null; 
+
+    if (mainAuthor && typeof _fbCompat !== 'undefined') {
+        _fbCompat.ref('builds').once('value').then(function(snap) {
+            var allBuilds = snap.exists() ? snap.val() : {};
+            var nameLower = mainAuthor.toLowerCase();
+            var count = Object.values(allBuilds).filter(function(b) {
+                if (!b || !b.author) return false;
+                var authors = Array.isArray(b.author)
+                    ? b.author
+                    : String(b.author).split(',').map(function(s){ return s.trim(); });
+                return authors.some(function(a){ return (a||'').toLowerCase() === nameLower; });
+            }).length;
+            var newTotal = count + 1;
+            var shouldGrant = (newTotal === 1) || ((newTotal - 1) % 3 === 0);
+            console.log('[cases] author:', mainAuthor, '| builds:', count, '| newTotal:', newTotal, '| shouldGrant:', shouldGrant);
+            if (!shouldGrant) { _spinGrantResult = false; return; }
+            _fbCompat.ref('caseSpins/' + mainAuthor).transaction(
+                function(cur) { return (cur || 0) + 1; },
+                function(err, committed, snap2) {
+                    if (err) { console.warn('[cases] tx error:', err); _spinGrantResult = false; return; }
+                    console.log('[cases] granted to', mainAuthor, '| committed:', committed, '| val:', snap2 && snap2.val());
+                    _spinGrantResult = committed ? true : false;
+                }
+            );
+        }).catch(function(err) { console.warn('[cases] read error:', err); });
+    }
 
     fetch(WORKER_URL, {
         method: 'POST',
@@ -2609,10 +2799,21 @@ function submitToGoogleForm() {
     .then(r => r.json())
     .then(data => {
         if (data.ok) {
-            btn.textContent = '✓ Заявка отправлена!';
-            btn.classList.remove('bg-[#D4AF37]', 'text-black');
-            btn.classList.add('bg-green-600', 'text-white');
-            setTimeout(() => toggleForm(false), 1800);
+            
+            setTimeout(function() {
+                var granted = _spinGrantResult === true;
+                var msg = granted ? '✓ Отправлено! +1 прокрутка кейса!' : '✓ Заявка отправлена!';
+                if (granted) {
+                    setTimeout(function() {
+                        var ntf = document.getElementById('case-spin-notify');
+                        if (ntf) { ntf.style.display='flex'; setTimeout(function(){ntf.style.display='none';},5000); }
+                    }, 400);
+                }
+                btn.textContent = msg;
+                btn.classList.remove('bg-[#D4AF37]', 'text-black');
+                btn.classList.add('bg-green-600', 'text-white');
+                setTimeout(() => toggleForm(false), granted ? 2400 : 1800);
+            }, 800);
         } else {
             throw new Error(data.description || 'Ошибка');
         }
@@ -2635,6 +2836,164 @@ function updateStats() {
     const seasonBadge = document.getElementById('header-season-name');
     if (seasonBadge) seasonBadge.innerText = CURRENT_SEASON;
 }
+
+function _achFeedToggle(btn) {
+    var drop = document.getElementById('ach-feed-drop');
+
+    
+    if (!drop) {
+        drop = document.createElement('div');
+        drop.id = 'ach-feed-drop';
+        drop.style.cssText = 'display:none;position:fixed;width:380px;max-height:420px;' +
+            'background:rgba(10,8,0,0.97);border:1px solid rgba(212,175,55,0.2);' +
+            'border-radius:16px;overflow:hidden;' +
+            'box-shadow:0 20px 60px rgba(0,0,0,0.9),0 4px 20px rgba(212,175,55,0.1);' +
+            'backdrop-filter:blur(24px);z-index:99999;';
+        drop.innerHTML =
+            '<div style="padding:10px 14px 8px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between;">' +
+                '<span style="font-size:9px;font-weight:900;color:#D4AF37;text-transform:uppercase;letter-spacing:.15em;">Последние достижения</span>' +
+                '<span onclick="event.stopPropagation();_achFeedClose()" style="color:#444;font-size:13px;cursor:pointer;padding:2px 8px;border-radius:4px;line-height:1;" onmouseover="this.style.color=\'#fff\'" onmouseout="this.style.color=\'#444\'">✕</span>' +
+            '</div>' +
+            '<div id="ach-feed-list" style="overflow-y:auto;max-height:330px;scrollbar-width:thin;scrollbar-color:#2a2a2a transparent;">' +
+                '<div style="color:#D4AF37;font-size:11px;text-align:center;padding:24px;">Загрузка...</div>' +
+            '</div>';
+        drop.addEventListener('click', function(e){ e.stopPropagation(); });
+        document.body.appendChild(drop);
+    }
+
+    var isOpen = drop.style.display !== 'none';
+    if (isOpen) { drop.style.display = 'none'; return; }
+
+    
+    var rect = btn.getBoundingClientRect();
+    var dropW = 380;
+    var left = rect.right - dropW;
+    if (left < 8) left = 8;
+    drop.style.left = left + 'px';
+    drop.style.top  = (rect.bottom + 8) + 'px';
+    drop.style.display = 'block';
+
+    _initAchFeed();
+}
+
+function _achFeedClose() {
+    var drop = document.getElementById('ach-feed-drop');
+    if (drop) drop.style.display = 'none';
+}
+
+
+document.addEventListener('click', function() {
+    _achFeedClose();
+});
+
+function _initAchFeed() {
+    var list = document.getElementById('ach-feed-list');
+    if (!list) return;
+
+    var TIER_COLOR = { 'I': '#4ade80', 'II': '#f87171', 'III': '#f59e0b' };
+    var entries = [];
+    var seen = {}; 
+
+    Object.keys(authorProfiles).forEach(function(name) {
+        try {
+            var achs = getAuthorAchievements(name);
+            achs.forEach(function(a) {
+                var key = name + '|' + a.id;
+                if (seen[key]) return;
+                seen[key] = true;
+                entries.push({ author: name, ach: a, ts: a.ts || 0, isCustom: !!a.isCustom });
+            });
+        } catch(e) {}
+    });
+
+    if (!entries.length) {
+        list.innerHTML = '<div style="color:#D4AF37;font-size:11px;text-align:center;padding:24px;">Достижений пока нет</div>';
+        return;
+    }
+
+    var authorLastBuild = {};
+    Object.keys(authorProfiles).forEach(function(name) {
+        var ab = builds.filter(function(b){ return getBuildAuthors(b).includes(name); });
+        authorLastBuild[name] = ab.length
+            ? Math.max.apply(null, ab.map(function(b){ return new Date(b.date).getTime() || 0; }))
+            : 0;
+    });
+
+    entries.sort(function(a, b) {
+        if (b.ts !== a.ts) return b.ts - a.ts;
+        var lastA = authorLastBuild[a.author] || 0;
+        var lastB = authorLastBuild[b.author] || 0;
+        if (lastB !== lastA) return lastB - lastA;
+        if (a.isCustom !== b.isCustom) return a.isCustom ? 1 : -1;
+        return 0;
+    });
+    var top = entries.slice(0, 30);
+
+    list.innerHTML = '';
+    top.forEach(function(e) {
+        var achDef = e.ach;
+        var tierColor = TIER_COLOR[achDef.tier] || '#D4AF37';
+        var iconUrl = e.isCustom ? (achDef.icon || '') : (ACH_ICONS[achDef.id] || '');
+        var skinUrl = 'https://visage.surgeplay.com/face/20/' + getSkin(e.author);
+        var timeStr = (e.ts > 0 && !e.isCustom) ? _achFeedTimeAgo(e.ts) : '';
+
+        var allAuthorsCount = Object.keys(authorProfiles).length || 1;
+        var pctStr = '';
+        if (!e.isCustom) {
+            var ownerCount = 0;
+            Object.keys(authorProfiles).forEach(function(n) {
+                var ab = builds.filter(function(b){ return getBuildAuthors(b).includes(n); });
+                try { if (achDef.check && achDef.check(n, ab)) ownerCount++; } catch(ex){}
+                if ((authorProfiles[n].unlockedAchievements || {})[achDef.id]) ownerCount++;
+            });
+
+            ownerCount = Math.min(ownerCount, allAuthorsCount);
+            var pct = Math.round(ownerCount / allAuthorsCount * 100);
+            pctStr = pct === 0 ? '✦ Уникальное' : 'Есть у ' + pct + '% игроков';
+        }
+
+        var row = document.createElement('div');
+        row.className = 'ach-feed-row';
+        row.onclick = (function(author){ return function(){ openAuthorProfile(author); _achFeedClose(); }; })(e.author);
+
+        row.innerHTML =
+
+            (iconUrl
+                ? '<img src="'+iconUrl+'" style="width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid '+tierColor+'44;box-shadow:0 0 8px '+tierColor+'33;" onerror="this.style.display=\'none\'">'
+                : '<span style="width:38px;height:38px;border-radius:8px;background:'+tierColor+'15;border:1px solid '+tierColor+'33;display:inline-flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏅</span>') +
+            '<div style="flex:1;min-width:0;padding-left:8px;">' +
+                '<div style="font-size:11px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;">'+_escHtmlFeed(achDef.name)+'</div>' +
+                (achDef.desc ? '<div style="font-size:9px;color:#666;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;">'+_escHtmlFeed(achDef.desc)+'</div>' : '') +
+                (pctStr ? '<div style="font-size:8px;color:'+tierColor+';opacity:0.6;margin-top:2px;">'+pctStr+'</div>' : '') +
+            '</div>' +
+            '<div style="flex-shrink:0;display:flex;align-items:center;gap:5px;padding-left:8px;">' +
+                '<div style="text-align:right;">' +
+                    '<div style="font-size:9px;font-weight:700;color:#D4AF37;white-space:nowrap;">'+_escHtmlFeed(e.author)+'</div>' +
+                    (timeStr ? '<div style="font-size:8px;color:#555;margin-top:1px;white-space:nowrap;">'+timeStr+'</div>' : '') +
+                '</div>' +
+                '<img src="'+skinUrl+'" style="width:22px;height:22px;border-radius:4px;image-rendering:pixelated;flex-shrink:0;" onerror="this.style.display=\'none\'">' +
+            '</div>';
+
+        list.appendChild(row);
+    });
+}
+
+function _achFeedTimeAgo(ts) {
+    if (!ts) return '';
+    var diff = Date.now() - ts;
+    var d = Math.floor(diff / 86400000);
+    var h = Math.floor(diff / 3600000);
+    var m = Math.floor(diff / 60000);
+    if (d > 30) return '';
+    if (d > 0) return d + 'д назад';
+    if (h > 0) return h + 'ч назад';
+    if (m > 0) return m + 'м назад';
+    return 'только что';
+}
+
+function _escHtmlFeed(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function _initAchTicker() { _initAchFeed(); } 
 
 function renderTopAuthors(searchQ, _fromInput) {
     searchQ = (searchQ || '').toLowerCase();
@@ -2738,12 +3097,14 @@ function _renderTopAuthorsList(filtered, authorsData) {
                 : ri === 0 ? `<div style="position:absolute;inset:0;background:linear-gradient(90deg,#1c1500,#1e1e1e);pointer-events:none;z-index:0;"></div>` : '';
 
             const achIcons = author.achs.map(a => {
-                const src = ACH_ICONS[a.id] || 'https://placehold.co/22x22/252525/555?text=?';
-                const tg  = a.tier==='I' ? '0 0 5px #4ade8077' : a.tier==='II' ? '0 0 5px #60a5fa77' : '0 0 7px #f59e0b99';
-                const tb  = a.tier==='I' ? '#4ade8055' : a.tier==='II' ? '#60a5fa55' : '#f59e0b88';
+                const iconUrl = a.isCustom ? (a.icon || '') : (ACH_ICONS[a.id] || '');
+                const src = iconUrl || 'https://placehold.co/22x22/252525/555?text=?';
+                const tg  = a.tier==='I' ? '0 0 5px #4ade8077' : a.tier==='II' ? '0 0 5px #f8717177' : '0 0 7px #f59e0b99';
+                const tb  = a.tier==='I' ? '#4ade8055' : a.tier==='II' ? '#f8717155' : '#f59e0b88';
                 const en  = (a.name||'').replace(/'/g,"\\'");
                 const ed  = (a.desc||'').replace(/'/g,"\\'");
-                return `<img src="${src}" title="${a.name}" class="w-6 h-6 rounded object-cover cursor-pointer hover:scale-125 transition-transform flex-shrink-0" style="border:1px solid ${tb};box-shadow:${tg};" onmouseenter="event.stopPropagation();_achTipShow(event,'${a.id}','${en}','${ed}',${a.exp},'${tb}')" onmouseleave="_achTipHide()" onerror="this.src='https://placehold.co/22x22/252525/555?text=?'">`;
+                const ic  = iconUrl.replace(/'/g,"\\'");
+                return `<img src="${src}" title="${a.name}" class="w-6 h-6 rounded object-cover cursor-pointer hover:scale-125 transition-transform flex-shrink-0" style="border:1px solid ${tb};box-shadow:${tg};" onmouseenter="event.stopPropagation();_achTipShow(event,'${a.id}','${en}','${ed}',${a.exp},'${tb}','${ic}')" onmouseleave="_achTipHide()" onerror="this.src='https://placehold.co/22x22/252525/555?text=?'">`;
             }).join('');
 
             const donorBadge = author.isDonor
@@ -2830,7 +3191,7 @@ function renderAchievements(filterTier, searchStr) {
 
     const tiers = [
         { id: 'I',   label: 'Строительные',  color: '#4ade80', bg: '#1c2a1c', desc: 'За мастерство и стиль' },
-        { id: 'II',  label: 'Сезонные',      color: '#60a5fa', bg: '#1a1f2e', desc: 'За активность в сезоне' },
+        { id: 'II',  label: 'Сезонные',      color: '#f87171', bg: '#1f1414', desc: 'За активность в сезоне' },
         { id: 'III', label: 'Легендарные',   color: '#f59e0b', bg: '#2a1f0e', desc: 'Тайные и сложнейшие' },
     ];
 
@@ -2920,7 +3281,7 @@ function renderAchievements(filterTier, searchStr) {
             <div class="flex gap-2 flex-wrap">
                 ${['all','I','II','III'].map(v => {
                     const labels = {all:'Все',I:'I · Строительные',II:'II · Сезонные',III:'III · Легендарные'};
-                    const colors = {all:'#ffffff22',I:'#4ade8033',II:'#60a5fa33',III:'#f59e0b33'};
+                    const colors = {all:'#ffffff22',I:'#4ade8033',II:'#f8717133',III:'#f59e0b33'};
                     const active = filterTier === v;
                     return `<button id="achfbtn-${v}" onclick="_achUpdateCards('${v}', (document.getElementById('ach-search')||{value:''}).value.toLowerCase())"
                         class="text-[11px] font-black uppercase tracking-wider px-4 py-2 rounded-xl border transition-all"
@@ -2981,7 +3342,7 @@ function _achUpdateCards(filterTier, searchStr) {
     ['all','I','II','III'].forEach(v => {
         const btn = document.getElementById('achfbtn-'+v);
         if (!btn) return;
-        const cols = {all:'#ffffff22',I:'#4ade8033',II:'#60a5fa33',III:'#f59e0b33'};
+        const cols = {all:'#ffffff22',I:'#4ade8033',II:'#f8717133',III:'#f59e0b33'};
         const active = filterTier === v;
         btn.style.background   = active ? cols[v] : 'transparent';
         btn.style.color        = active ? '#fff' : '#666';
@@ -2989,7 +3350,7 @@ function _achUpdateCards(filterTier, searchStr) {
     });
     const tiers = [
         { id:'I',   label:'Строительные', color:'#4ade80', bg:'#1c2a1c', desc:'За мастерство и стиль' },
-        { id:'II',  label:'Сезонные',     color:'#60a5fa', bg:'#1a1f2e', desc:'За активность в сезоне' },
+        { id:'II',  label:'Сезонные',     color:'#f87171', bg:'#1f1414', desc:'За активность в сезоне' },
         { id:'III', label:'Легендарные',  color:'#f59e0b', bg:'#2a1f0e', desc:'Тайные и сложнейшие' },
     ];
     const allAuthNames  = [...new Set(builds.flatMap(b => getBuildAuthors(b)))];
@@ -3090,7 +3451,7 @@ function showAchPopup(id, name, desc, exp, color) {
     </div>`;
 }
 
-function _achTipShow(evt, id, name, desc, exp, color, customIcon) {
+function _achTipShow(evt, id, name, desc, exp, color, customIcon, ts) {
     const tip = document.getElementById('ach-cursor-tip');
     tip.style.border = '1px solid ' + color + '55';
     const iconSrc = (customIcon && /^https?:\/\//i.test(customIcon)) ? customIcon : (ACH_ICONS[id] || 'https://placehold.co/44x44/252525/555?text=?'); document.getElementById('act-img').src = iconSrc;
@@ -3101,6 +3462,17 @@ function _achTipShow(evt, id, name, desc, exp, color, customIcon) {
     expEl.style.background = color + '18';
     expEl.style.color = color;
     expEl.style.border = '1px solid ' + color + '44';
+    const dateEl = document.getElementById('act-date');
+    if (dateEl) {
+        const isCustom = String(id).startsWith('custom_');
+        if (ts && ts > 0 && !isCustom) {
+            const d = new Date(ts);
+            dateEl.textContent = '📅 ' + d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+            dateEl.style.display = 'inline';
+        } else {
+            dateEl.style.display = 'none';
+        }
+    }
     _achTipMove(evt);
     tip.style.display = 'block';
 }
@@ -3193,24 +3565,31 @@ function openImgInTab() {
 
 document.getElementById('search-input').addEventListener('input', e => {
     const activeTab = document.querySelector('.nav-tab.active').innerText.trim();
-    if (['Топ авторов','Информация','Достижения','Архив','Обновления','Магазин'].includes(activeTab)) return;
+    if (['Топ авторов','Информация','Достижения','Архив','Обновления','Магазин','Кейсы'].includes(activeTab)) return;
     renderBuilds('Все', e.target.value);
 });
 
 document.getElementById('sort-select').addEventListener('change', () => {
     const activeTab = document.querySelector('.nav-tab.active').innerText.trim();
-    if (['Топ авторов','Информация','Достижения','Архив','Обновления','Магазин'].includes(activeTab)) return;
+    if (['Топ авторов','Информация','Достижения','Архив','Обновления','Магазин','Кейсы'].includes(activeTab)) return;
     renderBuilds('Все', document.getElementById('search-input').value);
 });
 
 document.querySelectorAll('.nav-tab').forEach(tab => {
     tab.addEventListener('click', (e) => {
         const tabName = tab.innerText.trim();
+        const tabId = tab.id || '';
         if (tabName === 'На сайт') return;
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         var _pt=document.getElementById('page-title');if(_pt)_pt.style.display='';
-        if (tabName === 'Топ авторов') {
+        if (tabId === 'nav-tab-cases') {
+            renderCases();
+        } else if (tabId === 'nav-tab-shop' || tabName === 'Магазин') {
+            renderShop();
+        } else if (tabId === 'nav-tab-map' || tabName === 'Карта') {
+            renderMap();
+        } else if (tabName === 'Топ авторов') {
             renderTopAuthors();
         } else if (tabName === 'Достижения') {
             renderAchievements();
@@ -3220,10 +3599,6 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
             renderArchive();
         } else if (tabName === 'Обновления') {
             renderUpdates();
-        } else if (tabName === 'Магазин') {
-            renderShop();
-        } else if (tabName === 'Карта') {
-            renderMap();
         } else {
             document.getElementById('page-title').innerText = 'Экспозиция построек';
             renderBuilds('Все', document.getElementById('search-input').value);
@@ -3276,7 +3651,7 @@ function renderInfo() {
                     '</div>' +
                     '<div style="display:flex;align-items:flex-start;gap:12px;filter:blur(4px);user-select:none;">' +
                     (RANK_ICONS['rank-demiurg']
-                        ? '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;"><img src="' + RANK_ICONS['rank-demiurg'] + '" style="width:40px;height:40px;border-radius:9px;object-fit:cover;display:block;" alt=""><span class="rank-badge rank-demiurg" style="margin-left:0;font-size:6px;padding:1px 5px;white-space:nowrap;">⬛ ???</span></div>'
+                        ? '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px;"><img src="' + RANK_ICONS['rank-demiurg'] + '" style="width:40px;height:40px;border-radius:9px;object-fit:cover;display:block;" alt=""><span class="rank-badge rank-demiurg" style="margin-left:0;font-size:6px;padding:1px 5px;white-space:nowrap;">⬛ ???</span></div>'
                         : '') +
                     '<div style="min-width:0;flex:1;">' +
                         '<div style="font-size:12px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:3px;">??? EXP</div>' +
@@ -3287,9 +3662,9 @@ function renderInfo() {
                 '</div>';
             }
             return '<div class="bg-black/30 rounded-xl border border-white/5 relative overflow-hidden" style="padding:12px 14px;cursor:default;transform-style:preserve-3d;transition:transform 0.08s ease;" onmouseenter="_rankSingleTipShow(event,\''+r.class+'\',\''+r.name+'\','+r.minExp+')" onmouseleave="_rankSingleTipHide();_rankCardTiltReset(this);" onmousemove="_rankCardTilt(event,this);_rankSingleTipMove(event);">' +
-                '<div style="display:flex;align-items:center;gap:0;">' +
+                '<div style="display:flex;align-items:flex-start;gap:0;">' +
                 (RANK_ICONS[r.class]
-                    ? '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;margin-right:14px;"><span class="rank-info-icon-wrap"><img src="' + RANK_ICONS[r.class] + '" style="width:40px;height:40px;border-radius:9px;object-fit:cover;display:block;" alt="" onerror="this.parentNode.parentNode.style.display=\'none\'"></span><span class="rank-badge ' + r.class + '" style="margin-left:0;font-size:6px;padding:1px 5px;white-space:nowrap;">' + r.name + '</span></div>'
+                    ? '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px;margin-right:14px;"><span class="rank-info-icon-wrap"><img src="' + RANK_ICONS[r.class] + '" style="width:40px;height:40px;border-radius:9px;object-fit:cover;display:block;" alt="" onerror="this.parentNode.parentNode.style.display=\'none\'"></span><span class="rank-badge ' + r.class + '" style="margin-left:0;font-size:6px;padding:1px 5px;white-space:nowrap;">' + r.name + '</span></div>'
                     : '<span class="rank-badge ' + r.class + '" style="margin-left:0;font-size:7px;padding:2px 8px;margin-right:14px;">' + r.name + '</span>') +
                 '<div style="flex:1;">' +
                     '<div style="font-size:12px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:3px;">' + fromLabel + '</div>' +
@@ -3508,7 +3883,7 @@ function renderInfo() {
             '<div class="p-6" id="styles-leveling-panel">' +
                 '<div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">Стили для прокачки</div>' +
                 '<div class="styles-inner-flex" style="display:flex;gap:12px;align-items:flex-start;">' +
-                    // сетка стилей
+                    
                     '<div class="grid grid-cols-4 gap-2" style="flex-shrink:0;" id="styles-grid">' +
                         STYLE_DEFS.map(function(s, idx) {
                             return '<div class="style-skill-btn bg-black/30 rounded-xl p-2.5 border border-white/5 text-center transition-all duration-200 cursor-pointer" style="border-color:rgba(255,255,255,0.05)" data-style-idx="' + idx + '">' +
@@ -3518,7 +3893,7 @@ function renderInfo() {
                             '</div>';
                         }).join('') +
                     '</div>' +
-                    // панель детальной информации
+                   
                     '<div id="style-info-panel" style="flex:1;min-width:0;display:none;animation:_siPanelIn .18s cubic-bezier(.34,1.56,.64,1);">' +
                         '<div style="background:#0a0a0a;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;">' +
                             '<div id="sip-accent-bar" style="height:2px;background:linear-gradient(90deg,#D4AF37,transparent);"></div>' +
@@ -3632,15 +4007,15 @@ function renderInfo() {
                     '</div>' +
                 '</div>' +
 
-                '<div class="rounded-xl border overflow-hidden flex-1" style="border-color:#60a5fa33">' +
-                    '<div class="flex items-center gap-3 px-4 py-3 h-full" style="background:#1a1f2e">' +
-                        '<div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0" style="background:#141828;color:#60a5fa;border:1px solid #60a5fa55">II</div>' +
+                '<div class="rounded-xl border overflow-hidden flex-1" style="border-color:#f8717133">' +
+                    '<div class="flex items-center gap-3 px-4 py-3 h-full" style="background:#1f1414">' +
+                        '<div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0" style="background:#180e0e;color:#f87171;border:1px solid #f8717155">II</div>' +
                         '<div class="flex-grow">' +
-                            '<div class="text-xs font-black" style="color:#60a5fa">Сезонные</div>' +
+                            '<div class="text-xs font-black" style="color:#f87171">Сезонные</div>' +
                             '<div class="text-[9px] text-gray-500">Активность в текущем сезоне, даты публикаций</div>' +
-                            '<div class="text-[9px] mt-0.5" style="color:#60a5fa77">+150 - +600 EXP</div>' +
+                            '<div class="text-[9px] mt-0.5" style="color:#f8717177">+150 - +600 EXP</div>' +
                         '</div>' +
-                        '<div class="text-right flex-shrink-0"><div class="text-sm font-black" style="color:#60a5fa">' + ACHIEVEMENTS.filter(a=>a.tier==='II').length + '</div><div class="text-[9px] text-gray-600">ачивок</div></div>' +
+                        '<div class="text-right flex-shrink-0"><div class="text-sm font-black" style="color:#f87171">' + ACHIEVEMENTS.filter(a=>a.tier==='II').length + '</div><div class="text-[9px] text-gray-600">ачивок</div></div>' +
                     '</div>' +
                 '</div>' +
 
@@ -3775,22 +4150,24 @@ function renderInfo() {
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Prime - это добровольная подписка-поддержка проекта. <strong class="text-white">1 подписка</strong> даёт: статус Prime в профиле, медаль донатера, 1 артефакт на выбор на 30 дней и открывает витрину снаряжения (до 5 предметов). Купить можно через кнопку <span class="text-[#D4AF37] font-bold">«Приобрести Prime»</span> в разделе <strong class="text-white">Магазин</strong> - заполняешь форму, мы свяжемся в Discord/Telegram.</p>' +
                 '</div> -->' +
 
-                '<!-- <div>' +
+                '<div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое Артефакты?</div>' +
-                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Артефакты - это особые предметы с эффектами, доступные только подписчикам <strong class="text-white">Prime</strong>. У каждого предмета есть <strong class="text-white">срок действия</strong> - обычно 30 дней. Когда срок истекает, предмет уходит в <strong class="text-white">Архив предметов</strong> в профиле и перестает действовать. Если подписка аннулируется раньше - все предметы тоже уходят в архив. В данный момент с доступными артефактами можно ознакомиться во вкладке <strong class="text-white">Магазин</strong>.</p>' +
-                '</div> -->' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Артефакты - это особые предметы с эффектами, доступные к получению только из <strong class="text-white">Кейса</strong>. У каждого предмета есть <strong class="text-white">срок действия</strong> - обычно 30 дней. Когда срок истекает, предмет уходит в <strong class="text-white">Архив предметов</strong> в профиле и перестает действовать. В данный момент с доступными артефактами можно ознакомиться во вкладке <strong class="text-white">Кейсы</strong>.</p>' +
+                '</div>' +
                 
                 '<div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что за частицы мерцают у автора в профиле?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Это эффекты профиля - анимированные частицы вокруг аватарки. Виден в <strong class="text-white">трёх местах</strong>: в большом профиле, в ховер-карточке при наведении и у головы в Топе авторов.</p>' +
                 '</div>' +
                 '<div>' +
-                    '<!-- <div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое Архив предметов?</div>' +
-                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Архив - это специальная секция в профиле с истёкшими артефактами. Предметы там отображаются <strong class="text-white">тёмными и неактивными</strong> - как история того, что было. Переобрести предмет можно заново через новую подписку Prime и тогда он станет активным снова.</p>' + 
-                '</div> -->' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое Архив предметов?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Архив - это специальная секция в профиле с истёкшими артефактами. Предметы там отображаются <strong class="text-white">тёмными и неактивными</strong> - как история того, что было. Получить предмет можно заново - выбив его из кейса и тогда он станет активным снова.</p>' + 
+                '</div>' +
             '</div>' +
 
             '</div>' +
+        '</div>' +
+
         '</div>' +
 
         '</div>';
@@ -4283,7 +4660,6 @@ function _donorTipHide() {
 var _rankMedalTipTimer = null;
 var _rankMedalCurrentEl = null;
 
-
 var RANK_MEDAL_ICONS = {
     'rank-novice':      '🪨',
     'rank-adept':       '🌿',
@@ -4306,7 +4682,7 @@ const RANK_ICONS = {
     'rank-adept':       'https://static.planetminecraft.com/files/image/minecraft/texture-pack/2024/798/18213694-image_xl.webp',
     'rank-expert':      'https://external-preview.redd.it/minevinyl-create-custom-music-disc-resource-packs-v0-9VNF9pIioxfdza9vvaDzs6_pUcFOovrA4KzaoZ5yH_I.png?width=640&crop=smart&auto=webp&s=3ce8445d7cb7bc9d5b3bb3f3b9fbedbced6f6565',
     'rank-master':      'https://static.planetminecraft.com/files/image/minecraft/texture-pack/2021/737/14142366_xl.webp',
-    'rank-grandmaster': 'https://i.namu.wiki/i/kN37VGPeQVhssLOUjleWtdU2iHUQwXGhddY-_9Hi9bgA2Kdd-RBJ4M-U-DulPhTM5xi46TJhuwDkbyjK5trkfg.png',
+    'rank-grandmaster': 'https://i.imgur.com/yPllrzg.png',
     'rank-legend':      'https://media.forgecdn.net/avatars/thumbnails/342/574/256/256/637486690270287164.png',
     'rank-architect':   'https://minecraft-max.net/upload/iblock/4cd/cqdo2ummm8x47pwkievrca7jox701i79.png',
     'rank-creator':     'https://media.forgecdn.net/avatars/thumbnails/1604/986/256/256/639036551651954575.png',
@@ -4338,7 +4714,7 @@ function _buildRankMedalList() {
     if (!el || el.children.length) return;
     RANKS_LOCAL.forEach(function(r) {
         var isDemiurg = r.cls === 'rank-demiurg';
-        if (isDemiurg) return; // скрыто пока
+        if (isDemiurg) return; // скрыт 
         var row = document.createElement('div');
         row.style.cssText = 'display:flex;align-items:center;gap:8px;';
         var iconHtml = RANK_ICONS[r.cls]
@@ -4439,13 +4815,11 @@ function _rankInfoIconTilt(evt, el) {
     var rotX = -dy * 28;
     el.style.transform = 'perspective(220px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale(1.18)';
     el.style.filter = 'brightness(1.3) drop-shadow(0 0 8px rgba(212,175,55,0.7))';
-    
     var tipImg = document.getElementById('rank-single-tip-img');
     if (tipImg) {
         tipImg.style.transform = 'rotateX(' + (rotX * 0.7) + 'deg) rotateY(' + (rotY * 0.7) + 'deg) scale(1.06)';
         tipImg.style.boxShadow = '0 ' + (8 + Math.abs(dy)*10) + 'px ' + (28 + Math.abs(dx)*20) + 'px rgba(0,0,0,0.8)';
     }
-    
     _rankSingleTipMove(evt);
 }
 
@@ -5971,7 +6345,7 @@ function _closePrimeModal() {
     if (typeof _pefTileRAFs !== 'undefined') { Object.values(_pefTileRAFs).forEach(function(r){ if(r) cancelAnimationFrame(r); }); _pefTileRAFs = {}; }
     document.getElementById('prime-modal').style.display = 'none';
     var _cbp2 = document.getElementById('contest-banner');
-    if (_cbp2 && document.getElementById('shop-modal').style.display !== 'flex' && !document.getElementById('modal-overlay').classList.contains('is-open') && document.getElementById('author-overlay').style.display !== 'flex') _cbp2.style.visibility = '';
+    if (document.getElementById('shop-modal').style.display !== 'flex' && !document.getElementById('modal-overlay').classList.contains('is-open') && document.getElementById('author-overlay').style.display !== 'flex') _contestBannerRestore();
     Object.keys(_petPreviewRenderers).forEach(function(id) {
         if (id.indexOf('prim-pet-preview') === 0) _destroyPetPreview(id);
     });
@@ -6535,7 +6909,7 @@ function _submitPrimeRequest() {
 function _closeShopModal() {
     document.getElementById('shop-modal').style.display = 'none';
     var _cbs2 = document.getElementById('contest-banner');
-    if (_cbs2 && document.getElementById('prime-modal').style.display !== 'flex' && !document.getElementById('modal-overlay').classList.contains('is-open') && document.getElementById('author-overlay').style.display !== 'flex') _cbs2.style.visibility = '';
+    if (document.getElementById('prime-modal').style.display !== 'flex' && !document.getElementById('modal-overlay').classList.contains('is-open') && document.getElementById('author-overlay').style.display !== 'flex') _contestBannerRestore();
     if (window._smCanvasRAF) { cancelAnimationFrame(window._smCanvasRAF); window._smCanvasRAF = null; }
     _destroyPetPreview('sm-pet-preview-canvas');
 }
@@ -6632,7 +7006,10 @@ function renderUpdates() {
 function renderArchive() {
     document.getElementById('page-title').innerText = 'Архив сезонов';
 
-    var seasons = [...new Set(builds.map(function(b){ return b.season; }))].sort(function(a, b) {
+    var heritageBuilds = builds.filter(function(b){ return !!b.heritage; });
+    var regularBuilds  = builds.filter(function(b){ return !b.heritage; });
+
+    var seasons = [...new Set(regularBuilds.map(function(b){ return b.season; }))].sort(function(a, b) {
         return parseInt(b.replace(/\D/g,'')) - parseInt(a.replace(/\D/g,''));
     });
 
@@ -6656,8 +7033,26 @@ function renderArchive() {
         '</div>' +
     '</div>';
 
+    function buildCard(item) {
+        var rank = getAuthorRank(item.author);
+        return '<div class="build-card fade-in-up" onclick="openModalById(\'' + item.id + '\')">' +
+            '<div class="relative h-48 overflow-hidden">' +
+                '<img src="' + item.images[0] + '" class="w-full h-full object-cover">' +
+                '<div class="absolute top-3 left-3 bg-black/70 backdrop-blur-sm text-[10px] font-bold px-3 py-1 rounded border border-yellow-500/30 uppercase tracking-widest">' + item.style + '</div>' +
+                '<div id="card-views-' + item.id + '" class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-[10px] font-bold px-2.5 py-1 rounded-lg text-gray-300 border border-white/10">👁 ' + getViews(item.id) + '</div>' +
+            '</div>' +
+            '<div class="p-5 flex flex-col flex-grow">' +
+                '<h3 class="text-sm font-extrabold mb-3 leading-tight uppercase">' + item.title + '</h3>' +
+                '<p class="text-[10px] text-gray-400 mt-auto font-medium italic uppercase tracking-wider">' +
+                    '<span class="text-[10px] text-gray-500 uppercase tracking-widest">Автор: </span><span class="text-white font-bold text-[10px]">' + item.author + '</span>' +
+                    '<span class="rank-badge ' + rank.class + '" style="font-size:7px;padding:1px 5px;margin-left:5px;">' + getRankIconHtml(rank.class) + rank.name + '</span>' +
+                '</p>' +
+            '</div>' +
+        '</div>';
+    }
+
     seasons.forEach(function(season) {
-        var seasonBuilds = builds.filter(function(b){ return b.season === season; });
+        var seasonBuilds = regularBuilds.filter(function(b){ return b.season === season; });
         var isCurrent = season === CURRENT_SEASON;
         var seasonAuthors = [...new Set(seasonBuilds.map(function(b){ return b.author; }))];
 
@@ -6667,24 +7062,6 @@ function renderArchive() {
 
         var titleColor = isCurrent ? 'gold-accent' : 'text-white';
 
-        var cardsHtml = seasonBuilds.map(function(item) {
-            var rank = getAuthorRank(item.author);
-            return '<div class="build-card fade-in-up" onclick="openModalById(\'' + item.id + '\')">' +
-                '<div class="relative h-48 overflow-hidden">' +
-                    '<img src="' + item.images[0] + '" class="w-full h-full object-cover">' +
-                    '<div class="absolute top-3 left-3 bg-black/70 backdrop-blur-sm text-[10px] font-bold px-3 py-1 rounded border border-yellow-500/30 uppercase tracking-widest">' + item.style + '</div>' +
-                    '<div id="card-views-' + item.id + '" class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-[10px] font-bold px-2.5 py-1 rounded-lg text-gray-300 border border-white/10">👁 ' + getViews(item.id) + '</div>' +
-                '</div>' +
-                '<div class="p-5 flex flex-col flex-grow">' +
-                    '<h3 class="text-sm font-extrabold mb-3 leading-tight uppercase">' + item.title + '</h3>' +
-                    '<p class="text-[10px] text-gray-400 mt-auto font-medium italic uppercase tracking-wider">' +
-                        '<span class="text-[10px] text-gray-500 uppercase tracking-widest">Автор: </span><span class="text-white font-bold text-[10px]">' + item.author + '</span>' +
-                        '<span class="rank-badge ' + rank.class + '" style="font-size:7px;padding:1px 5px;margin-left:5px;">' + getRankIconHtml(rank.class) + rank.name + '</span>' +
-                    '</p>' +
-                '</div>' +
-            '</div>';
-        }).join('');
-
         html += '<div>' +
             '<div class="flex items-center gap-4 mb-5">' +
                 '<div class="flex items-center gap-3">' + badge +
@@ -6693,9 +7070,29 @@ function renderArchive() {
                 '<div class="flex-grow h-px bg-white/5"></div>' +
                 '<span class="text-[10px] text-gray-500 flex-shrink-0">' + seasonBuilds.length + ' построек · ' + seasonAuthors.length + ' авторов</span>' +
             '</div>' +
-            '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">' + cardsHtml + '</div>' +
+            '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">' +
+                seasonBuilds.map(buildCard).join('') +
+            '</div>' +
         '</div>';
     });
+
+    if (heritageBuilds.length) {
+        var heritageAuthors = [...new Set(heritageBuilds.map(function(b){ return b.author; }))];
+        html +=
+            '<div style="border-top:1px solid rgba(212,175,55,0.12);padding-top:32px;">' +
+                '<div class="flex items-center gap-4 mb-5">' +
+                    '<div class="flex items-center gap-3">' +
+                        '<span class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full" style="background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.25);color:#D4AF37;">Наследие</span>' +
+                    '</div>' +
+                    '<div class="flex-grow h-px" style="background:rgba(212,175,55,0.08);"></div>' +
+                    '<span class="text-[10px] text-gray-500 flex-shrink-0">' + heritageBuilds.length + ' построек · ' + heritageAuthors.length + ' авторов · до Classic v1.21.1</span>' +
+                '</div>' +
+                '<p class="text-gray-600 text-xs mb-6">Постройки, созданные до введения сезонной системы. Часть истории сервера.</p>' +
+                '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">' +
+                    heritageBuilds.map(buildCard).join('') +
+                '</div>' +
+            '</div>';
+    }
 
     html += '</div>';
     container.innerHTML = html;
@@ -6723,200 +7120,10 @@ if (window._fbReady) {
 
 <style>
 
-  #disc-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.75);
-    backdrop-filter: blur(4px);
-    z-index: 9990;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: disc-fadein 0.4s ease;
-  }
-  @keyframes disc-fadein { from { opacity:0 } to { opacity:1 } }
-
-  #disc-modal {
-    background: #161616;
-    border: 1px solid #2a2a2a;
-    border-top: 3px solid #D4AF37;
-    border-radius: 12px;
-    width: min(520px, 92vw);
-    padding: 32px;
-    position: relative;
-    animation: disc-slidein 0.4s cubic-bezier(0.16,1,0.3,1);
-  }
-  @keyframes disc-slidein {
-    from { transform: translateY(24px); opacity:0 }
-    to   { transform: translateY(0);    opacity:1 }
-  }
-
-  .disc-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #D4AF3720;
-    border: 1px solid #D4AF3740;
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    color: #D4AF37;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-  }
-  .disc-badge::before {
-    content: '';
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #D4AF37;
-    animation: disc-pulse 1.5s ease-in-out infinite;
-  }
-  @keyframes disc-pulse {
-    0%,100% { opacity:1; transform:scale(1) }
-    50%      { opacity:0.4; transform:scale(0.7) }
-  }
-
-  #disc-modal h2 {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 18px;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 6px;
-    letter-spacing: 0.02em;
-  }
-
-  #disc-modal .disc-sub {
-    font-size: 12px;
-    color: #666;
-    font-family: 'Montserrat', sans-serif;
-    margin-bottom: 24px;
-  }
-
-  .disc-section {
-    background: #1e1e1e;
-    border: 1px solid #2a2a2a;
-    border-radius: 8px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-  }
-  .disc-section-title {
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: #D4AF37;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-  .disc-section p {
-    font-size: 12px;
-    color: #aaa;
-    font-family: 'Montserrat', sans-serif;
-    line-height: 1.6;
-  }
-  .disc-section p a {
-    color: #D4AF37;
-    text-decoration: none;
-  }
-  .disc-section p a:hover { text-decoration: underline; }
-
-  .disc-check-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 20px 0 16px;
-    cursor: pointer;
-    user-select: none;
-  }
-  #disc-check {
-    appearance: none;
-    width: 18px; height: 18px;
-    border: 2px solid #3a3a3a;
-    border-radius: 4px;
-    background: #1e1e1e;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.15s;
-    position: relative;
-  }
-  #disc-check:checked {
-    background: #D4AF37;
-    border-color: #D4AF37;
-  }
-  #disc-check:checked::after {
-    content: '✓';
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #000;
-    font-size: 11px;
-    font-weight: 900;
-  }
-  .disc-check-row label {
-    font-size: 12px;
-    color: #888;
-    font-family: 'Montserrat', sans-serif;
-    cursor: pointer;
-  }
-
-  #disc-confirm-btn {
-    width: 100%;
-    background: #D4AF37;
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    padding: 13px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all 0.2s;
-    opacity: 0.4;
-    pointer-events: none;
-  }
-  #disc-confirm-btn.ready {
-    opacity: 1;
-    pointer-events: all;
-  }
-  #disc-confirm-btn.ready:hover {
-    background: #f0cb50;
-    transform: translateY(-1px);
-  }
-
-  #disc-mini {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #161616;
-    border: 1px solid #2a2a2a;
-    border-radius: 8px;
-    padding: 8px 14px;
-    display: none;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    z-index: 9989;
-    transition: border-color 0.3s, transform 0.2s;
-    animation: disc-blink 4s ease-in-out infinite;
-  }
-  #disc-mini:hover {
-    border-color: #D4AF37;
-    transform: translateY(-2px);
-    animation: none;
-  }
-
   #update-mini {
     position: fixed;
     bottom: 20px;
-    right: 100px; 
+    right: 20px; 
     background: #0d1a0d;
     border: 1px solid #4ade8044;
     border-radius: 8px;
@@ -7226,24 +7433,6 @@ if (window._fbReady) {
     from { width: 0; }
     to   { width: 100%; }
   }
-  @keyframes disc-blink {
-    0%,45%,55%,100% { opacity: 1 }
-    50%              { opacity: 0.35 }
-  }
-  .disc-mini-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: #D4AF37;
-    flex-shrink: 0;
-  }
-  .disc-mini-text {
-    font-size: 11px;
-    color: #888;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-  }
-
   @media (max-width: 640px) {
     .profile-two-col { grid-template-columns: 1fr !important; }
     .prime-modal-grid { grid-template-columns: 1fr !important; }
@@ -7257,44 +7446,10 @@ if (window._fbReady) {
 
 </style>
 
-<div id="disc-overlay">
-  <div id="disc-modal">
-    <div class="disc-badge">Beta v1.9.1</div>
-    <h2>Добро пожаловать в Classic HUB</h2>
-    <p class="disc-sub">Пожалуйста, ознакомьтесь перед использованием сайта</p>
-
-    <div class="disc-section">
-      <div class="disc-section-title">⚠️ Открытое Бета Тестирование</div>
-      <p>Сайт находится в стадии открытого бета-теста. Возможны ошибки, некорректное отображение или сбои в работе. Если вы столкнулись с проблемой - сообщите нам в поддержку.</p>
-    </div>
-
-    <div class="disc-section">
-      <div class="disc-section-title">©️ Авторские права</div>
-      <p>Все постройки, представленные в архиве, являются интеллектуальной собственностью их авторов. Копирование, распространение или использование без согласия автора запрещено. Classic HUB выступает исключительно как площадка для демонстрации работ.</p>
-    </div>
-
-    <div class="disc-section">
-      <div class="disc-section-title">💬 Техническая Поддержка</div>
-      <p>По вопросам и ошибкам обращайтесь напрямую через специальную форму, доступную по нажатии на кнопку "Тех.Поддержка". Если ситуация требует незамедлительного вмешательства, то там так-же есть контакт администратора, он старается отвечать как можно быстрее.</p>
-    </div>
-
-    
-
-    <label class="disc-check-row">
-      <input type="checkbox" id="disc-check" onchange="discCheckChange()">
-      <label for="disc-check">Я ознакомился с информацией и принимаю условия</label>
-    </label>
-
-    <button id="disc-confirm-btn" onclick="discConfirm()">
-      Продолжить →
-    </button>
-  </div>
-</div>
-
 <!-- по обнове 2.0 заглушка -->
 <div id="update-mini" onclick="updOpen()" title="Обновление 2.0 - что нового">
   <div class="upd-mini-dot"></div>
-  <span class="upd-mini-text">Обновление 2.0</span>
+  <span class="upd-mini-text">ОБНОВЛЕНИЕ 2.1</span>
 </div>
 
 <div id="upd-overlay" onclick="if(event.target===this)updClose()">
@@ -7302,14 +7457,14 @@ if (window._fbReady) {
     <button class="upd-close-x" onclick="updClose()">✕</button>
 
     <div class="upd-header">
-      <div class="upd-version-badge">Обновление 2.0</div>
+      <div class="upd-version-badge">Обновление 2.1</div>
       <div class="upd-title">Classic HUB - Масштабное обновление</div>
-      <div class="upd-subtitle">? Марта 2026 · Список всех изменений</div>
+      <div class="upd-subtitle">Май 2026 · Список всех изменений</div>
     </div>
 
     <div class="upd-body" id="upd-content">
 
-      <div class="upd-block">
+     <!-- <div class="upd-block">
         <div class="upd-block-head">
           <span class="upd-block-icon">✦</span>
           <span class="upd-block-label" style="color:#D4AF37;">Подписка Prime</span>
@@ -7317,58 +7472,99 @@ if (window._fbReady) {
         </div>
         <div class="upd-block-content">
           <div class="upd-block-title">Подписка-поддержка с привилегиями</div>
-          <div class="upd-block-desc">Добровольная поддержка проекта. Сайт работает полностью без подписки Prime - это просто способ сказать спасибо и получить приятные бонусы.</div>
+          <div class="upd-block-desc">Добровольная поддержка проекта. Сайт работает полностью без подписки Prime — это просто способ сказать спасибо и получить приятные бонусы.</div>
           <ul class="upd-list">
             <li>Статус «подписчик с...» и счётчик покупок в профиле</li>
             <li>Медаль донатера с кастомным свечением и анимацией</li>
             <li>Один артефакт на выбор на 30 дней</li>
-            <li>Витрина снаряжения - 5 слотов в профиле</li>
+            <li>Витрина снаряжения — 5 слотов в профиле</li>
             <li>Архив истёкших предметов</li>
           </ul>
-          <img src="https://i.imgur.com/ZsgSuVM.png" class="upd-img" alt="Prime профиль"> 
+          <img src="https://i.imgur.com/ZsgSuVM.png" class="upd-img" alt="Prime профиль">
           <p class="upd-img-caption">Так выглядит профиль с подпиской Prime</p>
+        </div>
+      </div>
+-->
+      <div class="upd-block">
+        <div class="upd-block-head">
+          <span class="upd-block-icon">🏅</span>
+          <span class="upd-block-label" style="color:#facc15;">Конкурс</span>
+          <span class="upd-tag" style="background:#facc1515;color:#facc15;border:1px solid #facc1530;">Результаты</span>
+        </div>
+        <div class="upd-block-content">
+          <div class="upd-block-title">Результаты сезонного конкурса</div>
+          <div class="upd-block-desc">Подошел к концу сезонный конкурс в стиле Japanese. Благодарим всех за то что приняли участие, хоть заявок было и не так много, но при этом было всеравно очень тяжело определить победителей. У каждого автора была сформированна и выстроенная своя индивидуальная постройка, в своем особенном стиле, кто-то больше формировал экстерьер, кто-то занимался интерьером, а кто-то выстраивал цельную структуру используя другие авторские приемы.</div>
+          <ul class="upd-list">
+            <li><strong style="color:#D4AF37;">1-е место</strong> - <strong>RolltonDomashniy </strong></li>
+            <div class="upd-block-desc">Невероятно детализированная постройка, круто объеденённый киберпанк стиль с классической японщиной, нет слов - одни эмоции, правда заслуженное первое место.</div>
+            <li><strong style="color:#f87171;">2-е место</strong> - <strong>lena_206</strong></li>
+            <div class="upd-block-desc">Атмосферное место, проработанная сакура напоминающая Японию ранней весной. Очень глубокая и тчщательно прописанная история постройки. Без всяких сомнений и колебаний заслуженное второе место.</div>
+            <li><strong style="color:#4ade80;">3-е место</strong> - <strong>ToniWest</strong></li>
+            <div class="upd-block-desc">Отлично проработанная территория и ландшафт возле самого храма, очень круто и красиво вписывается в саму историю и структуру постройки. Были сомнения насчет выдачи призового места, ибо по нашему мнению не хватило проработки внутри самого храма, по нашему скромному мнению - если бы автор дополнил храм деталями и более подробно раскрыл бы его историю, то возможно место было бы повыше. В любом случае постройка действительно достойная.</div>
+            <li>Всем остальным не хватило совсем чуть-чуть, возможно в будущем с уже насущным опытом и здравой конкуренцией другие авторы смогут улучшить свои строительные навыки и сделать ещё круче чем сейчас. В любом случае мы благодарны всем кто принял участие в данном конкурсе, поэтому в качестве утешительных призов мы выдадим эксклюзивное достижение за участие в конкурсе, а так-же по 1 прокруту кейса артефактов.</li>
+            <div class="upd-block-desc">Призы можно забрать у главного администратора проекта - <strong>slowdown</strong>, оставьте тикет через форму <strong style="color:#D4AF37;">«Тех.Поддержка»</strong>, после чего он с вами свяжется и выдаст призы в качестве привилегии или рубинов.</div>
+          </ul>
+          <img src="https://i.imgur.com/v2YYfSK.png" class="upd-img" alt="Prime профиль">
         </div>
       </div>
 
       <div class="upd-block">
         <div class="upd-block-head">
-          <span class="upd-block-icon">▼</span>
-          <span class="upd-block-label" style="color:#a78bfa;">Артефакты</span>
-          <span class="upd-tag" style="background:#a78bfa15;color:#a78bfa;border:1px solid #a78bfa30;">6 предметов</span>
+          <span class="upd-block-icon">🏆</span>
+          <span class="upd-block-label" style="color:#facc15;">Достижения</span>
+          <span class="upd-tag" style="background:#facc1515;color:#facc15;border:1px solid #facc1530;">Новое</span>
         </div>
         <div class="upd-block-content">
-          <div class="upd-block-title">Система артефактов Prime</div>
-          <div class="upd-block-desc">Выбери один предмет при оформлении подписки - он активен 30 дней.</div>
+          <div class="upd-block-title">Система достижений игроков</div>
+          <div class="upd-block-desc">Полноценная система наград за активность на сервере и сайте. Достижения отображаются в профиле каждого игрока.</div>
           <ul class="upd-list">
-            <li><strong style="color:#fb923c;">Бирка</strong> - своя кастомная медаль рядом с ником, цветом и анимацией свечения</li>
-            <li><strong style="color:#D4AF37;">Рамка</strong> - золотое обрамление аватара в профиле и топе</li>
-            <li><strong style="color:#4ade80;">Картина</strong> - своё изображение во всех трёх зонах фона профиля</li>
-            <li><strong style="color:#a78bfa;">Фонарь</strong> - золотое свечение вокруг карточки постройки в галерее</li>
-            <li><strong style="color:#fbbf24;">Пузырёк опыта</strong> - ×2 EXP за все постройки что загружаются, пока артефакт активен</li>
-            <li><strong style="color:#c084fc;">Огненный порошок</strong> - частицы с эффектами в профиле (эндермен, зачарования и другие)</li>
-            <li><strong style="color:#D4AF37;">Яйцо призыва</strong> - 3D питомец у вас в профиле.</li>
+            <li>Несколько уровней редкости: обычные, редкие, эпические, легендарные</li>
+            <li>Автоматическое выдача за постройки, голоса, активность</li>
+            <li>Лента последних достижений прямо в навигационной панели - кнопка с иконкой трофея.</li>
+            <li>Тултипы с описанием и датой получения при наведении на иконку</li>
+            <li>Фильтр по редкости и поиск на странице «Достижения»</li>
           </ul>
-          <img src="https://i.imgur.com/N4y6YVT.png" class="upd-img" alt="Артефакты"> 
-          <p class="upd-img-caption">Магазин артефактов</p> 
+          <img src="https://i.imgur.com/uTIvKBO.png" class="upd-img" alt="Prime профиль">
+        </div>
+      </div>
+
+      <div class="upd-block">
+        <div class="upd-block-head">
+          <span class="upd-block-icon">🎁</span>
+          <span class="upd-block-label" style="color:#D4AF37;">Кейс Архитектора</span>
+          <span class="upd-tag" style="background:#D4AF3715;color:#D4AF37;border:1px solid #D4AF3730;">Новое</span>
+        </div>
+        <div class="upd-block-content">
+          <div class="upd-block-title">Система кейсов за постройки</div>
+          <div class="upd-block-desc">Загружай постройки - получай прокрутки и открывай уникальные награды разной редкости.</div>
+          <ul class="upd-list">
+            <li>Первая загруженная постройка даёт прокрутку сразу</li>
+            <li>Каждые 3 новые постройки - ещё одна прокрутка</li>
+            <li>Предметы разных редкостей: от обычных до легендарных</li>
+            <li>У некоторых предметов есть подтипы - случайный вариант при открытии</li>
+            <li>Анимация открытия кейса с эффектом рулетки</li>
+            <li>Всем авторам ранее загрузившим постройки, будет начислено корректное количество прокруток</li>
+          </ul>
+          <img src="https://i.imgur.com/kOijsuO.png" class="upd-img" alt="Prime профиль">
         </div>
       </div>
 
       <div class="upd-block">
         <div class="upd-block-head">
           <span class="upd-block-icon">▲</span>
-          <span class="upd-block-label" style="color:#fb923c;">Медали донатеров</span>
+          <span class="upd-block-label" style="color:#fb923c;">Медали</span>
           <span class="upd-tag" style="background:#fb923c15;color:#fb923c;border:1px solid #fb923c30;">Обновлено</span>
         </div>
         <div class="upd-block-content">
           <div class="upd-block-title">Движок свечения медалей</div>
-          <div class="upd-block-desc">Полностью переписан - медаль теперь видна везде: в карточках постройки, профиле, топе авторов, hover-карточке. 9 эффектов анимации.</div>
+          <div class="upd-block-desc">Полностью переписан - медаль теперь видна везде: в карточках постройки, профиле, топе авторов, hover-карточке. Разные эффекты анимации.</div>
           <ul class="upd-list">
             <li>Эффекты: пульсация, мерцание, радуга, голограмма, 3D-наклон, верчение, кружение, монетка</li>
             <li>Любой цвет свечения + пресеты золота, серебра, алмаза, изумруда, аметиста</li>
             <li>Подсказка при наведении: иконка + имя и ранг донатера</li>
           </ul>
           <img src="https://i.imgur.com/Qr1EpTK.png" class="upd-img" alt="Медали">
-          <p class="upd-img-caption">Медали с разными эффектами и цветовой гаммой</p> 
+          <p class="upd-img-caption">Медали с разными эффектами и цветовой гаммой</p>
         </div>
       </div>
 
@@ -7381,13 +7577,33 @@ if (window._fbReady) {
         <div class="upd-block-content">
           <div class="upd-block-title">Серьёзный апгрейд профилей</div>
           <ul class="upd-list">
-            <li>Блок Prime: дата подписки, счётчик ×N, статус активности</li>
-            <li>Витрина снаряжения - 5 слотов с активными артефактами и сроком</li>
+            
+            <li>Витрина снаряжения - теперь активна и используется предметами из кейса</li>
             <li>Кастомные фоны для трёх зон: полный профиль, hover-карточка, топ авторов</li>
             <li>Поддержка кастомного скина через Visage</li>
-            <li>Архив предметов - все истёкшие артефакты сохраняются</li>
-            <li>И много ещё чего другого</li>
+            <li>Архив предметов - все истёкшие артефакты сохраняются и падают в архив когда заканчивается их срок действия</li>
+            <li>Отображение полученных достижений прямо в профиле</li>
           </ul>
+          <img src="https://i.imgur.com/BBvZaDT.png" class="upd-img" alt="Медали">
+        </div>
+      </div>
+
+      <div class="upd-block">
+        <div class="upd-block-head">
+          <span class="upd-block-icon">⬡</span>
+          <span class="upd-block-label" style="color:#38bdf8;">Навигация</span>
+          <span class="upd-tag" style="background:#38bdf815;color:#38bdf8;border:1px solid #38bdf830;">Обновлено</span>
+        </div>
+        <div class="upd-block-content">
+          <div class="upd-block-title">Умная навигационная панель</div>
+          <div class="upd-block-desc">Бейджи в шапке теперь интерактивны - при наведении расширяются и показывают полную информацию.</div>
+          <ul class="upd-list">
+            <li><strong style="color:#D4AF37;">Онлайн</strong> - показывает число игроков, при наведении: «На сервере: N»</li>
+            <li><strong style="color:#f87171;">Стиль</strong> - текущий тренд построек, при наведении: «Текущий стиль: …»</li>
+            <li><strong style="color:#4ade80;">Сезон</strong> - активный ивент, при наведении: «Сейчас проходит: …»</li>
+            <li>Кнопка с иконкой трофея - живая лента последних достижений игроков</li>
+          </ul>
+           <img src="https://i.imgur.com/kplfmEm.png" class="upd-img" alt="Медали">
         </div>
       </div>
 
@@ -7398,12 +7614,15 @@ if (window._fbReady) {
         </div>
         <div class="upd-block-content">
           <ul class="upd-list">
-            <li>Адаптация и обновление панели CH Admins: теперь может управлять артефактами, инвентарём, витриной и каталогом магазина</li>
-            <li>Новая система иконок</li>
-            <li>Полный пересмотр страницы «Информация» с обновлёнными данными</li>
+            <li>Адаптация и обновление панели CH Admins: управление артефактами, инвентарём, витриной, каталогом магазина и кейсами</li>
+            <li>Новая система иконок по всему сайту</li>
+            <li>Пересмотр страницы «Информация» с обновлёнными данными</li>
+            <li>Добавлен чек-бокс при загрузке постройки для построек из наследия - для построек которые были построены до версии 1.21.1</li>
+            <li>Отдельная секция «Наследие» на главной странице и в архиве, для построек которые были созданы до перехода на версию 1.21.1</li>
             <li>Множество мелких исправлений и улучшений производительности</li>
-            <li>В скором времени будут почищены профили-заглушки, которые использовались для теста новых функций сервиса</li>
+            <li>В скором времени будут почищены профили-заглушки тестирования</li>
           </ul>
+          <img src="https://i.imgur.com/KyVRCFv.png" class="upd-img" alt="Медали">
         </div>
       </div>
 
@@ -7416,7 +7635,7 @@ if (window._fbReady) {
       <button class="upd-btn-close" onclick="updClose()">
         Закрыть
       </button>
-      <div style="flex:1;min-width:100px;font-size:10px;color:#333;text-align:right;">Classic HUB · ? Марта 2026</div>
+      <div style="flex:1;min-width:100px;font-size:10px;color:#333;text-align:right;">Classic HUB · Май 2026</div>
     </div>
   </div>
 </div>
@@ -7468,16 +7687,13 @@ if (window._fbReady) {
 <style>
 @keyframes contest-bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-6px)} }
 @keyframes contest-trophy { 0%,100%{transform:scale(1) rotate(-5deg)} 50%{transform:scale(1.15) rotate(5deg)} }
+@keyframes case-btn-shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
+@keyframes case-btn-glow { 0%,100%{box-shadow:0 6px 24px rgba(212,175,55,0.3),0 0 0 0 rgba(212,175,55,0.4)} 50%{box-shadow:0 8px 32px rgba(212,175,55,0.55),0 0 0 6px rgba(212,175,55,0.08)} }
 @keyframes pet-pulse-slow { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.65;transform:scale(0.96)} }
 @keyframes pet-pulse-fast { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.92)} }
 @keyframes pet-flicker    { 0%,100%{opacity:1} 25%{opacity:0.2} 50%{opacity:0.9} 75%{opacity:0.1} }
 @keyframes pet-heartbeat  { 0%{transform:scale(1)} 14%{transform:scale(1.1)} 28%{transform:scale(1)} 42%{transform:scale(1.08)} 70%,100%{transform:scale(1)} }
 </style>
-
-<div id="disc-mini" onclick="discReopen()" title="Открыть дисклеймер">
-  <div class="disc-mini-dot"></div>
-  <span class="disc-mini-text">BETA</span>
-</div>
 
 <script>
   function updOpen() {
@@ -7504,57 +7720,20 @@ if (window._fbReady) {
     }, 300);
   }
 
-  function discCheckChange() {
-    const btn = document.getElementById('disc-confirm-btn');
-    btn.classList.toggle('ready', document.getElementById('disc-check').checked);
-  }
-
-  function discConfirm() {
-    if (!document.getElementById('disc-check').checked) return;
-    localStorage.setItem('ch_disc_confirmed', '1');
-    const overlay = document.getElementById('disc-overlay');
-    overlay.style.transition = 'opacity 0.35s';
-    overlay.style.opacity = '0';
-    setTimeout(() => {
-      overlay.style.display = 'none';
-      var flags = window._siteFlags || {};
-      var dm = document.getElementById('disc-mini');
-      var um = document.getElementById('update-mini');
-      if (dm && flags.showDisclaimer  !== false) dm.style.display = 'flex';
-      if (um && flags.showUpdateMini  !== false) um.style.display = 'flex';
-    }, 350);
-  }
-
-
-  
   function _applySiteFlags(flags) {
       flags = flags || {};
       window._siteFlags = flags;
 
-      
-      var discSeen  = !!localStorage.getItem('ch_disc_confirmed');
-      var showDisc  = flags.showDisclaimer !== false;
-      var ov = document.getElementById('disc-overlay');
-      var dm = document.getElementById('disc-mini');
-      if (!showDisc) {
-          if (ov) ov.style.display = 'none';
-          if (dm) dm.style.display = 'none';
-      } else {
-          
-          if (ov && ov.style.display === 'none' && !discSeen) ov.style.display = 'flex';
-         
-          if (dm && discSeen) dm.style.display = 'flex';
-      }
-
-      
       var um = document.getElementById('update-mini');
       if (um) um.style.display = flags.showUpdateMini === false ? 'none' : 'flex';
 
-      
+      var casesTab = document.getElementById('nav-tab-cases');
       var shopTab  = document.getElementById('nav-tab-shop');
       var faqPrime = document.getElementById('faq-prime-block');
       var hide = flags.showShop === false;
       if (shopTab)  shopTab.style.display  = hide ? 'none' : '';
+      var hideCases = flags.showCases === false;
+      if (casesTab) casesTab.style.display = hideCases ? 'none' : '';
       if (faqPrime) faqPrime.style.display = hide ? 'none' : '';
   }
 
@@ -7582,7 +7761,12 @@ if (window._fbReady) {
       _contestData = data;
       var banner = document.getElementById('contest-banner');
       if (!banner) return;
-      if (!data || !data.active) { banner.style.display = 'none'; return; }
+      if (!data || !data.active) {
+          banner.style.display = 'none';
+          
+          sessionStorage.removeItem('ch_contest_shown');
+          return;
+      }
       banner.style.display = 'block';
       function _cSet(id, val) { var el = document.getElementById(id); if (el) { el.innerHTML = ''; el.textContent = val != null ? val : ''; } }
       
@@ -7602,9 +7786,21 @@ if (window._fbReady) {
       _cSet('contest-banner-label', data.bannerLabel || 'Идёт конкурс');
       _cSet('contest-banner-sub',   data.bannerSub   || 'Нажми, чтобы узнать подробности');
   }
+ 
+  function _contestBannerRestore() {
+      var banner = document.getElementById('contest-banner');
+      if (!banner) return;
+      if (!_contestData || !_contestData.active) {
+          banner.style.display = 'none';
+          banner.style.visibility = '';
+          return;
+      }
+      banner.style.visibility = '';
+      banner.style.display = 'block';
+  }
   function contestOpen() {
       var d = _contestData;
-      if (!d) return;
+      if (!d || !d.active) return;
       
       function _cSet(id, val) {
           var el = document.getElementById(id);
@@ -7651,19 +7847,6 @@ if (window._fbReady) {
       if (banner) banner.style.display = 'none';
   }
   document.addEventListener('DOMContentLoaded', _loadContest);
-
-  function discReopen() {
-    const overlay = document.getElementById('disc-overlay');
-    overlay.style.display = 'flex';
-    overlay.style.opacity = '0';
-    requestAnimationFrame(() => {
-      overlay.style.transition = 'opacity 0.3s';
-      overlay.style.opacity = '1';
-    });
-    document.getElementById('disc-mini').style.display = 'none';
-    document.getElementById('disc-check').checked = false;
-    document.getElementById('disc-confirm-btn').classList.remove('ready');
-  }
 
 </script>
 
@@ -7888,7 +8071,7 @@ function _mcUpdateBadge() {
         if (data && data.online === true) {
     var online = (data.players && data.players.online) || 0;
             countEl.textContent = online + ' игроков';
-            if (dot) { dot.style.background = '#60a5fa'; }
+            if (dot) { dot.style.background = '#D4AF37'; }
         } else {
             countEl.textContent = 'оффлайн';
             if (dot) { dot.style.background = '#f87171'; dot.style.animation = 'none'; }
@@ -7982,7 +8165,7 @@ function _mcStatusOpen() {
         _mcGetPeakHtml(online, function(peakHtml) {
             body.innerHTML =
                 '<div style="width:100%;">' +
-                    // Status row
+                    
                     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">' +
                         '<div style="display:flex;align-items:center;gap:7px;">' +
                             '<span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 10px #4ade8088;flex-shrink:0;"></span>' +
@@ -8009,6 +8192,46 @@ document.addEventListener('DOMContentLoaded', function() {
     _mcUpdateBadge();
     setInterval(_mcUpdateBadge, 90000);
 });
+
+
+(function() {
+    function _syncNavFull() {
+        document.querySelectorAll('.nav-full-val[data-src]').forEach(function(el) {
+            var src = document.getElementById(el.getAttribute('data-src'));
+            if (src) el.textContent = src.textContent;
+        });
+    }
+    _syncNavFull();
+    setInterval(_syncNavFull, 1500);
+    ['mc-online-count','header-trend-name','header-season-name'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) new MutationObserver(_syncNavFull).observe(el, {childList:true, characterData:true, subtree:true});
+    });
+})();
+
+
+(function() {
+    var btn = document.getElementById('ach-medal-btn');
+    var tip = document.getElementById('ach-medal-tip');
+    if (!btn || !tip) return;
+    btn.addEventListener('mouseenter', function() {
+        var r = btn.getBoundingClientRect();
+        tip.style.top  = (r.top - tip.offsetHeight - 10) + 'px';
+        tip.style.left = (r.right - tip.offsetWidth) + 'px';
+        tip.style.opacity = '1';
+    });
+    btn.addEventListener('mouseleave', function() {
+        tip.style.opacity = '0';
+    });
+    
+    btn.addEventListener('mousemove', function() {
+        if (tip.style.opacity === '1') {
+            var r = btn.getBoundingClientRect();
+            tip.style.top  = (r.top - tip.offsetHeight - 10) + 'px';
+            tip.style.left = (r.right - tip.offsetWidth) + 'px';
+        }
+    });
+})();
 </script>
 
 
@@ -8317,9 +8540,9 @@ function _closeBundleModal() {
 }
 
 
-var _mapTiles   = {};  // { "col_row": url }
+var _mapTiles   = {};  
 var _mapMarkers = {};
-var _mapBuilds  = [];  // { id: { x, z, label, type, color, buildId } }
+var _mapBuilds  = [];  
 var _mapScale = 1;
 var _mapOffX = 0, _mapOffY = 0;
 var _mapCols = 34, _mapRows = 34;
@@ -8940,5 +9163,737 @@ function _mapRenderMarkerList(){
     appendGroup(el,blds,'Постройки на карте',custom.length?14:0);
 }
 </script>
+
+<!-- CASE SPIN NOTIFICATION -->
+<div id="case-spin-notify" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;
+     background:linear-gradient(135deg,#1a1200,#2a1a00);border:1px solid rgba(212,175,55,0.6);border-radius:16px;
+     padding:14px 22px;align-items:center;gap:12px;box-shadow:0 0 30px rgba(212,175,55,0.3),0 8px 32px rgba(0,0,0,0.8);
+     animation:case-notify-in .4s cubic-bezier(.34,1.56,.64,1);">
+  <span style="font-size:1.6rem;">🎁</span>
+  <div>
+    <div style="font-size:11px;font-weight:900;color:#D4AF37;text-transform:uppercase;letter-spacing:.1em;">Получена прокрутка кейса!</div>
+    <div style="font-size:10px;color:#888;margin-top:2px;">Перейди на вкладку «Кейсы» чтобы открыть</div>
+  </div>
+  <button onclick="document.getElementById('case-spin-notify').style.display='none'" style="background:none;border:none;color:#555;cursor:pointer;font-size:14px;padding:4px;">✕</button>
+</div>
+
+<!-- CASES OVERLAY -->
+<div id="cases-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeCaseModal()">
+  <div onclick="event.stopPropagation()" style="background:#111;border:1px solid rgba(212,175,55,0.2);border-radius:22px;width:100%;max-width:540px;position:relative;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.9);">
+    <div style="height:3px;background:linear-gradient(90deg,#D4AF37,#f59e0b,#D4AF37);"></div>
+    <button onclick="closeCaseModal()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:#1f1f1f;border:1px solid #333;color:#555;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;">✕</button>
+    <div style="padding:28px 28px 32px;">
+      <div style="text-align:center;margin-bottom:22px;">
+        <div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.2em;color:#D4AF37;margin-bottom:6px;">Кейс Архитектора</div>
+        <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px;">Прокрутка кейса</div>
+        <div style="font-size:11px;color:#555;" id="case-spins-left-modal">Загрузка...</div>
+      </div>
+
+      <!-- Case nick input -->
+      <div id="case-nick-section" style="margin-bottom:18px;">
+        <label style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#555;display:block;margin-bottom:6px;">Твой ник</label>
+        <div style="display:flex;gap:8px;">
+          <input id="case-nick-input" type="text" placeholder="Введи ник..." style="flex:1;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:10px;padding:10px 14px;font-size:13px;color:#fff;outline:none;" oninput="caseNickCheck()">
+          <button onclick="caseNickCheck()" style="background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.3);border-radius:10px;padding:0 16px;color:#D4AF37;font-weight:900;font-size:11px;cursor:pointer;white-space:nowrap;font-family:'Montserrat',sans-serif;">Проверить</button>
+        </div>
+        <div id="case-nick-status" style="font-size:10px;margin-top:6px;color:#555;"></div>
+      </div>
+
+      <!-- Reel strip -->
+      <div style="position:relative;margin-bottom:20px;overflow:hidden;border-radius:14px;border:1px solid rgba(212,175,55,0.15);background:#0a0a0a;">
+        <!-- Golden pointer -->
+        <div style="position:absolute;top:0;bottom:0;left:50%;width:3px;background:linear-gradient(180deg,#D4AF37,#f59e0b);transform:translateX(-50%);z-index:10;box-shadow:0 0 12px rgba(212,175,55,0.8);"></div>
+        <!-- Left fade -->
+        <div style="position:absolute;left:0;top:0;bottom:0;width:80px;background:linear-gradient(90deg,#0a0a0a,transparent);z-index:5;pointer-events:none;"></div>
+        <!-- Right fade -->
+        <div style="position:absolute;right:0;top:0;bottom:0;width:80px;background:linear-gradient(270deg,#0a0a0a,transparent);z-index:5;pointer-events:none;"></div>
+        <div id="case-reel" style="display:flex;align-items:center;gap:8px;padding:16px 8px;height:120px;white-space:nowrap;will-change:transform;"></div>
+      </div>
+
+      <!-- Result display -->
+      <div id="case-result-box" style="display:none;text-align:center;padding:18px;background:rgba(212,175,55,0.05);border:1px solid rgba(212,175,55,0.2);border-radius:14px;margin-bottom:18px;animation:case-result-pop .5s cubic-bezier(.34,1.56,.64,1);">
+        <div id="case-result-icon" style="font-size:2.5rem;margin-bottom:8px;"></div>
+        <div id="case-result-name" style="font-size:14px;font-weight:900;color:#fff;margin-bottom:4px;"></div>
+        <div id="case-result-rarity" style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;padding:3px 12px;border-radius:20px;display:inline-block;"></div>
+        <div id="case-result-desc" style="font-size:10px;color:#666;margin-top:6px;display:none;"></div>
+        <!-- Sub-item reveal panel (CS:GO style second roll) -->
+        <div id="case-subitem-panel" style="display:none;margin-top:16px;border-top:1px solid rgba(255,255,255,0.06);padding-top:14px;">
+          <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.2em;color:#D4AF37;margin-bottom:10px;">Выпал тип предмета</div>
+          <!-- Sub reel -->
+          <div id="case-sub-reel-wrap" style="position:relative;overflow:hidden;border-radius:10px;border:1px solid rgba(212,175,55,0.15);background:#0a0a0a;margin-bottom:12px;height:72px;">
+            <div style="position:absolute;top:0;bottom:0;left:50%;width:2px;background:linear-gradient(180deg,#D4AF37,#f59e0b);transform:translateX(-50%);z-index:10;box-shadow:0 0 8px rgba(212,175,55,0.8);"></div>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:50px;background:linear-gradient(90deg,#0a0a0a,transparent);z-index:5;pointer-events:none;"></div>
+            <div style="position:absolute;right:0;top:0;bottom:0;width:50px;background:linear-gradient(270deg,#0a0a0a,transparent);z-index:5;pointer-events:none;"></div>
+            <div id="case-sub-reel" style="display:flex;align-items:center;gap:6px;padding:8px 6px;height:72px;will-change:transform;"></div>
+          </div>
+          <!-- Sub result -->
+          <div id="case-subresult" style="display:none;animation:case-result-pop .4s cubic-bezier(.34,1.56,.64,1);">
+            <div style="display:flex;align-items:center;justify-content:center;gap:10px;background:#0e0e0e;border-radius:12px;padding:12px 16px;border:1px solid rgba(212,175,55,0.15);">
+              <div id="case-subresult-icon" style="font-size:1.8rem;"></div>
+              <div>
+                <div id="case-subresult-label" style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#555;margin-bottom:2px;"></div>
+                <div id="case-subresult-name" style="font-size:14px;font-weight:900;color:#fff;"></div>
+              </div>
+            </div>
+          </div>
+          <button id="case-sub-spin-btn" onclick="doSubSpin()" style="width:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border:none;border-radius:10px;padding:11px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#fff;cursor:pointer;transition:all .2s;margin-top:10px;display:none;">
+            Определить тип
+          </button>
+        </div>
+        <div style="font-size:10px;color:#555;margin-top:10px;" id="case-result-footer">Награда будет выдана вручную администратором</div>
+      </div>
+
+      <button id="case-spin-btn" onclick="doSpin()" style="width:100%;background:linear-gradient(90deg,#D4AF37,#f59e0b);border:none;border-radius:12px;padding:14px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#000;cursor:pointer;transition:all .2s;opacity:0.4;pointer-events:none;">
+        Прокрутить кейс
+      </button>
+      <div id="case-spin-err" style="display:none;font-size:10px;color:#f87171;text-align:center;margin-top:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes case-notify-in { from{opacity:0;transform:translateX(-50%) translateY(20px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+@keyframes case-result-pop { from{opacity:0;transform:scale(.85)} to{opacity:1;transform:scale(1)} }
+@keyframes case-reel-spin { 0%{transform:translateX(0)} 100%{transform:translateX(-9999px)} }
+@keyframes subitem-reveal { 0%{opacity:0;transform:scale(0.7) rotateY(-20deg)} 60%{transform:scale(1.05) rotateY(0deg)} 100%{opacity:1;transform:scale(1) rotateY(0deg)} }
+#case-subresult.show { animation:subitem-reveal .6s cubic-bezier(.34,1.56,.64,1) forwards; }
+</style>
+
+<script>
+var _caseNick = '';
+var _caseSpins = 0;
+var _caseItems = [];
+var _caseSpinning = false;
+var _caseReelRaf = null;
+var _caseSubReelRaf = null;
+var _caseCurrentItem = null;
+var _caseCurrentRarity = null;
+var _caseSubSpinning = false;
+
+var CASE_RARITIES = [
+    { id:'common',    name:'Обычная',     color:'#9ca3af', weight:45 },
+    { id:'uncommon',  name:'Необычная',   color:'#4ade80', weight:30 },
+    { id:'rare',      name:'Редкая',      color:'#60a5fa', weight:15 },
+    { id:'epic',      name:'Эпическая',   color:'#a78bfa', weight:7  },
+    { id:'legendary', name:'Легендарная', color:'#f59e0b', weight:3  },
+];
+
+var _CASE_BUILTIN = [
+    { id:'custom_medal',   icon:'🏅', name:'Кастомная медалька', color:'#fb923c', defaultRarity:'uncommon' },
+    { id:'golden_frame',   icon:'🖼️', name:'Золотая рамка',      color:'#D4AF37', defaultRarity:'rare'     },
+    { id:'profile_bg',     icon:'🌌', name:'Фон профиля',         color:'#4ade80', defaultRarity:'rare'     },
+    { id:'build_glow',     icon:'✨', name:'Подсветка постройки', color:'#a78bfa', defaultRarity:'uncommon' },
+    { id:'double_exp',     icon:'⚡', name:'Двойной опыт',        color:'#fbbf24', defaultRarity:'common'   },
+    { id:'profile_effect', icon:'🌀', name:'Эффект профиля',      color:'#c084fc', defaultRarity:'epic'     },
+    { id:'pet',            icon:'🐾', name:'Питомец',             color:'#34d399', defaultRarity:'legendary',
+      subItems:[
+        { id:'pet_cat',    icon:'🐱', name:'Кот',     color:'#fb923c' },
+        { id:'pet_dog',    icon:'🐶', name:'Собака',  color:'#f59e0b' },
+        { id:'pet_dragon', icon:'🐉', name:'Дракон',  color:'#f87171' },
+        { id:'pet_parrot', icon:'🦜', name:'Попугай', color:'#4ade80' },
+        { id:'pet_bunny',  icon:'🐰', name:'Кролик',  color:'#c084fc' },
+        { id:'pet_fox',    icon:'🦊', name:'Лиса',    color:'#fb923c' },
+        { id:'pet_panda',  icon:'🐼', name:'Панда',   color:'#9ca3af' },
+        { id:'pet_wolf',   icon:'🐺', name:'Волк',    color:'#60a5fa' },
+        { id:'pet_turtle', icon:'🐢', name:'Черепаха',color:'#34d399' },
+        { id:'pet_owl',    icon:'🦉', name:'Сова',    color:'#a78bfa' },
+        { id:'pet_frog',   icon:'🐸', name:'Лягушка', color:'#4ade80' },
+        { id:'pet_bear',   icon:'🐻', name:'Медведь', color:'#92400e' },
+      ]
+    },
+    { id:'totem',          icon:'🗿', name:'Тотем',               color:'#f59e0b', defaultRarity:'rare',
+      subItems:[
+        { id:'totem_fire',   icon:'🔥', name:'Тотем Огня',   color:'#f87171' },
+        { id:'totem_water',  icon:'💧', name:'Тотем Воды',   color:'#60a5fa' },
+        { id:'totem_earth',  icon:'🌿', name:'Тотем Земли',  color:'#4ade80' },
+        { id:'totem_storm',  icon:'⚡', name:'Тотем Бури',   color:'#fbbf24' },
+        { id:'totem_shadow', icon:'🌑', name:'Тотем Тьмы',  color:'#a78bfa' },
+        { id:'totem_light',  icon:'☀️', name:'Тотем Света', color:'#fde68a' },
+      ]
+    },
+];
+
+function _caseLoadItems(cb) {
+    if (!window._fbDb || !window._fbRef || !window._fbGet) {
+        _caseItems = _CASE_BUILTIN.map(function(b){ return Object.assign({},b,{rarity:b.defaultRarity,enabled:true}); });
+        window._caseItems = _caseItems;
+        if (cb) cb();
+        return;
+    }
+    Promise.all([
+        window._fbGet(window._fbRef(window._fbDb,'config/caseItems')).then(function(s){return s.exists()?s.val():null;}),
+        window._fbGet(window._fbRef(window._fbDb,'config/shopItems')).then(function(s){return s.exists()?s.val():null;}),
+    ]).then(function(res) {
+        var caseConf = res[0] || {};
+        var shopItems = res[1] || {};
+        var items = _CASE_BUILTIN.map(function(b){
+            var ov = caseConf[b.id] || {};
+            
+            var subItems = ov.subItems || b.subItems || null;
+            return { id:b.id, icon:ov.icon||b.icon, name:ov.name||b.name, color:ov.color||b.color,
+                     rarity:ov.rarity||b.defaultRarity, enabled:ov.enabled!==false, iconUrl:ov.iconUrl||'',
+                     description:ov.description||b.description||'', subItems:subItems };
+        });
+        Object.keys(shopItems).forEach(function(k){
+            var sh = shopItems[k]; var ov = caseConf[k]||{};
+            if (ov.inCase) items.push({ id:k, icon:sh.icon||'📦', name:sh.name||k, color:sh.color||'#D4AF37',
+                rarity:ov.rarity||'common', enabled:ov.enabled!==false, iconUrl:sh.iconUrl||ov.iconUrl||'',
+                description:ov.description||sh.description||'', subItems:ov.subItems||null });
+        });
+        Object.keys(caseConf).forEach(function(k){
+            var cf = caseConf[k];
+            if (!items.find(function(x){return x.id===k;}) && cf.inCase)
+                items.push({ id:k, icon:cf.icon||'📦', name:cf.name||k, color:cf.color||'#D4AF37',
+                    rarity:cf.rarity||'common', enabled:cf.enabled!==false, iconUrl:cf.iconUrl||'',
+                    description:cf.description||'', subItems:cf.subItems||null });
+        });
+        _caseItems = items.filter(function(x){return x.enabled;});
+        if (!_caseItems.length) _caseItems = _CASE_BUILTIN.map(function(b){return Object.assign({},b,{rarity:b.defaultRarity,enabled:true});});
+        window._caseItems = _caseItems;
+        if (cb) cb();
+    }).catch(function(){
+        _caseItems = _CASE_BUILTIN.map(function(b){return Object.assign({},b,{rarity:b.defaultRarity,enabled:true});});
+        window._caseItems = _caseItems;
+        if (cb) cb();
+    });
+}
+
+function _caseWeightedRoll() {
+    var totalW = CASE_RARITIES.reduce(function(s,r){return s+r.weight;},0);
+    var roll = Math.random()*totalW, cumul=0;
+    var pickedRarity = CASE_RARITIES[CASE_RARITIES.length-1];
+    for (var i=0;i<CASE_RARITIES.length;i++){ cumul+=CASE_RARITIES[i].weight; if(roll<=cumul){pickedRarity=CASE_RARITIES[i];break;} }
+    var pool = _caseItems.filter(function(it){return it.rarity===pickedRarity.id;});
+    if (!pool.length) pool = _caseItems;
+    return { item: pool[Math.floor(Math.random()*pool.length)], rarity: pickedRarity };
+}
+
+function _caseItemCard(item, rarity, size) {
+    var s = size||88, rc = rarity?rarity.color:(item.color||'#D4AF37');
+    var icon = item.iconUrl
+        ? '<img src="' + item.iconUrl + '" style="width:' + Math.round(s*.5) + 'px;height:' + Math.round(s*.5) + 'px;object-fit:contain;border-radius:6px;">'
+        : '<span style="font-size:' + Math.round(s*.32) + 'px;line-height:1;">' + item.icon + '</span>';
+    return '<div style="flex-shrink:0;width:' + s + 'px;height:' + s + 'px;border-radius:12px;background:' + rc + '14;border:2px solid ' + rc + '44;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:0 0 8px ' + rc + '33;">'
+        + icon
+        + '<div style="font-size:8px;font-weight:900;color:#fff;text-align:center;max-width:' + (s-12) + 'px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px;">' + item.name + '</div>'
+        + '</div>';
+}
+
+function _caseBuildReel(winner, winnerRarity) {
+    var reel = document.getElementById('case-reel');
+    if (!reel) return { winnerIdx:50, cardW:96 };
+    var cards = [];
+    for (var i=0;i<55;i++) cards.push(_caseWeightedRoll());
+    cards.splice(50,0,{item:winner,rarity:winnerRarity});
+    cards.push(_caseWeightedRoll(),_caseWeightedRoll(),_caseWeightedRoll());
+    reel.style.transform = 'translateX(0px)';
+    reel.innerHTML = '';
+    cards.forEach(function(c){
+        var div = document.createElement('div');
+        div.style.cssText = 'flex-shrink:0;';
+        div.innerHTML = _caseItemCard(c.item,c.rarity,88);
+        reel.appendChild(div);
+    });
+    
+    return { cards:cards, winnerIdx:50, cardW:96 };
+}
+
+function openCaseModal() {
+    var overlay = document.getElementById('cases-overlay');
+    if (overlay) overlay.style.display='flex';
+    document.getElementById('case-result-box').style.display='none';
+    document.getElementById('case-spin-err').style.display='none';
+    _caseNick=''; _caseSpins=0; _caseCurrentItem=null; _caseCurrentRarity=null;
+    var inp = document.getElementById('case-nick-input');
+    if (inp) {
+        inp.value='';
+        inp.onfocus = function(){ this.style.borderColor='rgba(212,175,55,0.4)'; };
+        inp.onblur  = function(){ this.style.borderColor='#2a2a2a'; };
+    }
+    var spinBtn = document.getElementById('case-spin-btn');
+    if (spinBtn) {
+        spinBtn.onmouseover = function(){ if(this.style.pointerEvents!=='none') this.style.filter='brightness(1.1)'; };
+        spinBtn.onmouseout  = function(){ this.style.filter=''; };
+    }
+    document.getElementById('case-nick-status').textContent='';
+    _caseUpdateBtn();
+    _caseLoadItems(function(){
+        if (_caseItems.length) {
+            _caseBuildReel(_caseItems[0], {color:'#D4AF37'});
+        }
+    });
+}
+
+function closeCaseModal() {
+    var overlay = document.getElementById('cases-overlay');
+    if (overlay) overlay.style.display='none';
+    if (_caseReelRaf) { cancelAnimationFrame(_caseReelRaf); _caseReelRaf=null; }
+    if (_caseSubReelRaf) { cancelAnimationFrame(_caseSubReelRaf); _caseSubReelRaf=null; }
+    _caseSpinning=false; _caseSubSpinning=false;
+}
+
+function _caseUpdateBtn() {
+    var btn = document.getElementById('case-spin-btn');
+    var sl  = document.getElementById('case-spins-left-modal');
+    if (!btn) return;
+    if (_caseNick && _caseSpins>0) {
+        btn.style.opacity='1'; btn.style.pointerEvents='auto';
+        btn.textContent='Прокрутить кейс (' + _caseSpins + ' осталось)';
+        if (sl) sl.textContent='Прокруток доступно: ' + _caseSpins;
+    } else if (_caseNick && _caseSpins===0) {
+        btn.style.opacity='0.4'; btn.style.pointerEvents='none';
+        btn.textContent='Нет доступных прокруток';
+        if (sl) sl.textContent='Прокруток нет · загружай постройки чтобы получить';
+    } else {
+        btn.style.opacity='0.4'; btn.style.pointerEvents='none';
+        btn.textContent='Введи свой ник чтобы прокрутить';
+        if (sl) sl.textContent='Введи свой ник чтобы прокрутить кейс';
+    }
+}
+
+function caseNickCheck() {
+    var inp = document.getElementById('case-nick-input');
+    var status = document.getElementById('case-nick-status');
+    var nick = (inp.value||'').trim();
+    if (!nick) { status.textContent=''; _caseNick=''; _caseSpins=0; _caseUpdateBtn(); return; }
+    status.textContent='Проверяем...'; status.style.color='#555';
+    _fbCompat.ref('caseSpins/' + nick).once('value').then(function(snap) {
+        var spins = snap.exists() ? (snap.val() || 0) : 0;
+        _caseNick = nick; _caseSpins = spins;
+        if (spins > 0) { status.textContent = '✓ Найдено прокруток: ' + spins; status.style.color = '#4ade80'; }
+        else { status.textContent = 'Прокруток нет. 1-я постройка - сразу, потом каждые 3'; status.style.color = '#555'; }
+        _caseUpdateBtn();
+    }).catch(function() { status.textContent = '⚠ Ошибка загрузки'; status.style.color = '#f87171'; });
+}
+
+function doSpin() {
+    if (_caseSpinning||_caseSpins<=0||!_caseNick) return;
+    if (window._siteFlags&&window._siteFlags.showCases===false) {
+        var e=document.getElementById('case-spin-err'); if(e){e.textContent='Кейсы временно недоступны';e.style.display='';}
+        return;
+    }
+    var nickAtSpin = _caseNick; 
+    _caseSpinning=true;
+    document.getElementById('case-spin-btn').style.opacity='0.4';
+    document.getElementById('case-spin-btn').style.pointerEvents='none';
+    document.getElementById('case-result-box').style.display='none';
+    document.getElementById('case-spin-err').style.display='none';
+    _caseLoadItems(function(){
+        var result=_caseWeightedRoll(), winner=result.item, winnerRarity=result.rarity;
+        var reelData=_caseBuildReel(winner,winnerRarity);
+        var reel=document.getElementById('case-reel');
+        if (!reel) return;
+        
+        reel.style.transition='none';
+        reel.style.transform='translateX(0px)';
+        
+        void reel.offsetWidth;
+        var vpW=reel.parentElement.offsetWidth||500;
+        var cardW=reelData.cardW;
+        var targetOffset=-(reelData.winnerIdx*cardW)+vpW/2-cardW/2;
+        targetOffset+=(Math.random()-.5)*40;
+        var startTime=null, duration=5000, startX=0;
+        function easeOut(t){return 1-Math.pow(1-t,4);}
+        function animFrame(ts){
+            if(!startTime) startTime=ts;
+            var progress=Math.min((ts-startTime)/duration,1);
+            var x=startX+(targetOffset-startX)*easeOut(progress);
+            reel.style.transform='translateX('+x+'px)';
+            if(progress>0.85){
+                var op=(progress-0.85)/0.15;
+                var center=reel.children[reelData.winnerIdx];
+                if(center&&center.firstChild){
+                    center.firstChild.style.boxShadow='0 0 '+(op*30)+'px '+winnerRarity.color+'88';
+                    center.firstChild.style.borderColor=winnerRarity.color;
+                    center.firstChild.style.transform='scale('+(1+op*.08)+')';
+                }
+            }
+            if(progress<1){ _caseReelRaf=requestAnimationFrame(animFrame); }
+            else { _caseSpinning=false; _showCaseResult(winner,winnerRarity); _caseDeductSpin(nickAtSpin); }
+        }
+        _caseReelRaf=requestAnimationFrame(animFrame);
+    });
+}
+
+function _caseDeductSpin(nick) {
+    var targetNick = nick || _caseNick;
+    if (!targetNick) return;
+    console.log('[caseDeductSpin] deducting spin for:', targetNick, '| current _caseSpins:', _caseSpins);
+    var ref = _fbCompat.ref('caseSpins/' + targetNick);
+    ref.transaction(function(cur) {
+        console.log('[caseDeductSpin] transaction cur value:', cur);
+        return Math.max(0, (cur || 0) - 1);
+    }, function(err, committed, snap) {
+        if (err) {
+            console.warn('[caseDeductSpin] error:', err);
+            _caseSpins = Math.max(0, _caseSpins - 1);
+        } else {
+            var newVal = snap ? (snap.val() || 0) : 0;
+            console.log('[caseDeductSpin] committed:', committed, '| new value:', newVal);
+            _caseSpins = newVal;
+        }
+        _caseUpdateBtn();
+    });
+}
+
+function _showCaseResult(item,rarity) {
+    var box=document.getElementById('case-result-box');
+    if (!box) return;
+    _caseCurrentItem=item; _caseCurrentRarity=rarity;
+    document.getElementById('case-result-icon').innerHTML=item.iconUrl
+        ? '<img src="'+item.iconUrl+'" style="width:52px;height:52px;object-fit:contain;border-radius:10px;">'
+        : item.icon;
+    document.getElementById('case-result-name').textContent=item.name;
+    var re=document.getElementById('case-result-rarity');
+    re.textContent=rarity.name;
+    re.style.background=rarity.color+'22';
+    re.style.border='1px solid '+rarity.color+'44';
+    re.style.color=rarity.color;
+    box.style.borderColor=rarity.color+'44';
+    box.style.background=rarity.color+'08';
+    
+    var descEl=document.getElementById('case-result-desc');
+    if (descEl) { if(item.description){descEl.textContent=item.description;descEl.style.display='';}else{descEl.style.display='none';} }
+    
+    var subPanel=document.getElementById('case-subitem-panel');
+    var subBtn=document.getElementById('case-sub-spin-btn');
+    var subResult=document.getElementById('case-subresult');
+    var footerEl=document.getElementById('case-result-footer');
+    if (subPanel) subPanel.style.display='none';
+    if (subResult) { subResult.style.display='none'; subResult.className=''; }
+    var subItems = item.subItems;
+    if (subItems && subItems.length>0) {
+        if (subPanel) subPanel.style.display='block';
+        if (subBtn) { subBtn.style.display=''; subBtn.disabled=false; subBtn.style.opacity='1'; }
+        if (footerEl) footerEl.textContent='Сначала определи тип предмета ↑';
+        
+        _caseSubBuildReel(subItems);
+    } else {
+        if (footerEl) footerEl.textContent='Награда будет выдана вручную администратором';
+        _caseSendResult(item,rarity,null);
+    }
+    box.style.display='block';
+}
+
+function _caseSubItemCard(sub, size) {
+    var s=size||60;
+    var iconHtml = sub.iconUrl
+        ? '<img src="'+sub.iconUrl+'" style="width:'+Math.round(s*.48)+'px;height:'+Math.round(s*.48)+'px;object-fit:contain;border-radius:5px;">'
+        : '<span style="font-size:'+Math.round(s*.35)+'px;line-height:1;">'+sub.icon+'</span>';
+    return '<div style="flex-shrink:0;width:'+s+'px;height:'+s+'px;border-radius:10px;background:'+sub.color+'14;border:2px solid '+sub.color+'44;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-shadow:0 0 6px '+sub.color+'22;">'
+        +iconHtml
+        +'<div style="font-size:7px;font-weight:900;color:#fff;text-align:center;max-width:'+(s-8)+'px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 3px;">'+sub.name+'</div>'
+        +'</div>';
+}
+
+function _caseSubBuildReel(subItems) {
+    var reel=document.getElementById('case-sub-reel');
+    if (!reel) return;
+    reel.style.transform='translateX(0px)';
+    reel.innerHTML='';
+    var cards=[];
+    for(var i=0;i<40;i++) cards.push(subItems[Math.floor(Math.random()*subItems.length)]);
+    var winnerIdx=30;
+    cards.forEach(function(sub){
+        var div=document.createElement('div'); div.style.cssText='flex-shrink:0;';
+        div.innerHTML=_caseSubItemCard(sub,60); reel.appendChild(div);
+    });
+    return {cards:cards, winnerIdx:winnerIdx, cardW:66};
+}
+
+function doSubSpin() {
+    if (_caseSubSpinning || !_caseCurrentItem) return;
+    var subItems=_caseCurrentItem.subItems;
+    if (!subItems||!subItems.length) return;
+    _caseSubSpinning=true;
+    var subBtn=document.getElementById('case-sub-spin-btn');
+    if (subBtn) {subBtn.disabled=true; subBtn.style.opacity='0.4';}
+    var winner=subItems[Math.floor(Math.random()*subItems.length)];
+    var reel=document.getElementById('case-sub-reel');
+    if (!reel) return;
+   
+    reel.innerHTML='';
+    var cards=[];
+    for(var i=0;i<35;i++) cards.push(subItems[Math.floor(Math.random()*subItems.length)]);
+    var winnerIdx=30;
+    cards.splice(winnerIdx,0,winner);
+    cards.forEach(function(sub){
+        var div=document.createElement('div'); div.style.cssText='flex-shrink:0;';
+        div.innerHTML=_caseSubItemCard(sub,60); reel.appendChild(div);
+    });
+    reel.style.transition='none'; reel.style.transform='translateX(0px)'; void reel.offsetWidth;
+    var vpW=reel.parentElement.offsetWidth||400;
+    var cardW=66;
+    var targetOffset=-(winnerIdx*cardW)+vpW/2-cardW/2;
+    targetOffset+=(Math.random()-.5)*20;
+    var startTime=null, duration=3500, startX=0;
+    function easeOut(t){return 1-Math.pow(1-t,4);}
+    function animFrame(ts){
+        if(!startTime) startTime=ts;
+        var progress=Math.min((ts-startTime)/duration,1);
+        var x=startX+(targetOffset-startX)*easeOut(progress);
+        reel.style.transform='translateX('+x+'px)';
+        if(progress>0.85){
+            var op=(progress-0.85)/0.15;
+            var center=reel.children[winnerIdx];
+            if(center&&center.firstChild){
+                center.firstChild.style.boxShadow='0 0 '+(op*20)+'px '+winner.color+'aa';
+                center.firstChild.style.borderColor=winner.color;
+                center.firstChild.style.transform='scale('+(1+op*.1)+')';
+            }
+        }
+        if(progress<1){_caseSubReelRaf=requestAnimationFrame(animFrame);}
+        else {_caseSubSpinning=false; _showSubResult(winner);}
+    }
+    _caseSubReelRaf=requestAnimationFrame(animFrame);
+}
+
+function _showSubResult(sub) {
+    var subResult=document.getElementById('case-subresult');
+    var iconEl=document.getElementById('case-subresult-icon');
+    var labelEl=document.getElementById('case-subresult-label');
+    var nameEl=document.getElementById('case-subresult-name');
+    var footerEl=document.getElementById('case-result-footer');
+    var subBtn=document.getElementById('case-sub-spin-btn');
+    if (iconEl) iconEl.textContent=sub.icon;
+    if (labelEl) labelEl.textContent=(_caseCurrentItem?_caseCurrentItem.name:'Предмет')+' · Тип';
+    if (nameEl) nameEl.textContent=sub.name;
+    if (subResult) { subResult.style.display=''; subResult.className='show'; }
+    if (subBtn) subBtn.style.display='none';
+    if (footerEl) footerEl.textContent='Награда будет выдана вручную администратором';
+    _caseSendResult(_caseCurrentItem, _caseCurrentRarity, sub);
+}
+
+function _caseSendResult(item,rarity,subItem) {
+    var subLine = subItem ? '\n🎲 Тип: '+subItem.icon+' '+subItem.name : '';
+    var text='Прокрутка кейса · Classic HUB\n\n👤 Игрок: '+_caseNick+'\n🏆 Выпало: '+item.icon+' '+item.name+'\n⭐ Редкость: '+rarity.name+subLine+'\n\nВыдать награду вручную!';
+    fetch('https://d1-template.herotorch.workers.dev/sendMessage',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({text:text})
+    }).catch(function(){});
+}
+
+function _caseItemDetailModal(item) {
+    var rarity = CASE_RARITIES.find(function(r){return r.id===item.rarity;})||CASE_RARITIES[0];
+    var rc = rarity.color;
+    var iconHtml = item.iconUrl
+        ? '<img src="'+item.iconUrl+'" style="width:56px;height:56px;object-fit:contain;border-radius:12px;">'
+        : '<span style="font-size:2.4rem;line-height:1;">'+item.icon+'</span>';
+    var subSection = '';
+    if (item.subItems && item.subItems.length) {
+        var subGrid = item.subItems.map(function(s){
+            var sIcon = s.iconUrl
+                ? '<img src="'+s.iconUrl+'" style="width:22px;height:22px;object-fit:contain;border-radius:4px;">'
+                : '<span style="font-size:14px;">'+s.icon+'</span>';
+            return '<div style="display:flex;align-items:center;gap:7px;padding:6px 9px;background:'+s.color+'0a;border:1px solid '+s.color+'25;border-radius:9px;">'
+                +'<div style="width:28px;height:28px;border-radius:7px;background:'+s.color+'18;border:1px solid '+s.color+'30;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+sIcon+'</div>'
+                +'<span style="font-size:11px;font-weight:700;color:#ccc;">'+s.name+'</span>'
+                +'</div>';
+        }).join('');
+        subSection = '<div style="margin-top:16px;border-top:1px solid #1f1f1f;padding-top:14px;">'
+            +'<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:#a78bfa;margin-bottom:8px;">Возможные варианты ('+item.subItems.length+')</div>'
+            +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">'+subGrid+'</div>'
+            +'</div>';
+    }
+    var descSection = item.description
+        ? '<div style="font-size:11px;color:#666;line-height:1.6;margin-top:8px;">'+item.description+'</div>'
+        : '';
+    var old=document.getElementById('case-item-detail-modal');if(old)old.remove();
+    var modal=document.createElement('div');modal.id='case-item-detail-modal';
+    modal.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:16px;';
+    modal.onclick=function(e){if(e.target===modal)modal.remove();};
+    modal.innerHTML='<div onclick="event.stopPropagation()" style="background:#111;border:1px solid '+rc+'30;border-radius:20px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.9);">'
+        +'<div style="height:2px;background:linear-gradient(90deg,'+rc+','+rc+'88,'+rc+');"></div>'
+        +'<div style="padding:22px 22px 24px;position:relative;">'
+            +'<button onclick="document.getElementById(\'case-item-detail-modal\').remove()" style="position:absolute;top:0;right:0;width:28px;height:28px;border-radius:50%;background:#1a1a1a;border:1px solid #2a2a2a;color:#555;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;">✕</button>'
+            +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">'
+                +'<div style="width:64px;height:64px;border-radius:14px;background:'+rc+'14;border:2px solid '+rc+'35;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 18px '+rc+'22;">'+iconHtml+'</div>'
+                +'<div>'
+                    +'<div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:4px;line-height:1.2;">'+item.name+'</div>'
+                    +'<span style="font-size:9px;font-weight:900;padding:3px 10px;border-radius:20px;background:'+rc+'18;color:'+rc+';border:1px solid '+rc+'30;text-transform:uppercase;letter-spacing:.1em;">'+rarity.name+'</span>'
+                +'</div>'
+            +'</div>'
+            +descSection
+            +subSection
+        +'</div>'
+        +'</div>';
+    document.body.appendChild(modal);
+}
+
+function renderCases() {
+    var pt=document.getElementById('page-title');
+    if (pt) pt.innerText='Кейсы';
+    var container=document.getElementById('builds-container');
+    container.className='';
+    var casesDisabled=window._siteFlags&&window._siteFlags.showCases===false;
+
+    var openBtn = casesDisabled
+        ? '<div style="text-align:center;padding:20px;background:#0e0e0e;border:1px solid #1f1f1f;border-radius:14px;color:#555;font-size:12px;">🔒 Прокрутка кейсов временно отключена</div>'
+        : '<button onclick="openCaseModal()" style="'
+            +'width:100%;border:none;border-radius:14px;padding:18px;'
+            +'font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;'
+            +'color:#000;cursor:pointer;font-family:Montserrat,sans-serif;'
+            +'background:linear-gradient(90deg,#b8860b,#D4AF37,#f59e0b,#ffe066,#D4AF37,#b8860b);'
+            +'background-size:300% auto;'
+            +'animation:case-btn-shimmer 3s linear infinite,case-btn-glow 2s ease-in-out infinite;'
+            +'transition:transform .15s,filter .15s;position:relative;overflow:hidden;'
+            +'" onmouseover="this.style.transform=\'scale(1.03)\';this.style.filter=\'brightness(1.1)\'"'
+            +' onmouseout="this.style.transform=\'\';this.style.filter=\'\'"'
+            +'>Открыть кейс</button>';
+
+    var totalItems = 0; 
+    var rarityCount = CASE_RARITIES.length;
+
+    container.innerHTML =
+        '<div class="col-span-full w-full">'
+
+        
+        +'<div class="relative rounded-3xl overflow-hidden mb-8 border border-white/5 px-8 py-10" style="background:linear-gradient(135deg,#0d0d0d 0%,#100e00 50%,#0d0d0d 100%);">'
+            +'<div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at 20% 50%,rgba(212,175,55,0.08) 0%,transparent 60%);"></div>'
+            +'<div class="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">'
+                +'<div class="flex-grow">'
+                    +'<div class="text-[10px] font-black tracking-[0.3em] uppercase mb-2" style="color:#D4AF37;">Система наград</div>'
+                    +'<h2 class="text-2xl font-black uppercase tracking-tighter mb-2">Кейс Архитектора</h2>'
+                    +'<p class="text-gray-400 text-sm max-w-xl">Загружай постройки - получай прокрутки и открывай уникальные награды. Первая работа даёт прокрутку сразу, затем каждые 3 новые.</p>'
+                +'</div>'
+                +'<div class="grid grid-cols-3 gap-3 flex-shrink-0">'
+                    +'<div class="bg-black/40 rounded-2xl p-4 border border-white/5 text-center min-w-[80px]">'
+                        +'<div class="text-xl font-black" style="color:#D4AF37;" id="cases-hero-count">—</div>'
+                        +'<div class="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Предметов</div>'
+                    +'</div>'
+                    +'<div class="bg-black/40 rounded-2xl p-4 border border-white/5 text-center min-w-[80px]">'
+                        +'<div class="text-xl font-black text-purple-400">'+rarityCount+'</div>'
+                        +'<div class="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Редкостей</div>'
+                    +'</div>'
+                    +'<div class="bg-black/40 rounded-2xl p-4 border border-white/5 text-center min-w-[80px]">'
+                        +'<div class="text-xl font-black text-amber-400">×3</div>'
+                        +'<div class="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">На постройку</div>'
+                    +'</div>'
+                +'</div>'
+            +'</div>'
+        +'</div>'
+
+        
+        +'<div style="display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start;">'
+
+            
+            +'<div>'
+                +'<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:#444;margin-bottom:10px;">Предметы в кейсе · нажми для просмотра</div>'
+                +'<div id="cases-items-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;"></div>'
+            +'</div>'
+
+            
+            +'<div style="display:flex;flex-direction:column;gap:12px;">'
+                +openBtn
+                +'<div style="background:#0c0c0c;border:1px solid #1a1a1a;border-radius:16px;padding:16px;">'
+                    +'<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:#444;margin-bottom:12px;">Шансы выпадения</div>'
+                    +CASE_RARITIES.map(function(r){
+                        var barW = Math.max(4, Math.round(r.weight * 3.2));
+                        return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #111;">'
+                            +'<span style="width:8px;height:8px;border-radius:50%;background:'+r.color+';box-shadow:0 0 5px '+r.color+'88;flex-shrink:0;display:inline-block;"></span>'
+                            +'<span style="font-size:10px;font-weight:700;color:'+r.color+';flex:1;">'+r.name+'</span>'
+                            +'<div style="height:3px;border-radius:4px;background:'+r.color+'33;width:80px;overflow:hidden;">'
+                                +'<div style="height:100%;width:'+barW+'%;background:'+r.color+';border-radius:4px;"></div>'
+                            +'</div>'
+                            +'<span style="font-size:10px;font-weight:900;color:#444;width:28px;text-align:right;">'+r.weight+'%</span>'
+                            +'</div>';
+                    }).join('')
+                +'</div>'
+                +'<div style="background:#0c0c0c;border:1px solid #1a1a1a;border-radius:16px;padding:16px;">'
+                    +'<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:#444;margin-bottom:10px;">Как получить прокрутку</div>'
+                    +'<div style="display:flex;flex-direction:column;gap:8px;">'
+                        +'<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 10px;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:10px;">'
+                            +'<span style="font-size:16px;flex-shrink:0;margin-top:1px;">🏗</span>'
+                            +'<div><div style="font-size:10px;font-weight:900;color:#ccc;margin-bottom:2px;">Первая постройка</div><div style="font-size:9px;color:#555;">Прокрутка выдаётся сразу после одобрения</div></div>'
+                        +'</div>'
+                        +'<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 10px;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:10px;">'
+                            +'<span style="font-size:16px;flex-shrink:0;margin-top:1px;">📦</span>'
+                            +'<div><div style="font-size:10px;font-weight:900;color:#ccc;margin-bottom:2px;">Каждые 3 постройки</div><div style="font-size:9px;color:#555;">Начиная со второй загруженной работы</div></div>'
+                        +'</div>'
+                    +'</div>'
+                +'</div>'
+            +'</div>'
+
+        +'</div>'
+        +'</div>';
+
+    _caseLoadItems(function(){
+        var grid=document.getElementById('cases-items-grid');
+        if (!grid) return;
+        
+        var heroCount = document.getElementById('cases-hero-count');
+        if (heroCount) heroCount.textContent = _caseItems.length;
+
+        grid.innerHTML=_caseItems.map(function(item,i){
+            var rarity=CASE_RARITIES.find(function(r){return r.id===item.rarity;})||CASE_RARITIES[0];
+            var rc=rarity.color;
+            var icon=item.iconUrl
+                ? '<img src="'+item.iconUrl+'" style="width:32px;height:32px;object-fit:contain;border-radius:7px;">'
+                : '<span style="font-size:1.35rem;line-height:1;">'+item.icon+'</span>';
+            var hasSubItems=item.subItems&&item.subItems.length;
+
+            
+            var subDots = hasSubItems
+                ? '<div style="display:flex;justify-content:center;gap:3px;margin-top:5px;flex-wrap:wrap;">'
+                    +item.subItems.slice(0,5).map(function(s){
+                        var sIco = s.iconUrl
+                            ? '<img src="'+s.iconUrl+'" style="width:12px;height:12px;object-fit:contain;border-radius:2px;vertical-align:middle;">'
+                            : '<span style="font-size:11px;line-height:1;">'+s.icon+'</span>';
+                        var sColor = s.color || '#a78bfa';
+                        return '<span class="case-sub-dot" style="position:relative;display:inline-flex;align-items:center;justify-content:center;cursor:default;">'
+                            +sIco
+                            +'<span style="'
+                                +'position:absolute;bottom:calc(100% + 8px);left:50%;'
+                                +'transform:translateX(-50%) translateY(3px);'
+                                +'background:#111;border:1px solid '+sColor+'40;'
+                                +'border-radius:8px;padding:4px 9px;'
+                                +'font-size:9px;font-weight:700;color:'+sColor+';'
+                                +'white-space:nowrap;pointer-events:none;'
+                                +'opacity:0;transition:opacity .15s,transform .15s;'
+                                +'box-shadow:0 4px 16px rgba(0,0,0,0.8);z-index:500;'
+                            +'" class="case-sub-tip">'+s.name+'</span>'
+                            +'</span>';
+                    }).join('')
+                    +(item.subItems.length>5?'<span style="font-size:8px;color:#555;align-self:center;margin-left:1px;">+'+( item.subItems.length-5)+'</span>':'')
+                  +'</div>'
+                : '';
+
+            var subIndicator = hasSubItems
+                ? '<div class="has-tip" style="position:absolute;top:5px;right:5px;width:15px;height:15px;border-radius:50%;background:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:#fff;box-shadow:0 0 6px #a78bfa88;cursor:default;">'
+                    +'🎲'
+                    +'<span class="nav-tip" style="border-color:rgba(167,139,250,0.4);color:#c4b5fd;bottom:calc(100% + 8px);">'+item.subItems.length+' вариант'+(item.subItems.length===1?'':'а/ов')+'</span>'
+                +'</div>'
+                : '';
+            return '<div onclick="(function(){var items=window._caseItems||[];var it=items['+i+'];if(it)_caseItemDetailModal(it);})()" '
+                +'style="position:relative;background:#0e0e0e;border:1px solid '+rc+'20;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .18s;user-select:none;" '
+                +'onmouseover="this.style.borderColor=\''+rc+'55\';this.style.background=\''+rc+'08\';this.style.transform=\'translateY(-2px)\'" '
+                +'onmouseout="this.style.borderColor=\''+rc+'20\';this.style.background=\'#0e0e0e\';this.style.transform=\'\'">'
+                +subIndicator
+                +'<div style="width:44px;height:44px;border-radius:10px;background:'+rc+'14;border:1px solid '+rc+'28;display:flex;align-items:center;justify-content:center;margin:0 auto 7px;box-shadow:0 2px 10px '+rc+'18;">'+icon+'</div>'
+                +'<div style="font-size:10px;font-weight:900;color:#e0e0e0;margin-bottom:3px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">'+item.name+'</div>'
+                +'<span style="font-size:7px;font-weight:900;padding:2px 7px;border-radius:20px;background:'+rc+'15;color:'+rc+';border:1px solid '+rc+'28;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;">'+rarity.name+'</span>'
+                +subDots
+                +'</div>';
+        }).join('');
+
+        
+        grid.addEventListener('mouseover', function(e) {
+            var dot = e.target.closest('.case-sub-dot');
+            if (!dot) return;
+            e.stopPropagation();
+            var tip = dot.querySelector('.case-sub-tip');
+            if (tip) { tip.style.opacity='1'; tip.style.transform='translateX(-50%) translateY(0)'; }
+        });
+        grid.addEventListener('mouseout', function(e) {
+            var dot = e.target.closest('.case-sub-dot');
+            if (!dot) return;
+            var tip = dot.querySelector('.case-sub-tip');
+            if (tip) { tip.style.opacity='0'; tip.style.transform='translateX(-50%) translateY(3px)'; }
+        });
+    });
+}
+
+</script>
+
 </body>
 </html>
