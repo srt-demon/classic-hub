@@ -62,7 +62,6 @@ Development by slowdown
 
         var _fbCompat = firebase.database();
 
-        
         window._fbDb  = _fbCompat;
         window._fbRef = function(db, path) { return _fbCompat.ref(path); };
         window._fbGet = function(ref) { return ref.once('value'); };
@@ -177,9 +176,15 @@ Development by slowdown
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
+        .subtle-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.14) transparent; }
+        .subtle-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .subtle-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .subtle-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 10px; }
+        .subtle-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.28); }
+        .skill-icon-wrap:hover { box-shadow:0 0 0 1px rgba(255,255,255,0.15); }
 
         .rank-badge {
             padding: 2px 8px;
@@ -304,14 +309,14 @@ Development by slowdown
         @keyframes _siPanelInDown{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         .style-skill-btn:hover { border-color: rgba(212,175,55,0.25) !important; background: rgba(212,175,55,0.04) !important; }
         .style-skill-btn.active { border-color: rgba(212,175,55,0.5) !important; background: rgba(212,175,55,0.07) !important; box-shadow: 0 0 14px rgba(212,175,55,0.12); }
-        /* mobile fix: stack styles panel vertically */
+        /* mobile fix */
         @media (max-width: 767px) {
             .styles-inner-flex { flex-direction: column !important; }
             .styles-inner-flex #styles-grid { width: 100% !important; flex-shrink: 1 !important; }
             .styles-inner-flex #style-info-panel { width: 100% !important; }
             #style-info-panel { animation-name: _siPanelInDown !important; }
         }
-        /* rank icon 3d hover on info page */
+        
         .rank-info-icon-wrap {
             display:inline-flex;align-items:center;justify-content:center;
             cursor:default;
@@ -319,7 +324,7 @@ Development by slowdown
             transform-style: preserve-3d;
             border-radius: 9px;
         }
-        /* rank icon image */
+        
         .rank-icon {
             width:13px;height:13px;border-radius:2px;object-fit:cover;
             display:inline-block;vertical-align:middle;flex-shrink:0;
@@ -329,7 +334,7 @@ Development by slowdown
             width:22px;height:22px;border-radius:4px;object-fit:cover;
             display:inline-block;vertical-align:middle;flex-shrink:0;
         }
-        /* rank medals tooltip */
+        
         #rank-medals-tip {
             position:fixed;z-index:99999;pointer-events:none;
             background:rgba(10,8,0,0.95);border:1px solid rgba(212,175,55,0.25);
@@ -419,6 +424,7 @@ Development by slowdown
                 <a href="#" class="nav-tab">Достижения</a>
                 <a href="#" class="nav-tab">Информация</a>
                 <a href="#" class="nav-tab">Архив</a>
+                <a href="#" class="nav-tab" id="nav-tab-events">События</a>
                 <a href="#" class="nav-tab" id="tab-updates-link">Обновления<span id="updates-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px #4ade80;animation:pulse-dot 1.4s infinite;" title="Новое обновление"></span></a>
                 <a href="#" class="nav-tab" id="nav-tab-shop">Магазин</a>
                 <a href="#" class="nav-tab" id="nav-tab-map">Карта</a>
@@ -582,6 +588,7 @@ Development by slowdown
                         <li><a href="#" onclick="goHome(); window.scrollTo(0,0);" class="hover:text-gold transition">Галерея построек</a></li>
                         <li><a href="#" onclick="[...document.querySelectorAll('.nav-tab')].forEach(t=>t.classList.remove('active')); [...document.querySelectorAll('.nav-tab')].find(t=>t.innerText.trim()==='Архив')?.classList.add('active'); renderArchive(); window.scrollTo(0,0);" class="hover:text-gold transition">Архив сезонов</a></li>
                         <li><a href="#" onclick="[...document.querySelectorAll('.nav-tab')].forEach(t=>t.classList.remove('active')); [...document.querySelectorAll('.nav-tab')].find(t=>t.innerText.trim()==='Обновления')?.classList.add('active'); renderUpdates(); window.scrollTo(0,0);" class="hover:text-gold transition">Обновления сайта</a></li>
+                        <li><a href="#" onclick="[...document.querySelectorAll('.nav-tab')].forEach(t=>t.classList.remove('active')); renderTeam(); window.scrollTo(0,0);" class="hover:text-gold transition">Команда сервиса</a></li>
                     </ul>
                 </div>
                 <div>
@@ -602,7 +609,7 @@ Development by slowdown
                 </div>
             </div>
             <div class="mt-12 pt-8 border-t border-white/5 text-[10px] text-gray-600 uppercase tracking-[0.3em] text-center">
-                © 2026 Classic HUB v2.1 | дизайн и разработка <a href="https://slowdown-portfolio.netlify.app" target="_blank" class="gold-accent hover:underline transition">slowdown</a>
+                © 2026 Classic HUB v2.5 | дизайн и разработка <a href="https://slowdown-portfolio.netlify.app" target="_blank" class="gold-accent hover:underline transition">slowdown</a>
             </div>
         </div>
     </footer>
@@ -633,33 +640,35 @@ Development by slowdown
                     <h2 id="modal-title" class="text-lg font-black uppercase leading-tight tracking-tighter text-white"></h2>
                 </div>
 
-                <p id="modal-desc" class="text-gray-400 text-xs leading-relaxed mb-4 max-h-20 overflow-y-auto custom-scrollbar pr-1"></p>
+                <p id="modal-desc" class="text-gray-400 text-xs leading-relaxed mb-4 max-h-40 overflow-y-auto custom-scrollbar pr-1"></p>
 
-                <div class="mb-4">
-                    <h4 class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">Галерея объекта</h4>
-                    <div id="modal-gallery-grid" class="grid grid-cols-3 gap-1.5 custom-scrollbar" style="max-height:180px;overflow-y:auto;"></div>
-                </div>
-
-                <div class="mt-auto space-y-3 pt-4 border-t border-white/5">
-                    <div class="flex justify-between items-start">
-                        <span class="text-[9px] text-gray-400 uppercase tracking-widest pt-1">Автор</span>
-                        <div id="modal-authors-list" class="flex flex-col items-end gap-1"></div>
+                <div class="mt-auto">
+                    <div class="mb-4">
+                        <h4 class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">Галерея объекта</h4>
+                        <div id="modal-gallery-grid" class="flex gap-1.5 custom-scrollbar" style="overflow-x:auto;overflow-y:hidden;padding-bottom:6px;"></div>
                     </div>
 
-                    <div class="flex justify-between items-center py-3 border-y border-white/5 text-[9px]">
-                        <span class="text-gray-400 uppercase">Стиль</span>
-                        <span id="modal-style" class="font-black gold-accent tracking-widest uppercase"></span>
-                    </div>
+                    <div class="space-y-3 pt-4 border-t border-white/5">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[9px] text-gray-400 uppercase tracking-widest pt-1">Автор</span>
+                            <div id="modal-authors-list" class="flex flex-col items-end gap-1"></div>
+                        </div>
 
-                    <div class="flex justify-between items-center py-2 text-[9px]">
-                        <span class="text-gray-400 uppercase">Координаты</span>
-                        <span id="modal-coords" class="font-black gold-accent tracking-widest uppercase">-</span>
-                    </div>
+                        <div class="flex justify-between items-center py-3 border-y border-white/5 text-[9px]">
+                            <span class="text-gray-400 uppercase">Стиль</span>
+                            <span id="modal-style" class="font-black gold-accent tracking-widest uppercase"></span>
+                        </div>
 
-                   <div class="flex justify-between items-center text-[9px]">
-                        <span class="text-gray-400 uppercase">Просмотры</span>
-                        <span id="modal-views" class="text-white font-bold">-</span>
-                    </div> 
+                        <div class="flex justify-between items-center py-2 text-[9px]">
+                            <span class="text-gray-400 uppercase">Координаты</span>
+                            <span id="modal-coords" class="font-black gold-accent tracking-widest uppercase">-</span>
+                        </div>
+
+                       <div class="flex justify-between items-center text-[9px]">
+                            <span class="text-gray-400 uppercase">Просмотры</span>
+                            <span id="modal-views" class="text-white font-bold">-</span>
+                        </div> 
+                    </div>
                 </div>
 
             </div>
@@ -727,26 +736,26 @@ Development by slowdown
             </div>
 
             <div class="p-5" style="padding-top:42px;">
-                <div class="grid grid-cols-4 gap-2 mb-5">
-                    <div class="rounded-xl p-3 border text-center" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);">
-                        <div id="profile-builds-count" class="font-black gold-accent" style="font-size:1.3rem;"></div>
+                <div class="grid grid-cols-4 gap-2 mb-4">
+                    <div class="rounded-xl p-2.5 border text-center" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);">
+                        <div id="profile-builds-count" class="font-black gold-accent" style="font-size:1.15rem;"></div>
                         <div class="text-gray-600 uppercase tracking-widest mt-0.5" style="font-size:8px;">Построек</div>
                     </div>
-                    <div class="rounded-xl p-3 border text-center" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);">
-                        <div id="profile-top-place" class="font-black text-white" style="font-size:1.3rem;"></div>
+                    <div class="rounded-xl p-2.5 border text-center" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);">
+                        <div id="profile-top-place" class="font-black text-white" style="font-size:1.15rem;"></div>
                         <div class="text-gray-600 uppercase tracking-widest mt-0.5" style="font-size:8px;">В топе</div>
                     </div>
-                    <div class="rounded-xl p-3 border text-center" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);">
-                        <div id="profile-views" class="font-black text-blue-300" style="font-size:1.3rem;">-</div>
+                    <div class="rounded-xl p-2.5 border text-center" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);">
+                        <div id="profile-views" class="font-black text-blue-300" style="font-size:1.15rem;">-</div>
                         <div class="text-gray-600 uppercase tracking-widest mt-0.5" style="font-size:8px;">Просмотров</div>
                     </div>
-                    <div class="rounded-xl p-3 border text-center" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);">
-                        <div id="profile-ach-count" class="font-black text-purple-300" style="font-size:1.3rem;">-</div>
+                    <div class="rounded-xl p-2.5 border text-center" style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);">
+                        <div id="profile-ach-count" class="font-black text-purple-300" style="font-size:1.15rem;">-</div>
                         <div class="text-gray-600 uppercase tracking-widest mt-0.5" style="font-size:8px;">Ачивок</div>
                     </div>
                 </div>
 
-                <div class="profile-two-col grid gap-4" style="grid-template-columns:1fr 1.1fr;">
+                <div class="profile-two-col grid gap-3" style="grid-template-columns:0.95fr 1.1fr 0.95fr;">
 
                     <div class="flex flex-col gap-3">
 
@@ -755,30 +764,61 @@ Development by slowdown
                                 <span class="text-gray-500 uppercase tracking-widest font-black" style="font-size:9px;">Общая информация</span>
                             </div>
                             <div class="grid grid-cols-2 divide-x divide-white/5">
-                                <div class="px-3 py-2.5">
+                                <div class="px-3 py-2">
                                     <div class="text-gray-600 uppercase tracking-widest mb-0.5" style="font-size:8px;">Любимый стиль</div>
                                     <div id="profile-fav-style" class="font-black gold-accent" style="font-size:11px;"></div>
                                 </div>
-                                <div class="px-3 py-2.5">
+                                <div class="px-3 py-2">
                                     <div class="text-gray-600 uppercase tracking-widest mb-0.5" style="font-size:8px;">На проекте с</div>
                                     <div id="profile-joined" class="font-black text-white" style="font-size:11px;"></div>
                                 </div>
                             </div>
+                            <div class="px-3 py-2 border-t flex items-center justify-between" style="border-color:rgba(255,255,255,0.05);">
+                                <div>
+                                    <div class="text-gray-600 uppercase tracking-widest mb-0.5" style="font-size:8px;">Время на сервере</div>
+                                    <div id="profile-playtime-value" class="font-black text-white" style="font-size:11px;">—</div>
+                                </div>
+                                <span id="profile-playtime-online-wrap" style="display:none;align-items:center;gap:5px;flex-shrink:0;cursor:default;"
+                                      onmouseenter="_ptOnlineTipShow(event)" onmouseleave="_eqTipHide()" onmousemove="_eqTipMove(event)">
+                                    <span style="font-size:8px;font-weight:900;color:#4ade80;text-transform:uppercase;letter-spacing:.08em;">онлайн</span>
+                                    <span id="profile-playtime-dot" style="width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade8088;flex-shrink:0;"></span>
+                                </span>
+                            </div>
                             <div id="profile-contacts" style="display:none;border-top:1px solid rgba(255,255,255,0.05);padding:8px 12px;flex-wrap:wrap;gap:6px;width:100%;box-sizing:border-box;"></div>
                         </div>
 
-                        <div class="rounded-xl border p-3" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);">
-                            <div class="text-gray-500 uppercase tracking-widest font-black mb-2.5" style="font-size:9px;">Стили построек</div>
-                            <div id="profile-styles-chart" class="space-y-1.5"></div>
+                        <div class="rounded-xl border p-3 flex-grow flex flex-col" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);">
+                            <div class="text-gray-500 uppercase tracking-widest font-black mb-2" style="font-size:9px;">Стили построек</div>
+                            <div id="profile-styles-chart" style="flex:1;display:flex;flex-direction:column;justify-content:center;"></div>
                         </div>
 
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+
                         <div class="rounded-xl border p-3" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);">
-                            <div class="flex items-center justify-between mb-2.5">
+                            <div class="flex items-center justify-between mb-2">
                                 <span class="text-gray-500 uppercase tracking-widest font-black" style="font-size:9px;">Снаряжение</span>
+                                <span id="profile-equip-lock" style="display:none;cursor:default;font-size:13px;line-height:1;"></span>
+                            </div>
+                            <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+                                <div id="profile-equip-armor-col" style="display:flex;flex-direction:column;gap:6px;"></div>
+                                <div style="position:relative;width:112px;height:172px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                                    <img id="profile-equip-3d" src="" alt=""
+                                         style="max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 14px rgba(0,0,0,0.65));"
+                                         onerror="this.style.visibility='hidden'">
+                                </div>
+                                <div id="profile-equip-hand-col" style="display:flex;flex-direction:column;gap:6px;justify-content:center;"></div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border p-3 flex-grow" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);">
+                            <div class="flex items-center justify-between mb-2" style="font-size:9px;">
+                                <span class="text-gray-500 uppercase tracking-widest font-black">Артефакты</span>
                                 <span id="profile-prime-sub-label" style="display:none;font-size:8px;font-weight:900;padding:2px 7px;border-radius:10px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);color:#D4AF37;">✦ PRIME</span>
                             </div>
                             <div id="profile-item-slots" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:4px;"></div>
-                            <div id="profile-equip-empty" style="display:none;font-size:10px;color:#333;text-align:center;padding:8px 0;">Нет активных предметов</div>
+                            <div id="profile-equip-empty" style="display:none;font-size:10px;color:#333;text-align:center;padding:6px 0;">Нет активных предметов</div>
                         </div>
 
                         <div id="profile-archive-block" style="display:none;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:10px 12px;">
@@ -791,18 +831,18 @@ Development by slowdown
                     <div class="flex flex-col gap-3">
 
                         <div class="rounded-xl border p-3" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);">
-                            <div class="flex items-center justify-between mb-2.5">
-                                <span class="text-gray-500 uppercase tracking-widest font-black" style="font-size:9px;">Витрина достижений</span>
+                            <div class="flex items-center justify-between mb-2" style="font-size:9px;">
+                                <span class="text-gray-500 uppercase tracking-widest font-black">Витрина достижений</span>
                                 <span id="profile-ach-total" class="text-gray-600" style="font-size:9px;"></span>
                             </div>
                             <div id="profile-achievements-showcase" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div>
-                            <div id="profile-achievements-rest" class="flex gap-1 flex-wrap mt-2"></div>
+                            <div id="profile-achievements-rest" class="flex gap-1 flex-wrap mt-2 subtle-scrollbar" style="max-height:90px;overflow-y:auto;padding-right:2px;"></div>
                             <div id="profile-no-ach" class="text-gray-700 italic hidden" style="font-size:10px;">Пока нет достижений</div>
                         </div>
 
-                        <div class="rounded-xl border p-3 flex-grow" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);">
-                            <div class="text-gray-500 uppercase tracking-widest font-black mb-2.5" style="font-size:9px;">Умения</div>
-                            <div id="profile-skills" class="grid gap-2" style="grid-template-columns:1fr 1fr;"></div>
+                        <div class="rounded-xl border p-3 flex-grow flex flex-col" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);">
+                            <div class="text-gray-500 uppercase tracking-widest font-black mb-2" style="font-size:9px;">Умения</div>
+                            <div id="profile-skills" style="display:grid;grid-template-columns:repeat(4,56px);grid-template-rows:repeat(2,56px);gap:10px;justify-content:space-between;align-content:space-evenly;overflow:visible;flex:1;"></div>
                         </div>
 
                     </div>
@@ -868,7 +908,7 @@ Development by slowdown
                 <div style="background:#111;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;margin-bottom:14px;">
                     <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#444;margin-bottom:12px;">Написать администратору</div>
 
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:12px;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:12px;">
                         <div onclick="_supportType('bug')" id="stype-bug"
                              style="border-radius:10px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:8px 4px;text-align:center;cursor:pointer;transition:all .15s;">
                             <div style="font-size:16px;margin-bottom:2px;">🐛</div>
@@ -883,6 +923,11 @@ Development by slowdown
                              style="border-radius:10px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:8px 4px;text-align:center;cursor:pointer;transition:all .15s;">
                             <div style="font-size:16px;margin-bottom:2px;">❓</div>
                             <div style="font-size:8px;font-weight:900;color:#666;text-transform:uppercase;letter-spacing:.06em;">Вопрос</div>
+                        </div>
+                        <div onclick="_supportType('event')" id="stype-event"
+                             style="border-radius:10px;border:1.5px solid #2a2a2a;background:#0e0e0e;padding:8px 4px;text-align:center;cursor:pointer;transition:all .15s;">
+                            <div style="font-size:16px;margin-bottom:2px;">📅</div>
+                            <div style="font-size:8px;font-weight:900;color:#666;text-transform:uppercase;letter-spacing:.06em;">Событие</div>
                         </div>
                     </div>
 
@@ -920,7 +965,7 @@ Development by slowdown
                 <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#555;margin-bottom:4px;">Прямая связь</div>
                 <div style="font-size:9px;color:#444;margin-bottom:8px;line-height:1.4;">Только для критических ситуаций, требующих незамедлительного вмешательства</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-                    <a href="https://t.me/s1owdown" target="_blank"
+                    <a href="https://t.me/melochniy1" target="_blank"
                        style="display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(34,158,217,.08);border:1px solid rgba(34,158,217,.2);border-radius:10px;padding:8px 4px;text-decoration:none;"
                        onmouseover="this.style.background='rgba(34,158,217,.18)'" onmouseout="this.style.background='rgba(34,158,217,.08)'">
                         <span id="support-icon-tg" style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;">
@@ -1193,7 +1238,7 @@ Development by slowdown
                         <div class="mt-2 bg-black/30 border border-white/5 rounded-lg px-3 py-2.5 space-y-1">
                             <p class="text-[10px] text-gray-500 leading-relaxed">📸 В альбоме должно быть <span class="text-white font-bold">не менее 3 и не более 9 фотографий</span>.</p>
                             <p class="text-[10px] text-gray-500 leading-relaxed">🔓 Альбом должен быть в <span class="text-white font-bold">общем доступе</span> - иначе мы не сможем загрузить фото на сайт.</p>
-                            <p class="text-[10px] text-gray-500 leading-relaxed">📐 Рекомендуемый формат фото: <span class="text-white font-bold">1980 × 1020 px</span>.</p>
+                            <p class="text-[10px] text-gray-500 leading-relaxed">📐 Рекомендуемый формат фото: <span class="text-white font-bold">1920 × 1080 px</span>.</p>
                         </div>
                     </div>
 
@@ -1706,7 +1751,7 @@ const ACHIEVEMENTS = [
     { id: 'classic_keeper', tier: 'III', name: 'Хранитель классики', desc: 'Найти и опубликовать постройка из самого первого сезона', exp: 500, hidden: true, check: (a, ab) => ab.some(b => b.season === 'Сезон 1') },
     { id: 'shadow_magnate', tier: 'III', name: 'Теневой магнат', desc: 'Построил Gothic-объект в подземном биоме', exp: 150, hidden: true, check: (a, ab) => ab.some(b => b.style === 'GOTHIC' && (b.desc.toLowerCase().includes('подзем') || b.desc.toLowerCase().includes('катакомб') || b.desc.toLowerCase().includes('пещер'))) },
 
-    
+    // те шо добавил в 1.4-1т
     { id: 'samurai_path',  tier: 'I',   name: 'Путь Самурая',         desc: 'Опубликовать 3 объекта в стиле JAPANESE',                                                            exp: 300,  check: (a, ab) => ab.filter(b => b.style === 'JAPANESE').length >= 3 },
     { id: 'void_engineer', tier: 'I',   name: 'Инженер пустоты',      desc: 'Опубликовать объект в стиле STEAMPUNK',                                                              exp: 150,  check: (a, ab) => ab.some(b => b.style === 'STEAMPUNK') },
     { id: 'urbanist',      tier: 'I',   name: 'Урбанист',             desc: 'Иметь в профиле одновременно постройки CITY и SETTLEMENT',                                           exp: 250,  check: (a, ab) => ab.some(b => b.style === 'CITY') && ab.some(b => b.style === 'SETTLEMENT') },
@@ -1743,7 +1788,7 @@ const ACHIEVEMENTS = [
     { id: 'april_fool',   tier: 'II', name: 'Апрельский приколист',  desc: 'Опубликовал постройку 1 апреля - умеет веселиться!',                                  exp: 200, check: (a, ab) => ab.some(b => { const d = new Date(b.date); return d.getMonth() === 3 && d.getDate() === 1; }) },
     { id: 'new_year',     tier: 'II', name: 'Новогодний чудило',     desc: 'Опубликовал постройку 31 декабря - встречает Новый год со стилем!',                    exp: 350, check: (a, ab) => ab.some(b => { const d = new Date(b.date); return d.getMonth() === 11 && d.getDate() === 31; }) },
 
-    
+    // Наследие
     { id: 'heritage_pioneer',  tier: 'I',   name: 'Хранитель наследия',   desc: 'Опубликовать 1 постройку из эпохи Наследия (до Classic v1.21.1)',   exp: 150,  check: (a, ab) => ab.some(b => !!b.heritage) },
     { id: 'heritage_guardian', tier: 'I',   name: 'Страж прошлого',        desc: 'Опубликовать 3 постройки из эпохи Наследия (до Classic v1.21.1)',   exp: 400,  check: (a, ab) => ab.filter(b => !!b.heritage).length >= 3 },
     { id: 'heritage_keeper',   tier: 'III', name: 'Летописец наследия',    desc: 'Опубликовать 5 построек из эпохи Наследия (до Classic v1.21.1)',    exp: 900,  hidden: true, check: (a, ab) => ab.filter(b => !!b.heritage).length >= 5 },
@@ -1759,8 +1804,16 @@ function getAuthorAchievements(authorName) {
     const profile = authorProfiles[authorName] || {};
     const manualUnlocked = profile.unlockedAchievements || {};
     const manualSet = new Set(Object.keys(manualUnlocked));
+    // Для авто-разблокированных достижений в базе нет отдельной метки времени (они не
+    // "выдаются" через CHAdmins, а просто вычисляются на лету по условию check()).
+    // Поэтому используем дату последней постройки автора как приблизительное время
+    // разблокировки - обычно именно новая постройка и "включает" достижение.
+    const lastBuildTs = authorBuilds.length
+        ? Math.max.apply(null, authorBuilds.map(b => new Date(b.date).getTime() || 0))
+        : 0;
     const standard = ACHIEVEMENTS.filter(ach => autoUnlocked.has(ach.id) || manualSet.has(ach.id)).map(ach => {
-        const ts = typeof manualUnlocked[ach.id] === 'number' ? manualUnlocked[ach.id] : 0;
+        let ts = typeof manualUnlocked[ach.id] === 'number' ? manualUnlocked[ach.id] : 0;
+        if (!ts && autoUnlocked.has(ach.id)) ts = lastBuildTs;
         return { ...ach, ts };
     });
     const unlockedCustom = profile.unlockedCustomAchievements || {};
@@ -1833,6 +1886,7 @@ function renderBuilds(filterStyle = 'Все', searchQuery = '') {
                             <span class="text-[9px] text-gray-500 uppercase tracking-widest flex-shrink-0">Автор:</span>
                             ${(function(){ var p=authorProfiles[getBuildAuthors(item)[0]]||{}; var cm=_getArtifactConfig(getBuildAuthors(item)[0],'custom_medal'); var out=''; if(cm&&cm.icon){out+='<span class="donor-wrap" onmouseenter="_donorTipShow(this)" onmouseleave="_donorTipHide()"><img src="'+cm.icon+'" class="donor-img" data-glow="'+(cm.glow||'#fb923c')+'" data-effect="'+(cm.effect||'')+'" data-medal-name="'+(cm.name||'')+'" style="width:14px;height:14px;border-radius:3px;object-fit:cover;display:block;"></span>';} if(p.donor){var ic=p.donorIcon||''; out+=ic ? '<span class="donor-wrap" onmouseenter="_donorTipShow(this)" onmouseleave="_donorTipHide()"><img src="'+ic+'" class="donor-img" data-glow="'+(p.donorGlowColor||'#D4AF37')+'" data-effect="'+(p.donorEffect||'')+'" data-medal-name="'+(p.donorMedalName||'')+'" style="width:14px;height:14px;border-radius:3px;object-fit:cover;display:block;"></span>' : '<span style="font-size:11px;flex-shrink:0;filter:drop-shadow(0 0 4px #D4AF37aa)" title="Донатер">🪙</span>';} return out; })()}
                             <span class="text-[10px] text-white font-bold truncate max-w-[110px]">${getBuildAuthors(item).join(', ')}</span>
+                            <img src="https://visage.surgeplay.com/face/14/${encodeURIComponent(getSkin(getBuildAuthors(item)[0]||''))}" style="width:14px;height:14px;border-radius:3px;image-rendering:pixelated;flex-shrink:0;object-fit:cover;" onerror="this.style.display='none'">
                             <span class="rank-badge ${rank.class} flex-shrink-0" title="${rank.next}" style="font-size:7px;padding:1px 5px;">${getRankIconHtml(rank.class)}${rank.name}</span>
                         </div>
                         <div id="card-views-${item.id}" class="text-[10px] text-gray-400 font-bold flex items-center gap-1 flex-shrink-0">👁 ${getViews(item.id)}</div>
@@ -1894,7 +1948,7 @@ function openModal(index) {
                 <span class="rank-badge ${r.class}" style="font-size:7px;padding:1px 6px;">${getRankIconHtml(r.class)}${r.name}</span>
                 ${customMedalHtml}${donorHtml}
                 <span class="font-bold text-white text-sm group-hover:text-[#D4AF37]">${name}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-gray-600 group-hover:text-[#D4AF37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <img src="https://visage.surgeplay.com/head/18/${encodeURIComponent(getSkin(name))}" style="width:18px;height:18px;border-radius:4px;image-rendering:pixelated;flex-shrink:0;object-fit:cover;" onerror="this.src='https://visage.surgeplay.com/head/18/Steve'">
             </button>`;
         }).join('');
         requestAnimationFrame(function(){ _applyAllDonorStyles(); });
@@ -1909,7 +1963,7 @@ function openModal(index) {
     item.images.forEach(imgUrl => {
         const img = document.createElement('img');
         img.src = imgUrl;
-        img.className = "w-full h-14 object-cover rounded cursor-pointer hover:ring-2 hover:ring-[#D4AF37] transition opacity-70 hover:opacity-100";
+        img.className = "w-20 h-14 flex-shrink-0 object-cover rounded cursor-pointer hover:ring-2 hover:ring-[#D4AF37] transition opacity-70 hover:opacity-100";
         img.onclick = () => {
             mainImg.style.opacity = '0';
             mainImg.src = imgUrl;
@@ -1953,6 +2007,9 @@ function openModalById(id) {
 function openAuthorProfile(nameOverride) {
     const authorName = nameOverride || document.getElementById('author-name').innerText;
     if (!authorName) return;
+
+    _ptRenderProfile(authorName);
+    _eqRenderProfile(authorName);
 
     const rankData    = getAuthorRank(authorName);
     const progress    = getRankProgress(authorName);
@@ -2068,30 +2125,6 @@ function openAuthorProfile(nameOverride) {
     _renderProfileContacts(profile);
     document.getElementById('profile-ach-count').innerText = unlockedAch.length;
 
-    const styleChart = document.getElementById('profile-styles-chart');
-    const _chartTotal = Object.values(styleCount).reduce((a,b)=>a+b,0);
-    if (Object.keys(styleCount).length === 0) {
-        styleChart.innerHTML = '<div class="text-[10px] text-gray-700 italic">Нет построек</div>';
-    } else {
-        styleChart.innerHTML = Object.entries(styleCount)
-            .sort((a,b) => b[1]-a[1])
-            .map(([style, cnt]) => {
-                const col = STYLE_COLORS_MAP[style] || '#D4AF37';
-                const pct = _chartTotal > 0 ? Math.round(cnt / _chartTotal * 100) : 0;
-                return `<div class="flex items-center gap-2">
-                    <div class="text-[9px] font-black uppercase text-right flex-shrink-0" style="width:72px;color:${col}">${style}</div>
-                    <div class="flex-grow bg-white/5 rounded-full h-2 overflow-hidden">
-                        <div class="h-full rounded-full transition-all duration-700" style="width:${pct}%;background:${col};"></div>
-                    </div>
-                    <div class="text-[9px] text-gray-500 flex-shrink-0 w-4 text-right">${pct}%</div>
-                </div>`;
-            }).join('');
-    }
-
-    const skillsEl = document.getElementById('profile-skills');
-    const skills = getAuthorSkills(authorName);
-    const activeSkills = Object.entries(skills).filter(([,s]) => s.count > 0).sort((a,b) => b[1].level - a[1].level || b[1].count - a[1].count);
-
     const SKILL_STYLE_ICONS = {
         GOTHIC:'🏰', MODERN:'🏙️', MEDIEVAL:'⚔️', FANTASY:'🧙', JAPANESE:'⛩️',
         STEAMPUNK:'⚙️', CITY:'🌆', SETTLEMENT:'🏡', FUTURISTIC:'🚀'
@@ -2105,40 +2138,72 @@ function openAuthorProfile(nameOverride) {
         return SKILL_STYLE_ICONS[style] || '🔨';
     }
 
-    if (activeSkills.length === 0) {
-        skillsEl.innerHTML = '<div style="color:#444;font-size:10px;font-style:italic;grid-column:1/-1;">Нет активных навыков</div>';
-    } else {
-        skillsEl.innerHTML = activeSkills.map(([style, s]) => {
+    const styleChart = document.getElementById('profile-styles-chart');
+    const _chartTotal = Object.values(styleCount).reduce((a,b)=>a+b,0);
+    {
+        const _ownedStylesSorted = SKILL_STYLES
+            .map(style => [style, styleCount[style] || 0])
+            .filter(([,cnt]) => cnt > 0)
+            .sort((a,b) => b[1]-a[1]);
+        if (_ownedStylesSorted.length === 0) {
+            styleChart.innerHTML = '<div class="text-[10px] text-gray-700 italic" style="text-align:center;">Нет построек</div>';
+        } else {
+        const _colsHtml = _ownedStylesSorted.map(([style, cnt]) => {
             const col = STYLE_COLORS_MAP[style] || '#D4AF37';
-            const starsHtml = Array.from({length:5}, (_,i) =>
-                `<span style="color:${i < s.level ? col : 'rgba(255,255,255,0.1)'};font-size:9px;">★</span>`
-            ).join('');
-            const lvlName = SKILL_LEVEL_NAMES[s.level] || '';
-            const nextInfo = s.level < 5 && s.nextAt ? `${s.count}/${s.nextAt}` : s.level === 5 ? 'МАКС' : '';
-            const bonusBadge = s.level > 0
-                ? `<span style="font-size:7px;font-weight:900;padding:1px 5px;border-radius:6px;background:rgba(212,175,55,0.15);color:#D4AF37;border:1px solid rgba(212,175,55,0.25);">+${s.bonus} EXP</span>`
-                : '';
-            return `<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px;display:flex;align-items:flex-start;gap:8px;">
-              
-                <div style="width:36px;height:36px;border-radius:8px;background:${col}18;border:1px solid ${col}33;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${_getStyleIconHtml(style, 24)}</div>
-                
-                <div style="flex:1;min-width:0;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
-                        <span style="font-size:10px;font-weight:900;color:#fff;">${SKILL_NAMES[style]||style}</span>
-                        <span style="font-size:8px;font-weight:700;color:${col};">${lvlName}</span>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:1px;margin-bottom:4px;">${starsHtml}</div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;">
-                        <div style="flex:1;background:rgba(255,255,255,0.06);border-radius:4px;height:3px;overflow:hidden;margin-right:6px;">
-                            <div style="height:100%;width:${s.level>=5?100:s.nextAt?Math.min(s.count/s.nextAt*100,100):0}%;background:${col};border-radius:4px;"></div>
-                        </div>
-                        <span style="font-size:7px;color:#555;margin-right:4px;">${nextInfo}</span>
-                        ${bonusBadge}
-                    </div>
-                </div>
+            const pct = _chartTotal > 0 ? (cnt / _chartTotal * 100) : 0;
+            const iconHtml = _getStyleIconHtml(style, 16);
+            const tipData = JSON.stringify({ style: style, pct: Math.round(pct), col: col }).replace(/"/g,'&quot;');
+            return `<div style="flex:${Math.max(pct,1)} 0 0;min-width:0;display:flex;flex-direction:column;align-items:center;height:100%;"
+                    onmouseenter="_styleChartTipShow(event,${tipData})" onmouseleave="_eqTipHide()" onmousemove="_eqTipMove(event)">
+                <span style="font-size:8px;font-weight:900;color:${col};margin-bottom:5px;white-space:nowrap;">${Math.round(pct)}%</span>
+                <div style="flex:1;width:100%;background:${col};border-radius:6px 6px 3px 3px;min-height:10px;transition:flex-grow .5s ease;"></div>
+                <div style="flex-shrink:0;margin-top:6px;font-size:15px;line-height:1;">${iconHtml}</div>
             </div>`;
         }).join('');
+        styleChart.innerHTML = `<div style="display:flex;align-items:stretch;height:100%;width:100%;gap:5px;">${_colsHtml}</div>`;
+        }
     }
+
+    const skillsEl = document.getElementById('profile-skills');
+    const skills = getAuthorSkills(authorName);
+
+    skillsEl.innerHTML = SKILL_STYLES.filter(function(style) { return style !== 'FUTURISTIC'; }).map(function(style) {
+        const s = skills[style] || { level: 0, count: 0, nextAt: null, bonus: 0 };
+        const col = STYLE_COLORS_MAP[style] || '#D4AF37';
+        const locked = s.count === 0;
+        const miniStars = Array.from({length:5}, function(_,i){
+            return '<span style="font-size:6px;line-height:1;color:' + (i < s.level ? col : 'rgba(255,255,255,0.14)') + ';">★</span>';
+        }).join('');
+        const bigStars = Array.from({length:5}, function(_,i){
+            return '<span style="font-size:9px;color:' + (i < s.level ? col : 'rgba(255,255,255,0.1)') + ';">★</span>';
+        }).join('');
+        const lvlName = SKILL_LEVEL_NAMES[s.level] || 'Не открыт';
+        const nextInfo = s.level < 5 && s.nextAt ? (s.count + '/' + s.nextAt) : s.level === 5 ? 'МАКС' : '';
+        const bonusBadge = s.level > 0
+            ? '<span style="font-size:7px;font-weight:900;padding:1px 5px;border-radius:6px;background:rgba(212,175,55,0.15);color:#D4AF37;border:1px solid rgba(212,175,55,0.25);">+' + s.bonus + ' EXP</span>'
+            : '';
+        const progressPct = s.level >= 5 ? 100 : (s.nextAt ? Math.min(s.count / s.nextAt * 100, 100) : 0);
+
+        const compactIcon = locked
+            ? '<span style="font-size:17px;filter:grayscale(1);opacity:.5;">' + _getStyleIconHtml(style, 20) + '</span>'
+            : '<span style="font-size:17px;">' + _getStyleIconHtml(style, 20) + '</span>';
+
+        // У закрытых умений (нет построек в стиле) наведение не работает вовсе —
+        // тултип открывается только для активных, чтобы не путать пустым всплытием.
+        const hoverAttrs = locked ? '' :
+            ' onmouseenter="_skillTipShow(event,' + JSON.stringify({
+                style: style, name: SKILL_NAMES[style]||style, lvlName: lvlName,
+                level: s.level, col: col, progressPct: progressPct, nextInfo: nextInfo, bonus: s.bonus
+            }).replace(/"/g,'&quot;') + ')" onmouseleave="_eqTipHide()" onmousemove="_eqTipMove(event)"';
+
+        return '<div class="skill-icon-wrap" style="width:56px;height:56px;border-radius:12px;' +
+                'background:#141414;border:1px solid ' + (locked ? 'rgba(255,255,255,0.08)' : col + '55') + ';' +
+                'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;' +
+                (locked ? '' : 'cursor:pointer;transition:box-shadow .15s;') + '"' + hoverAttrs + '>' +
+            compactIcon +
+            '<div style="display:flex;gap:1px;">' + miniStars + '</div>' +
+        '</div>';
+    }).join('');
 
     const now = Date.now();
     const primeRow  = document.getElementById('profile-prime-row');
@@ -2564,7 +2629,7 @@ function toggleQuestion(show) {
         var b=document.getElementById('support-send-btn');
         if(b){b.disabled=false;b.textContent='✦ Отправить обращение';b.style.background='';b.style.color='';}
         window._supportSelectedType=null;
-        ['bug','idea','question'].forEach(function(tp){
+        ['bug','idea','question','event'].forEach(function(tp){
             var s=document.getElementById('stype-'+tp);
             if(s){s.style.borderColor='#2a2a2a';s.style.background='#0e0e0e';}
         });
@@ -2573,8 +2638,8 @@ function toggleQuestion(show) {
 window._supportSelectedType = null;
 function _supportType(type) {
     window._supportSelectedType = type;
-    var cols = {bug:'#f87171', idea:'#fbbf24', question:'#60a5fa'};
-    ['bug','idea','question'].forEach(function(tp){
+    var cols = {bug:'#f87171', idea:'#fbbf24', question:'#60a5fa', event:'#D4AF37'};
+    ['bug','idea','question','event'].forEach(function(tp){
         var el=document.getElementById('stype-'+tp); if(!el) return;
         el.style.borderColor = tp===type ? cols[tp] : '#2a2a2a';
         el.style.background  = tp===type ? cols[tp]+'22' : '#0e0e0e';
@@ -2591,7 +2656,7 @@ function _submitSupportMsg() {
     errEl.style.display='none'; okEl.style.display='none';
     if (!type) { errEl.textContent='Выберите тип обращения'; errEl.style.display=''; return; }
     if (!msg)  { errEl.textContent='Напишите сообщение';     errEl.style.display=''; return; }
-    var typeLabels = {bug:'🐛 Баг', idea:'💡 Идея / Предложение', question:'❓ Вопрос'};
+    var typeLabels = {bug:'🐛 Баг', idea:'💡 Идея / Предложение', question:'❓ Вопрос', event:'📅 Событие'};
     var lines = ['📩 <b>Тех. поддержка · Classic HUB</b>', '', '📋 <b>Тип:</b> '+typeLabels[type]];
     if (nick)    lines.push('👤 <b>Ник:</b> '+nick);
     if (contact) lines.push('💬 <b>Контакт:</b> '+contact);
@@ -2840,7 +2905,7 @@ function updateStats() {
 function _achFeedToggle(btn) {
     var drop = document.getElementById('ach-feed-drop');
 
-    
+    // Создаём дропдаун если ещё нет
     if (!drop) {
         drop = document.createElement('div');
         drop.id = 'ach-feed-drop';
@@ -2864,7 +2929,7 @@ function _achFeedToggle(btn) {
     var isOpen = drop.style.display !== 'none';
     if (isOpen) { drop.style.display = 'none'; return; }
 
-    
+    // Позиционируем под кнопкой
     var rect = btn.getBoundingClientRect();
     var dropW = 380;
     var left = rect.right - dropW;
@@ -2881,7 +2946,7 @@ function _achFeedClose() {
     if (drop) drop.style.display = 'none';
 }
 
-
+// Закрытие по клику вне
 document.addEventListener('click', function() {
     _achFeedClose();
 });
@@ -2892,7 +2957,7 @@ function _initAchFeed() {
 
     var TIER_COLOR = { 'I': '#4ade80', 'II': '#f87171', 'III': '#f59e0b' };
     var entries = [];
-    var seen = {}; 
+    var seen = {}; // дедупликация author+id
 
     Object.keys(authorProfiles).forEach(function(name) {
         try {
@@ -3565,13 +3630,13 @@ function openImgInTab() {
 
 document.getElementById('search-input').addEventListener('input', e => {
     const activeTab = document.querySelector('.nav-tab.active').innerText.trim();
-    if (['Топ авторов','Информация','Достижения','Архив','Обновления','Магазин','Кейсы'].includes(activeTab)) return;
+    if (['Топ авторов','Информация','Достижения','Архив','Обновления','Магазин','Кейсы','События'].includes(activeTab)) return;
     renderBuilds('Все', e.target.value);
 });
 
 document.getElementById('sort-select').addEventListener('change', () => {
     const activeTab = document.querySelector('.nav-tab.active').innerText.trim();
-    if (['Топ авторов','Информация','Достижения','Архив','Обновления','Магазин','Кейсы'].includes(activeTab)) return;
+    if (['Топ авторов','Информация','Достижения','Архив','Обновления','Магазин','Кейсы','События'].includes(activeTab)) return;
     renderBuilds('Все', document.getElementById('search-input').value);
 });
 
@@ -3585,6 +3650,8 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
         var _pt=document.getElementById('page-title');if(_pt)_pt.style.display='';
         if (tabId === 'nav-tab-cases') {
             renderCases();
+        } else if (tabId === 'nav-tab-events' || tabName === 'События') {
+            renderEvents();
         } else if (tabId === 'nav-tab-shop' || tabName === 'Магазин') {
             renderShop();
         } else if (tabId === 'nav-tab-map' || tabName === 'Карта') {
@@ -3883,7 +3950,7 @@ function renderInfo() {
             '<div class="p-6" id="styles-leveling-panel">' +
                 '<div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">Стили для прокачки</div>' +
                 '<div class="styles-inner-flex" style="display:flex;gap:12px;align-items:flex-start;">' +
-                    
+                    // сетка стилей
                     '<div class="grid grid-cols-4 gap-2" style="flex-shrink:0;" id="styles-grid">' +
                         STYLE_DEFS.map(function(s, idx) {
                             return '<div class="style-skill-btn bg-black/30 rounded-xl p-2.5 border border-white/5 text-center transition-all duration-200 cursor-pointer" style="border-color:rgba(255,255,255,0.05)" data-style-idx="' + idx + '">' +
@@ -3893,7 +3960,7 @@ function renderInfo() {
                             '</div>';
                         }).join('') +
                     '</div>' +
-                   
+                    // панель детальной информации
                     '<div id="style-info-panel" style="flex:1;min-width:0;display:none;animation:_siPanelIn .18s cubic-bezier(.34,1.56,.64,1);">' +
                         '<div style="background:#0a0a0a;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;">' +
                             '<div id="sip-accent-bar" style="height:2px;background:linear-gradient(90deg,#D4AF37,transparent);"></div>' +
@@ -3914,6 +3981,95 @@ function renderInfo() {
                 '<p class="text-gray-600 text-[9px] mt-3 leading-relaxed">Навыки прокачиваются автоматически - просто публикуй постройки в любимом стиле. Бонус суммируется к базовым 500 EXP за постройку. Максимальный уровень - Легенда (15+ построек одного стиля).</p>' +
             '</div>' +
 
+            '</div>' +
+        '</div>' +
+
+        //снаряжение
+        '<div class="bg-[#1a1a1a] rounded-2xl border border-white/5 overflow-hidden mb-6">' +
+            '<div class="p-6 border-b border-white/5">' +
+                '<div class="text-[9px] gold-accent font-black tracking-[0.25em] uppercase mb-1">Новое</div>' +
+                '<h3 class="text-base font-black uppercase mb-1">Снаряжение</h3>' +
+                '<p class="text-gray-500 text-[10px]">Экипируй автора бронёй и оружием с зачарованиями прямо в профиле - предметы выдаются в процессе прохождения сезонных событий.</p>' +
+            '</div>' +
+
+            '<div class="p-6" style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;background:radial-gradient(ellipse at 50% 30%,rgba(212,175,55,0.05) 0%,transparent 65%);">' +
+
+                // выноски с зачарованиями + слоты брони слева
+                '<div style="display:flex;flex-direction:column;gap:11px;flex-shrink:0;">' +
+                    [
+                        ['https://minecraft.wiki/images/Netherite_Helmet_%28item%29_JE2_BE1.png?98302','Шлем','Дыхание','III','Не кончается воздух под водой','#9ca3af'],
+                        ['https://minecraft.wiki/images/Netherite_Chestplate_%28item%29_JE2_BE1.png?796fb','Нагрудник','Защита','IV','-16% получаемого урона','#60a5fa'],
+                        ['https://minecraft.wiki/images/Netherite_Leggings_%28item%29_JE2_BE1.png?314d4','Штаны','Ловкость','II','+10% скорость передвижения','#4ade80'],
+                        ['https://minecraft.wiki/images/Netherite_Boots_%28item%29_BE1.png?b8363','Ботинки','Амортизация','IV','-80% урона от падения','#d97706']
+                    ].map(function(p) {
+                        return '<div style="display:flex;align-items:center;gap:0;">' +
+                            '<div style="background:rgba(10,9,0,0.5);border:1px solid ' + p[5] + '3a;border-radius:9px;padding:5px 9px;min-width:120px;">' +
+                                '<div style="font-size:8px;color:' + p[5] + ';font-weight:900;text-transform:uppercase;letter-spacing:.04em;">' + p[1] + '</div>' +
+                                '<div style="font-size:8px;color:#93c5fd;font-weight:700;margin-top:1px;">' + p[2] + ' ' + p[3] + '</div>' +
+                                '<div style="font-size:9px;color:#8a8a8a;line-height:1.3;">' + p[4] + '</div>' +
+                            '</div>' +
+                            '<div style="width:14px;height:1px;background:' + p[5] + '55;flex-shrink:0;"></div>' +
+                            '<span style="font-size:9px;color:' + p[5] + '99;flex-shrink:0;margin-right:8px;">◀</span>' +
+                            '<div style="width:44px;height:44px;border-radius:10px;background:' + p[5] + '14;border:1px solid ' + p[5] + '3a;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                                '<img src="' + p[0] + '" style="width:28px;height:28px;object-fit:contain;image-rendering:pixelated;" alt="' + p[1] + '">' +
+                            '</div>' +
+                        '</div>';
+                    }).join('') +
+                '</div>' +
+
+                // 3D модель по центру
+                '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 8px;">' +
+                    '<div style="position:relative;width:150px;height:230px;display:flex;align-items:center;justify-content:center;">' +
+                        '<img src="https://visage.surgeplay.com/full/300/naoisaac" alt="" style="max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 12px 20px rgba(0,0,0,0.65));" onerror="this.style.visibility=\'hidden\'">' +
+                    '</div>' +
+                    '<span style="font-size:8px;color:#3a3a3a;text-transform:uppercase;letter-spacing:.1em;">Пример экипировки</span>' +
+                '</div>' +
+
+                // эффекты справа
+                '<div style="display:flex;flex-direction:column;gap:10px;flex-shrink:0;width:210px;">' +
+
+                    '<div style="display:flex;flex-direction:column;gap:11px;">' +
+                        [
+                            ['https://minecraft.wiki/images/Netherite_Axe_JE2_BE2.png?52d88','Основная рука','Заточка','II','+2 урона по мобам','#f87171'],
+                            ['https://static.wikia.nocookie.net/minecraft_gamepedia/images/c/c6/Shield_JE2_BE1.png/revision/latest?cb=20190725172341','Вторая рука','Отражение','I','Шанс отразить стрелу','#a78bfa']
+                        ].map(function(p) {
+                            return '<div style="display:flex;align-items:center;gap:0;">' +
+                                '<div style="width:44px;height:44px;border-radius:10px;background:' + p[5] + '14;border:1px solid ' + p[5] + '3a;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                                    '<img src="' + p[0] + '" style="width:28px;height:28px;object-fit:contain;image-rendering:pixelated;" alt="' + p[1] + '">' +
+                                '</div>' +
+                                '<span style="font-size:9px;color:' + p[5] + '99;flex-shrink:0;margin-left:8px;">▶</span>' +
+                                '<div style="width:14px;height:1px;background:' + p[5] + '55;flex-shrink:0;"></div>' +
+                                '<div style="background:rgba(10,9,0,0.5);border:1px solid ' + p[5] + '3a;border-radius:9px;padding:5px 9px;flex:1;min-width:0;">' +
+                                    '<div style="font-size:8px;color:' + p[5] + ';font-weight:900;text-transform:uppercase;letter-spacing:.04em;">' + p[1] + '</div>' +
+                                    '<div style="font-size:8px;color:#93c5fd;font-weight:700;margin-top:1px;">' + p[2] + ' ' + p[3] + '</div>' +
+                                    '<div style="font-size:9px;color:#8a8a8a;line-height:1.3;">' + p[4] + '</div>' +
+                                '</div>' +
+                            '</div>';
+                        }).join('') +
+                    '</div>' +
+
+                    '<div style="background:rgba(10,9,0,0.5);border:1px solid rgba(212,175,55,0.25);border-radius:10px;padding:8px 10px;">' +
+                        '<div style="font-size:9px;font-weight:900;color:#fff;">Эффект полного набора</div>' +
+                        '<div style="border-top:1px solid rgba(255,255,255,0.08);margin-top:4px;padding-top:4px;">' +
+                            '<div style="font-size:8px;color:#93c5fd;font-weight:700;">Удача | III</div>' +
+                            '<div style="font-size:9px;color:#9a9a9a;line-height:1.3;">60% удвоить опыт при загрузке постройки</div>' +
+                        '</div>' +
+                    '</div>' +
+
+                    '<div style="display:flex;align-items:center;gap:8px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.25);border-radius:9px;padding:7px 10px;">' +
+                        '<img src="https://cdn.modrinth.com/data/c5EIs0UX/9e8def35f04e0f96840b5d16e8a247f5f59b81be.png" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" alt="">' +
+                        '<div><div style="font-size:9px;font-weight:900;color:#4ade80;">Сет собран</div><div style="font-size:8.5px;color:#8a8a8a;">Эффект набора активен</div></div>' +
+                    '</div>' +
+
+                '</div>' +
+
+            '</div>' +
+
+            '<div class="px-6 pb-6">' +
+                '<div class="px-4 py-2.5 rounded-xl flex items-center gap-2.5" style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.15)">' +
+                    '<span class="text-sm">❓</span>' +
+                    '<span class="text-[10px] text-gray-400">Наведи курсор на предмет или замок в профиле автора, чтобы увидеть зачарования и статус эффекта. Предметы снаряжения выдаются в процессе прохождения <span class="text-white font-bold">сезонных событий</span>.</span>' +
+                '</div>' +
             '</div>' +
         '</div>' +
 
@@ -4153,6 +4309,16 @@ function renderInfo() {
                 '<div>' +
                     '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое Артефакты?</div>' +
                     '<p class="text-gray-400 text-xs leading-relaxed pl-5">Артефакты - это особые предметы с эффектами, доступные к получению только из <strong class="text-white">Кейса</strong>. У каждого предмета есть <strong class="text-white">срок действия</strong> - обычно 30 дней. Когда срок истекает, предмет уходит в <strong class="text-white">Архив предметов</strong> в профиле и перестает действовать. В данный момент с доступными артефактами можно ознакомиться во вкладке <strong class="text-white">Кейсы</strong>.</p>' +
+                '</div>' +
+
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что такое Снаряжение?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Снаряжение - это броня и оружие с зачарованиями, которые можно надеть на 3D-модель автора в профиле: <strong class="text-white">шлем, нагрудник, штаны, ботинки</strong> и по предмету в каждую руку. Предметы выдаются в процессе прохождения <strong class="text-white">сезонных событий</strong>. Наведи курсор на надетый предмет, чтобы увидеть его зачарования и эффекты.</p>' +
+                '</div>' +
+
+                '<div>' +
+                    '<div class="text-white font-bold text-sm mb-1.5 flex items-center gap-2"><span class="gold-accent text-base">Q</span> Что за замок рядом со Снаряжением в профиле?</div>' +
+                    '<p class="text-gray-400 text-xs leading-relaxed pl-5">Это индикатор <strong class="text-white">эффекта полного сета</strong>. Если собрать полный тематический комплект брони (например, алмазный сет) - замок откроется и подсветится цветом, активируя особый бонус-эффект. Пока сет не собран - замок серый и закрытый. Наведи курсор на замок, чтобы увидеть название и описание эффекта.</p>' +
                 '</div>' +
                 
                 '<div>' +
@@ -4733,7 +4899,7 @@ function _rankMedalTipShow(evt, activeClass) {
     var tip = document.getElementById('rank-medals-tip');
     if (!tip) return;
 
-    
+    // Подсветить активный ранг
     var rows = tip.querySelectorAll('#rank-medals-list > div');
     rows.forEach(function(row) {
         var badge = row.querySelector('.rank-badge');
@@ -4788,7 +4954,7 @@ function _rankCardTilt(evt, el) {
     var rotY =  dx * 10;
     var rotX = -dy * 10;
     el.style.transform = 'perspective(600px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg)';
-    
+    // тилт иконки в тултипе синхронно
     var tipImg = document.getElementById('rank-single-tip-img');
     if (tipImg) {
         tipImg.style.transform = 'rotateX(' + (rotX * 2.2) + 'deg) rotateY(' + (rotY * 2.2) + 'deg) scale(1.06)';
@@ -6952,6 +7118,94 @@ const STATIC_UPDATES = [
  
 ];
 
+function renderTeam() {
+    document.getElementById('page-title').innerText = 'Команда сервиса';
+    var container = document.getElementById('builds-container');
+    container.className = '';
+    container.innerHTML =
+        '<div class="col-span-full w-full">'+
+        '<div style="position:relative;border-radius:24px;overflow:hidden;margin-bottom:28px;border:1px solid rgba(255,255,255,0.05);padding:36px;background:linear-gradient(135deg,#0d0d0d 0%,#140f00 50%,#0d0d0d 100%)">'+
+            '<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 20% 50%,rgba(212,175,55,0.08) 0%,transparent 60%)"></div>'+
+            '<div style="position:relative">'+
+                '<div style="font-size:10px;font-weight:900;letter-spacing:.3em;text-transform:uppercase;margin-bottom:8px;color:#D4AF37">Люди за проектом</div>'+
+                '<h2 style="font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Команда сервиса</h2>'+
+                '<p style="color:#6b7280;font-size:13px;max-width:480px">Те, кто разрабатывает, администрирует и развивает Classic HUB.</p>'+
+            '</div>'+
+        '</div>'+
+        '<div id="team-cards-wrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">'+
+            '<div class="col-span-full" style="text-align:center;padding:32px;color:#444;font-size:13px">Загрузка...</div>'+
+        '</div>'+
+        '</div>';
+
+    if (!window._fbDb || !window._fbRef || !window._fbGet) {
+        var wrap0 = document.getElementById('team-cards-wrap');
+        if (wrap0) wrap0.innerHTML = '<div class="col-span-full" style="text-align:center;padding:32px;color:#444;font-size:13px">Команда пока не заполнена</div>';
+        return;
+    }
+
+    var teamRef = window._fbRef(window._fbDb, 'config/team');
+    window._fbGet(teamRef).then(function(snap) {
+        var data = snap.exists() ? snap.val() : {};
+        var list = Object.keys(data).map(function(k) { var m = data[k] || {}; m._key = k; return m; });
+        list.sort(function(a, b) {
+            return (a.order || 0) - (b.order || 0) || String(a.name || '').localeCompare(String(b.name || ''));
+        });
+        var wrap = document.getElementById('team-cards-wrap');
+        if (!wrap) return;
+        if (!list.length) {
+            wrap.innerHTML = '<div class="col-span-full" style="text-align:center;padding:32px;color:#444;font-size:13px">Команда пока не заполнена</div>';
+            return;
+        }
+        wrap.innerHTML = _buildTeamHtml(list);
+    }).catch(function(e) {
+        var wrap = document.getElementById('team-cards-wrap');
+        if (wrap) wrap.innerHTML = '<div class="col-span-full" style="text-align:center;padding:32px;color:#f87171;font-size:13px">Не удалось загрузить команду</div>';
+    });
+}
+
+function _buildTeamHtml(list) {
+    return list.map(function(m) {
+        var name = _escHtmlFeed(m.name || 'Без имени');
+        var skin = m.skinUrl || '';
+        var rawPositions = Array.isArray(m.positions) ? m.positions : (typeof m.positions === 'string' ? m.positions.split(',').map(function(s){ return { name: s.trim() }; }).filter(function(p){ return p.name; }) : []);
+        var positions = rawPositions.map(function(p) {
+            return (typeof p === 'string') ? { name: p, color: '#D4AF37' } : { name: p.name || '', color: p.color || '#D4AF37' };
+        }).filter(function(p) { return p.name; });
+        var posHtml = positions.map(function(p) {
+            var c = p.color || '#D4AF37';
+            return '<span style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;padding:3px 10px;border-radius:20px;background:'+c+'18;color:'+c+';border:1px solid '+c+'55;">'+_escHtmlFeed(p.name)+'</span>';
+        }).join('');
+        var contacts = Array.isArray(m.contacts) ? m.contacts : [];
+        var contactsHtml = contacts.filter(function(c) { return c && c.url; }).map(function(c) {
+            var label = _escHtmlFeed(c.label || '');
+            var url = String(c.url || '').replace(/"/g, '&quot;');
+            var iconInner = c.iconUrl
+                ? '<img src="'+String(c.iconUrl).replace(/"/g,'&quot;')+'" style="width:18px;height:18px;object-fit:cover;border-radius:4px;" onerror="this.style.display=\'none\';this.parentElement.textContent=\'🔗\';">'
+                : _escHtmlFeed(c.icon || '🔗');
+            return '<a href="'+url+'" target="_blank" rel="noopener" title="'+label+'" '+
+                'style="width:34px;height:34px;border-radius:10px;background:#1c1c1c;border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;text-decoration:none;transition:all .15s;" '+
+                'onmouseenter="this.style.borderColor=\'#D4AF37\';this.style.background=\'#D4AF3714\';" '+
+                'onmouseleave="this.style.borderColor=\'rgba(255,255,255,0.06)\';this.style.background=\'#1c1c1c\';">'+iconInner+'</a>';
+        }).join('');
+
+        return '<div style="border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,0.05);background:#141414;display:flex;flex-direction:column;transition:border-color .2s;" '+
+            'onmouseenter="this.style.borderColor=\'#D4AF3755\'" onmouseleave="this.style.borderColor=\'rgba(255,255,255,0.05)\'">'+
+            '<div style="position:relative;height:260px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at 50% 100%,rgba(212,175,55,0.12) 0%,transparent 65%),#0d0d0d;">'+
+                (skin
+                    ? '<img src="'+skin+'" alt="'+name+'" style="max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 12px 18px rgba(0,0,0,0.6));" onerror="this.style.display=\'none\';">'
+                    : '<div style="font-size:48px;opacity:.15;">🧍</div>')+
+                '<div style="position:absolute;top:14px;right:16px;z-index:2;max-width:calc(100% - 32px);text-align:right;">'+
+                    '<span class="font-black text-white" style="font-size:15px;letter-spacing:.03em;text-transform:uppercase;text-shadow:0 2px 4px rgba(0,0,0,1),0 0 14px rgba(0,0,0,0.85),0 0 28px rgba(0,0,0,0.6);">'+name+'</span>'+
+                '</div>'+
+            '</div>'+
+            '<div style="padding:18px;display:flex;flex-direction:column;gap:10px;flex-grow:1;">'+
+                '<div style="display:flex;flex-wrap:wrap;gap:6px;">'+(posHtml || '<span style="font-size:10px;color:#444;">Без должности</span>')+'</div>'+
+                (contactsHtml ? '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:8px;border-top:1px solid rgba(255,255,255,0.04);">'+contactsHtml+'</div>' : '')+
+            '</div>'+
+        '</div>';
+    }).join('');
+}
+
 function renderUpdates() {
     document.getElementById('page-title').innerText = 'Обновления сайта';
     _hideUpdatesDot();
@@ -7034,19 +7288,40 @@ function renderArchive() {
     '</div>';
 
     function buildCard(item) {
-        var rank = getAuthorRank(item.author);
-        return '<div class="build-card fade-in-up" onclick="openModalById(\'' + item.id + '\')">' +
-            '<div class="relative h-48 overflow-hidden">' +
+        var authors = getBuildAuthors(item);
+        var rank = getAuthorRank(authors[0] || item.author);
+        return '<div class="build-card fade-in-up" id="bcard-' + item.id + '" onclick="openModalById(\'' + item.id + '\')">' +
+            '<div class="relative h-52 overflow-hidden">' +
                 '<img src="' + item.images[0] + '" class="w-full h-full object-cover">' +
-                '<div class="absolute top-3 left-3 bg-black/70 backdrop-blur-sm text-[10px] font-bold px-3 py-1 rounded border border-yellow-500/30 uppercase tracking-widest">' + item.style + '</div>' +
-                '<div id="card-views-' + item.id + '" class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-[10px] font-bold px-2.5 py-1 rounded-lg text-gray-300 border border-white/10">👁 ' + getViews(item.id) + '</div>' +
+                '<div class="absolute top-3 left-3 bg-black/70 backdrop-blur-sm text-[10px] font-bold px-3 py-1 rounded border border-[#D4AF37]/30 uppercase tracking-widest">' + (item.heritage ? 'Наследие' : item.season) + '</div>' +
             '</div>' +
             '<div class="p-5 flex flex-col flex-grow">' +
-                '<h3 class="text-sm font-extrabold mb-3 leading-tight uppercase">' + item.title + '</h3>' +
-                '<p class="text-[10px] text-gray-400 mt-auto font-medium italic uppercase tracking-wider">' +
-                    '<span class="text-[10px] text-gray-500 uppercase tracking-widest">Автор: </span><span class="text-white font-bold text-[10px]">' + item.author + '</span>' +
-                    '<span class="rank-badge ' + rank.class + '" style="font-size:7px;padding:1px 5px;margin-left:5px;">' + getRankIconHtml(rank.class) + rank.name + '</span>' +
-                '</p>' +
+                '<div class="text-[10px] font-black gold-accent tracking-widest uppercase mb-1">' + getBuildStyles(item).join(", ") + '</div>' +
+                '<h3 class="text-base font-extrabold mb-3 leading-tight uppercase">' + item.title + '</h3>' +
+                '<div class="flex items-center justify-between mt-auto pt-3 border-t border-white/5 gap-2">' +
+                    '<div class="flex items-center gap-1 min-w-0 flex-1">' +
+                        '<span class="text-[9px] text-gray-500 uppercase tracking-widest flex-shrink-0">Автор:</span>' +
+                        (function(){
+                            var p = authorProfiles[authors[0]] || {};
+                            var cm = _getArtifactConfig(authors[0], 'custom_medal');
+                            var out = '';
+                            if (cm && cm.icon) {
+                                out += '<span class="donor-wrap" onmouseenter="_donorTipShow(this)" onmouseleave="_donorTipHide()"><img src="'+cm.icon+'" class="donor-img" data-glow="'+(cm.glow||'#fb923c')+'" data-effect="'+(cm.effect||'')+'" data-medal-name="'+(cm.name||'')+'" style="width:14px;height:14px;border-radius:3px;object-fit:cover;display:block;"></span>';
+                            }
+                            if (p.donor) {
+                                var ic = p.donorIcon || '';
+                                out += ic
+                                    ? '<span class="donor-wrap" onmouseenter="_donorTipShow(this)" onmouseleave="_donorTipHide()"><img src="'+ic+'" class="donor-img" data-glow="'+(p.donorGlowColor||'#D4AF37')+'" data-effect="'+(p.donorEffect||'')+'" data-medal-name="'+(p.donorMedalName||'')+'" style="width:14px;height:14px;border-radius:3px;object-fit:cover;display:block;"></span>'
+                                    : '<span style="font-size:11px;flex-shrink:0;filter:drop-shadow(0 0 4px #D4AF37aa)" title="Донатер">🪙</span>';
+                            }
+                            return out;
+                        })() +
+                        '<span class="text-[10px] text-white font-bold truncate max-w-[110px]">' + authors.join(', ') + '</span>' +
+                        '<img src="https://visage.surgeplay.com/face/14/' + encodeURIComponent(getSkin(authors[0]||'')) + '" style="width:14px;height:14px;border-radius:3px;image-rendering:pixelated;flex-shrink:0;object-fit:cover;" onerror="this.style.display=\'none\'">' +
+                        '<span class="rank-badge ' + rank.class + ' flex-shrink-0" title="' + rank.next + '" style="font-size:7px;padding:1px 5px;">' + getRankIconHtml(rank.class) + rank.name + '</span>' +
+                    '</div>' +
+                    '<div id="card-views-' + item.id + '" class="text-[10px] text-gray-400 font-bold flex items-center gap-1 flex-shrink-0">👁 ' + getViews(item.id) + '</div>' +
+                '</div>' +
             '</div>' +
         '</div>';
     }
@@ -7096,6 +7371,7 @@ function renderArchive() {
 
     html += '</div>';
     container.innerHTML = html;
+    requestAnimationFrame(function(){ _applyAllDonorStyles(); });
 }
 
 function startApp() {
@@ -7786,7 +8062,7 @@ if (window._fbReady) {
       _cSet('contest-banner-label', data.bannerLabel || 'Идёт конкурс');
       _cSet('contest-banner-sub',   data.bannerSub   || 'Нажми, чтобы узнать подробности');
   }
- 
+  
   function _contestBannerRestore() {
       var banner = document.getElementById('contest-banner');
       if (!banner) return;
@@ -8042,6 +8318,282 @@ function _hidePrimeTip() {
     if (tip) tip.style.display = 'none';
 }
 
+
+var _PT_ONLINE_FRESH_MS = 2 * 60 * 1000; // считаем "сейчас в сети" если тик был < 2 минут назад
+
+function _ptFetchPlayer(name, cb) {
+    if (!window._fbDb || !window._fbRef || !window._fbGet) { cb(null); return; }
+    try {
+        var ref = window._fbRef(window._fbDb, 'playtime/' + name);
+        window._fbGet(ref).then(function(snap) {
+            cb(snap && snap.exists && snap.exists() ? snap.val() : null);
+        }).catch(function(e){ console.error('[playtime] Ошибка чтения для "'+name+'":', e); cb(null); });
+    } catch (e) { cb(null); }
+}
+
+function _ptPlural(n, one, few, many) {
+    var n100 = n % 100;
+    var n10 = n % 10;
+    if (n100 >= 11 && n100 <= 14) return many;
+    if (n10 === 1) return one;
+    if (n10 >= 2 && n10 <= 4) return few;
+    return many;
+}
+
+function _ptFormatDuration(totalSeconds) {
+    var totalMinutes = Math.floor((totalSeconds || 0) / 60);
+    if (totalMinutes <= 0) {
+        return '<span style="color:#444;font-style:italic;font-size:12px;">меньше минуты</span>';
+    }
+    var hours = Math.floor(totalMinutes / 60);
+    var minutes = totalMinutes % 60;
+    var html = '';
+    if (hours > 0) {
+        html += hours.toLocaleString('ru-RU') + ' <span style="font-size:11px;color:#555;font-weight:700;">' + _ptPlural(hours, 'час', 'часа', 'часов') + '</span> ';
+    }
+    html += minutes.toLocaleString('ru-RU') + ' <span style="font-size:11px;color:#555;font-weight:700;">' + _ptPlural(minutes, 'минута', 'минуты', 'минут') + '</span>';
+    return html;
+}
+
+function _ptRenderProfile(authorName) {
+    var valEl = document.getElementById('profile-playtime-value');
+    var wrapEl = document.getElementById('profile-playtime-online-wrap');
+    if (!valEl) return;
+    valEl.innerHTML = '<span style="color:#444;font-size:12px;">Загрузка…</span>';
+    if (wrapEl) wrapEl.style.display = 'none';
+    _ptFetchPlayer(authorName, function(rec) {
+       
+        console.info('[playtime] (только чтение) в базе для "'+authorName+'" сейчас —', rec);
+        var valElNow = document.getElementById('profile-playtime-value');
+        var wrapElNow = document.getElementById('profile-playtime-online-wrap');
+        if (!valElNow) return;
+        if (rec && rec.totalSeconds > 0) {
+            valElNow.innerHTML = _ptFormatDuration(rec.totalSeconds);
+            var isOnlineNow = rec.lastSeen && (Date.now() - rec.lastSeen) < _PT_ONLINE_FRESH_MS;
+            if (wrapElNow) wrapElNow.style.display = isOnlineNow ? 'inline-flex' : 'none';
+        } else {
+            valElNow.innerHTML = '<span style="color:#444;font-style:italic;font-size:12px;">Время недоступно</span>';
+        }
+    });
+}
+
+
+var _EQ_ARMOR_SLOTS = [
+    { key: 'helmet',     label: 'Шлем' },
+    { key: 'chestplate', label: 'Нагрудник' },
+    { key: 'leggings',   label: 'Штаны' },
+    { key: 'boots',      label: 'Ботинки' }
+];
+var _EQ_HAND_SLOTS = [
+    { key: 'mainHand', label: 'Осн. рука' },
+    { key: 'offHand',  label: 'Втор. рука' }
+];
+
+var _eqCatalogCache = null;
+var _eqCatalogFetchedAt = 0;
+var _EQ_CATALOG_TTL = 30000; // 30 сек, чтобы не дёргать базу 
+
+function _eqLoadCatalog(cb) {
+    var now = Date.now();
+    if (_eqCatalogCache && (now - _eqCatalogFetchedAt) < _EQ_CATALOG_TTL) { cb(_eqCatalogCache); return; }
+    if (!window._fbDb || !window._fbRef || !window._fbGet) { cb({}); return; }
+    var ref = window._fbRef(window._fbDb, 'config/equipmentCatalog');
+    window._fbGet(ref).then(function(snap) {
+        _eqCatalogCache = snap && snap.exists && snap.exists() ? snap.val() : {};
+        _eqCatalogFetchedAt = Date.now();
+        cb(_eqCatalogCache);
+    }).catch(function(e) {
+        console.error('[equipment] Ошибка загрузки каталога:', e);
+        cb({});
+    });
+}
+
+function _eqSlotHtml(slotKey, label, itemDef) {
+    var box;
+    if (itemDef) {
+        var color = itemDef.color || '#D4AF37';
+        var iconInner = itemDef.icon
+            ? '<img src="' + itemDef.icon + '" style="width:75%;height:75%;object-fit:contain;image-rendering:pixelated;" onerror="this.style.display=\'none\'">'
+            : '<span style="font-size:13px;">⚔️</span>';
+        box = '<div data-eq-slot="' + slotKey + '" ' +
+            'style="width:32px;height:32px;border-radius:8px;background:' + color + '14;border:1px solid ' + color + '3a;display:flex;align-items:center;justify-content:center;cursor:default;position:relative;transition:all .15s;" ' +
+            'onmouseenter="_eqTipShow(event,' + JSON.stringify(itemDef).replace(/"/g,'&quot;') + ')" onmouseleave="_eqTipHide()" ' +
+            'onmouseover="this.style.background=\'' + color + '28\'" onmouseout="this.style.background=\'' + color + '14\'">' +
+            iconInner + '</div>';
+    } else {
+        box = '<div data-eq-slot="' + slotKey + '" title="Пусто: ' + label + '" ' +
+            'style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:10px;color:#292929;">✦</div>';
+    }
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">' + box +
+        '<span style="font-size:6px;color:#3a3a3a;text-transform:uppercase;letter-spacing:.04em;text-align:center;max-width:40px;line-height:1.2;">' + label + '</span></div>';
+}
+
+function _eqRenderProfile(authorName) {
+    var modelEl = document.getElementById('profile-equip-3d');
+    var armorColEl = document.getElementById('profile-equip-armor-col');
+    var handColEl = document.getElementById('profile-equip-hand-col');
+    var lockEl = document.getElementById('profile-equip-lock');
+    if (!modelEl || !armorColEl || !handColEl) return;
+
+    modelEl.style.visibility = '';
+    modelEl.src = 'https://visage.surgeplay.com/full/300/' + encodeURIComponent(getSkin(authorName));
+
+    armorColEl.innerHTML = _EQ_ARMOR_SLOTS.map(function(s) { return _eqSlotHtml(s.key, s.label, null); }).join('');
+    handColEl.innerHTML = _EQ_HAND_SLOTS.map(function(s) { return _eqSlotHtml(s.key, s.label, null); }).join('');
+
+    var profileNow = authorProfiles[authorName] || {};
+    var setEffect = profileNow.equipmentSetEffect || null;
+    if (lockEl) {
+        if (setEffect && setEffect.name) {
+            var unlocked = !!setEffect.unlocked;
+            var customIcon = unlocked ? setEffect.iconUnlocked : setEffect.iconLocked;
+            lockEl.style.display = '';
+            lockEl.style.color = unlocked ? '#4ade80' : '#71717a';
+            lockEl.innerHTML = customIcon
+                ? '<img src="' + customIcon + '" style="width:15px;height:15px;object-fit:contain;vertical-align:middle;" onerror="this.parentNode.textContent=\'' + (unlocked ? '🔓' : '🔒') + '\'">'
+                : (unlocked ? '🔓' : '🔒');
+            lockEl.onmouseenter = function(evt) { _eqSetTipShow(evt, setEffect); };
+            lockEl.onmouseleave = _eqTipHide;
+            lockEl.onmousemove = _eqTipMove;
+        } else {
+            lockEl.style.display = 'none';
+            lockEl.onmouseenter = null;
+            lockEl.onmouseleave = null;
+            lockEl.onmousemove = null;
+        }
+    }
+
+    _eqLoadCatalog(function(catalog) {
+        var armorColElNow = document.getElementById('profile-equip-armor-col');
+        var handColElNow = document.getElementById('profile-equip-hand-col');
+        if (!armorColElNow || !handColElNow) return;
+        var profile = authorProfiles[authorName] || {};
+        var equipment = profile.equipment || {};
+        armorColElNow.innerHTML = _EQ_ARMOR_SLOTS.map(function(s) {
+            var itemId = equipment[s.key];
+            var def = itemId ? catalog[itemId] : null;
+            return _eqSlotHtml(s.key, s.label, def || null);
+        }).join('');
+        handColElNow.innerHTML = _EQ_HAND_SLOTS.map(function(s) {
+            var itemId = equipment[s.key];
+            var def = itemId ? catalog[itemId] : null;
+            return _eqSlotHtml(s.key, s.label, def || null);
+        }).join('');
+    });
+}
+
+function _skillTipShow(evt, data) {
+    var tip = document.getElementById('eq-cursor-tip');
+    if (!tip) {
+        tip = document.createElement('div');
+        tip.id = 'eq-cursor-tip';
+        tip.style.cssText = 'position:fixed;z-index:99999;pointer-events:none;background:rgba(10,9,0,0.92);border-radius:12px;padding:10px 14px;backdrop-filter:blur(14px);box-shadow:0 8px 32px rgba(0,0,0,0.7);display:none;min-width:170px;max-width:240px;';
+        document.body.appendChild(tip);
+    }
+    tip.style.border = '1px solid ' + data.col + '55';
+    var starsHtml = Array.from({length:5}, function(_,i){
+        return '<span style="font-size:10px;color:' + (i < data.level ? data.col : 'rgba(255,255,255,0.12)') + ';">★</span>';
+    }).join('');
+    var bonusBadge = data.level > 0
+        ? '<span style="font-size:8px;font-weight:900;padding:1px 6px;border-radius:6px;background:rgba(212,175,55,0.15);color:#D4AF37;border:1px solid rgba(212,175,55,0.25);margin-left:5px;">+' + data.bonus + ' EXP</span>'
+        : '';
+    tip.innerHTML = '<div style="font-size:13px;font-weight:900;color:#fff;">' + data.name + '</div>' +
+        '<div style="font-size:10px;font-weight:700;color:' + data.col + ';margin-top:2px;margin-bottom:5px;">' + data.lvlName + '</div>' +
+        '<div style="margin-bottom:5px;">' + starsHtml + '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;">' +
+            '<div style="flex:1;background:rgba(255,255,255,0.08);border-radius:4px;height:4px;overflow:hidden;">' +
+                '<div style="height:100%;width:' + data.progressPct + '%;background:' + data.col + ';border-radius:4px;"></div>' +
+            '</div>' +
+            '<span style="font-size:9px;color:#777;white-space:nowrap;">' + (data.nextInfo || '') + '</span>' +
+        '</div>' +
+        (bonusBadge ? '<div style="margin-top:5px;">' + bonusBadge + '</div>' : '');
+    tip.style.display = 'block';
+    _eqTipMove(evt);
+}
+
+function _ptOnlineTipShow(evt) {
+    var tip = document.getElementById('eq-cursor-tip');
+    if (!tip) {
+        tip = document.createElement('div');
+        tip.id = 'eq-cursor-tip';
+        tip.style.cssText = 'position:fixed;z-index:99999;pointer-events:none;background:rgba(10,9,0,0.92);border-radius:12px;padding:10px 14px;backdrop-filter:blur(14px);box-shadow:0 8px 32px rgba(0,0,0,0.7);display:none;min-width:170px;max-width:240px;';
+        document.body.appendChild(tip);
+    }
+    tip.style.border = '1px solid #4ade8055';
+    tip.innerHTML = '<div style="font-size:11px;font-weight:900;color:#4ade80;">Сейчас на сервере</div>';
+    tip.style.display = 'block';
+    _eqTipMove(evt);
+}
+
+function _styleChartTipShow(evt, data) {
+    var tip = document.getElementById('eq-cursor-tip');
+    if (!tip) {
+        tip = document.createElement('div');
+        tip.id = 'eq-cursor-tip';
+        tip.style.cssText = 'position:fixed;z-index:99999;pointer-events:none;background:rgba(10,9,0,0.92);border-radius:12px;padding:10px 14px;backdrop-filter:blur(14px);box-shadow:0 8px 32px rgba(0,0,0,0.7);display:none;min-width:170px;max-width:240px;';
+        document.body.appendChild(tip);
+    }
+    tip.style.border = '1px solid ' + data.col + '55';
+    tip.innerHTML = '<div style="font-size:13px;font-weight:900;color:' + data.col + ';">' + data.style + '</div>' +
+        '<div style="font-size:10px;color:#999;margin-top:2px;">' + data.pct + '% построек в этом стиле</div>';
+    tip.style.display = 'block';
+    _eqTipMove(evt);
+}
+
+function _eqSetTipShow(evt, setEffect) {
+    var tip = document.getElementById('eq-cursor-tip');
+    if (!tip) {
+        tip = document.createElement('div');
+        tip.id = 'eq-cursor-tip';
+        tip.style.cssText = 'position:fixed;z-index:99999;pointer-events:none;background:rgba(10,9,0,0.92);border-radius:12px;padding:10px 14px;backdrop-filter:blur(14px);box-shadow:0 8px 32px rgba(0,0,0,0.7);display:none;min-width:170px;max-width:240px;';
+        document.body.appendChild(tip);
+    }
+    var unlocked = !!setEffect.unlocked;
+    var color = unlocked ? '#4ade80' : '#71717a';
+    tip.style.border = '1px solid ' + color + '44';
+    tip.innerHTML = '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:' + color + ';margin-bottom:4px;">' + (unlocked ? '🔓 Разблокировано' : '🔒 Заблокировано') + '</div>' +
+        '<div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:4px;">' + (setEffect.name || '') + '</div>' +
+        (setEffect.desc ? '<div style="font-size:10px;color:#888;">' + setEffect.desc + '</div>' : '');
+    tip.style.display = 'block';
+    _eqTipMove(evt);
+}
+
+function _eqTipShow(evt, itemDef) {
+    var tip = document.getElementById('eq-cursor-tip');
+    if (!tip) {
+        tip = document.createElement('div');
+        tip.id = 'eq-cursor-tip';
+        tip.style.cssText = 'position:fixed;z-index:99999;pointer-events:none;background:rgba(10,9,0,0.92);border-radius:12px;padding:10px 14px;backdrop-filter:blur(14px);box-shadow:0 8px 32px rgba(0,0,0,0.7);display:none;min-width:170px;max-width:240px;';
+        document.body.appendChild(tip);
+    }
+    var color = itemDef.color || '#D4AF37';
+    tip.style.border = '1px solid ' + color + '44';
+    var enchantsHtml = '';
+    if (itemDef.enchantments && itemDef.enchantments.length) {
+        enchantsHtml = '<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:2px;">' +
+            itemDef.enchantments.map(function(e) {
+                return '<div style="font-size:10px;color:#93c5fd;font-weight:700;">' + (e.name || '') + (e.level ? ' ' + e.level : '') + '</div>' +
+                    (e.effect ? '<div style="font-size:9px;color:#666;margin-bottom:3px;">' + e.effect + '</div>' : '');
+            }).join('') + '</div>';
+    }
+    tip.innerHTML = '<div style="font-size:13px;font-weight:900;color:#fff;">' + (itemDef.name || '') + '</div>' + enchantsHtml;
+    tip.style.display = 'block';
+    _eqTipMove(evt);
+}
+function _eqTipMove(evt) {
+    var tip = document.getElementById('eq-cursor-tip');
+    if (!tip || tip.style.display === 'none') return;
+    var x = evt.clientX + 14, y = evt.clientY + 14;
+    var tw = tip.offsetWidth || 200, th = tip.offsetHeight || 80;
+    tip.style.left = (x + tw > window.innerWidth ? x - tw - 20 : x) + 'px';
+    tip.style.top  = (y + th > window.innerHeight ? y - th - 20 : y) + 'px';
+}
+function _eqTipHide() {
+    var tip = document.getElementById('eq-cursor-tip');
+    if (tip) tip.style.display = 'none';
+}
+document.addEventListener('mousemove', _eqTipMove);
+
 var _mcCache = null;
 var _mcCacheTime = 0;
 var _MC_HOST = '78.17.80.64:25510';
@@ -8165,7 +8717,7 @@ function _mcStatusOpen() {
         _mcGetPeakHtml(online, function(peakHtml) {
             body.innerHTML =
                 '<div style="width:100%;">' +
-                    
+                    // Status 
                     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">' +
                         '<div style="display:flex;align-items:center;gap:7px;">' +
                             '<span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 10px #4ade8088;flex-shrink:0;"></span>' +
@@ -8193,7 +8745,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(_mcUpdateBadge, 90000);
 });
 
-
+// cинхрон значений nav-full-val 
 (function() {
     function _syncNavFull() {
         document.querySelectorAll('.nav-full-val[data-src]').forEach(function(el) {
@@ -8209,7 +8761,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 })();
 
-
+// медалей-тултип
 (function() {
     var btn = document.getElementById('ach-medal-btn');
     var tip = document.getElementById('ach-medal-tip');
@@ -8540,9 +9092,9 @@ function _closeBundleModal() {
 }
 
 
-var _mapTiles   = {};  
+var _mapTiles   = {};  // { "col_row": url }
 var _mapMarkers = {};
-var _mapBuilds  = [];  
+var _mapBuilds  = [];  // { id: { x, z, label, type, color, buildId } }
 var _mapScale = 1;
 var _mapOffX = 0, _mapOffY = 0;
 var _mapCols = 34, _mapRows = 34;
@@ -9394,7 +9946,7 @@ function _caseBuildReel(winner, winnerRarity) {
         div.innerHTML = _caseItemCard(c.item,c.rarity,88);
         reel.appendChild(div);
     });
-    
+    // cardW = card width (88) + gap (8) = 96
     return { cards:cards, winnerIdx:50, cardW:96 };
 }
 
@@ -9820,7 +10372,7 @@ function renderCases() {
     _caseLoadItems(function(){
         var grid=document.getElementById('cases-items-grid');
         if (!grid) return;
-        
+        // Обновляем счётчик 
         var heroCount = document.getElementById('cases-hero-count');
         if (heroCount) heroCount.textContent = _caseItems.length;
 
@@ -9876,7 +10428,7 @@ function renderCases() {
                 +'</div>';
         }).join('');
 
-        
+        // Hover для тултипов 
         grid.addEventListener('mouseover', function(e) {
             var dot = e.target.closest('.case-sub-dot');
             if (!dot) return;
@@ -9891,6 +10443,250 @@ function renderCases() {
             if (tip) { tip.style.opacity='0'; tip.style.transform='translateX(-50%) translateY(3px)'; }
         });
     });
+}
+
+
+var EVENT_STATUS_META = {
+    active:   { label: 'Идёт сейчас', dot: '#4ade80', bg: '#0d1f0d', border: 'rgba(74,222,128,0.35)' },
+    upcoming: { label: 'Скоро',       dot: '#60a5fa', bg: '#0d1420', border: 'rgba(96,165,250,0.35)' },
+    past:     { label: 'Завершено',   dot: '#9ca3af', bg: '#141414', border: 'rgba(156,163,175,0.25)' }
+};
+
+function _eventCardHtml(key, e) {
+    var meta = EVENT_STATUS_META[e.status] || EVENT_STATUS_META.upcoming;
+    var accent = e.color || '#D4AF37';
+    var seasonStr = e.season ? 'Сезон ' + e.season : '';
+    var iconInlineHtml = e.iconUrl
+        ? '<img src="'+e.iconUrl+'" style="width:18px;height:18px;object-fit:cover;border-radius:4px;flex-shrink:0;">'
+        : (e.emoji ? '<span>'+e.emoji+'</span>' : '');
+    var coverInnerHtml = e.cover
+        ? '<div style="height:120px;border-radius:12px 12px 0 0;background:url(\''+e.cover+'\') center/cover;"></div>'
+        : '<div style="height:70px;border-radius:12px 12px 0 0;background:linear-gradient(135deg,'+accent+'22,'+accent+'05);display:flex;align-items:center;justify-content:center;font-size:28px;">'+(e.iconUrl?'<img src="'+e.iconUrl+'" style="width:36px;height:36px;object-fit:cover;border-radius:8px;">':(e.emoji||'📅'))+'</div>';
+    var seasonBadgeHtml = seasonStr
+        ? '<div class="bg-black/70 backdrop-blur-sm text-[10px] font-bold px-3 py-1 rounded border uppercase tracking-widest" style="position:absolute;top:10px;left:10px;border-color:'+accent+'4d;color:#fff;">'+seasonStr+'</div>'
+        : '';
+    var coverHtml = '<div style="position:relative;">' + coverInnerHtml + seasonBadgeHtml + '</div>';
+    return '<div onclick="_eventDetailModal(\''+key.replace(/'/g,"\\'")+'\')" style="cursor:pointer;background:#111;border:1px solid '+meta.border+';border-radius:14px;overflow:hidden;transition:transform .15s,border-color .15s;" '
+        +'onmouseover="this.style.transform=\'translateY(-3px)\';this.style.borderColor=\''+accent+'66\'" '
+        +'onmouseout="this.style.transform=\'\';this.style.borderColor=\''+meta.border+'\'">'
+        + coverHtml
+        + '<div style="padding:14px 16px 16px;">'
+            + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">'
+                + '<span style="width:7px;height:7px;border-radius:50%;background:'+meta.dot+';box-shadow:0 0 6px '+meta.dot+'88;flex-shrink:0;"></span>'
+                + '<span style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:'+meta.dot+';">'+meta.label+'</span>'
+            + '</div>'
+            + '<div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:4px;line-height:1.25;display:flex;align-items:center;gap:6px;">'+iconInlineHtml+'<span>'+e.title+'</span></div>'
+            + (e.description ? '<div style="font-size:11px;color:#777;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">'+e.description+'</div>' : '')
+        + '</div>'
+    + '</div>';
+}
+
+function renderEvents() {
+    var pt = document.getElementById('page-title');
+    if (pt) pt.innerText = 'События';
+    var container = document.getElementById('builds-container');
+    container.className = '';
+    container.innerHTML =
+        '<div class="col-span-full w-full">'
+        + '<div style="position:relative;border-radius:24px;overflow:hidden;margin-bottom:28px;border:1px solid rgba(255,255,255,0.05);padding:36px;background:linear-gradient(135deg,#0d0d0d 0%,#1a1200 50%,#0d0d0d 100%)">'
+            + '<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 20% 50%,rgba(212,175,55,0.08) 0%,transparent 60%)"></div>'
+            + '<div style="position:relative">'
+                + '<div style="font-size:10px;font-weight:900;letter-spacing:.3em;text-transform:uppercase;margin-bottom:8px;color:#D4AF37">Ивенты Classic HUB</div>'
+                + '<h2 style="font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">События</h2>'
+                + '<p style="color:#6b7280;font-size:13px;max-width:480px">Тематические конкурсы и активности для авторов - задания, правила и победители каждого события собраны здесь.</p>'
+            + '</div>'
+        + '</div>'
+        + '<div id="events-cards-wrap" style="display:flex;flex-direction:column;gap:28px">'
+            + '<div style="text-align:center;padding:32px;color:#444;font-size:13px">Загрузка...</div>'
+        + '</div>'
+        + '</div>';
+
+    var evRef = window._fbRef(window._fbDb, 'config/events');
+    window._fbGet(evRef).then(function(snap) {
+        var data = snap.exists() ? snap.val() : {};
+        var entries = Object.entries(data);
+        var wrap = document.getElementById('events-cards-wrap');
+        if (!wrap) return;
+        if (!entries.length) {
+            wrap.innerHTML = '<div style="text-align:center;padding:32px;color:#444;font-size:13px">Событий пока нет — загляните позже</div>';
+            return;
+        }
+        var groups = { active: [], upcoming: [], past: [] };
+        entries.forEach(function(e) { (groups[e[1].status] || groups.upcoming).push(e); });
+        ['active','upcoming','past'].forEach(function(g) {
+            groups[g].sort(function(a,b){
+                var sa = parseFloat(a[1].season) || 0, sb = parseFloat(b[1].season) || 0;
+                if (sb !== sa) return sb - sa;
+                return (b[1]._ts||0)-(a[1]._ts||0);
+            });
+        });
+        var groupTitles = { active: '🟢 Идут сейчас', upcoming: '🔵 Скоро', past: '⚪ Прошедшие' };
+        var html = '';
+        ['active','upcoming','past'].forEach(function(g) {
+            if (!groups[g].length) return;
+            html += '<div>'
+                + '<div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:#888;margin-bottom:12px">'+groupTitles[g]+'</div>'
+                + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">'
+                + groups[g].map(function(e){ return _eventCardHtml(e[0], e[1]); }).join('')
+                + '</div>'
+            + '</div>';
+        });
+        wrap.innerHTML = html;
+    }).catch(function() {
+        var wrap = document.getElementById('events-cards-wrap');
+        if (wrap) wrap.innerHTML = '<div style="text-align:center;padding:32px;color:#444;font-size:13px">Не удалось загрузить события</div>';
+    });
+}
+
+function _eventDetailModal(key) {
+    var evRef = window._fbRef(window._fbDb, 'config/events/' + key);
+    window._fbGet(evRef).then(function(snap) {
+        if (!snap.exists()) return;
+        var e = snap.val();
+        var meta = EVENT_STATUS_META[e.status] || EVENT_STATUS_META.upcoming;
+        var accent = e.color || '#D4AF37';
+
+        var caseTag = (e.caseLabel ? e.caseLabel + ' · ' : '') + (e.season ? 'Сезон ' + e.season : '') + (e.season || e.caseLabel ? ' · ' : '') + meta.label;
+
+        var leadHtml = (e.description || '').split('\n').filter(Boolean).map(function(p) {
+            return '<p style="color:#999;font-size:12.5px;line-height:1.65;margin-bottom:8px;">'+p+'</p>';
+        }).join('');
+
+        
+        var objectsHtml = '';
+        if (e.objects && e.objects.length) {
+            objectsHtml = '<div style="margin-top:22px;">'
+                + '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">'
+                    + '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.16em;color:'+accent+';">Объекты события</div>'
+                    + '<div style="font-size:10px;color:#555;">'+e.objects.filter(function(o){return o.found;}).length+' / '+e.objects.length+' найдено</div>'
+                + '</div>'
+                + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;">'
+                + e.objects.map(function(o) {
+                    var imgHtml = o.img
+                        ? '<img src="'+o.img+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:'+(o.found?'0.85':'0.32')+';">'
+                        : '';
+                    var hasImg = !!o.img;
+                    var zoomHintHtml = hasImg ? '<div class="opacity-0 group-hover:opacity-100 transition" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);">'
+                        + '<span style="font-size:15px;">🔍</span></div>' : '';
+                    var imgClickAttr = hasImg ? ' onclick="event.stopPropagation();_eventImgLightbox(\''+String(o.img).replace(/'/g,"\\'")+'\',\''+String(o.title||'').replace(/'/g,"\\'")+'\')"' : '';
+                    return '<div class="'+(hasImg?'group':'')+'" style="position:relative;border:1px solid '+(o.found?accent+'55':'#242424')+';border-radius:10px;overflow:hidden;background:#0c0c0c;">'
+                        + '<div style="position:relative;height:76px;background:#0a0a0a;'+(hasImg?'cursor:zoom-in;':'')+'"'+imgClickAttr+' title="'+(hasImg?'Нажмите, чтобы увеличить':'')+'">'
+                            + imgHtml
+                            + zoomHintHtml
+                            + (o.tag ? '<span style="position:absolute;top:6px;left:6px;font-size:8px;font-weight:900;padding:2px 6px;border-radius:5px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.12);color:#eee;pointer-events:none;">'+o.tag+'</span>' : '')
+                            + '<span style="position:absolute;top:6px;right:6px;font-size:7.5px;font-weight:900;text-transform:uppercase;padding:2px 6px;border-radius:5px;background:rgba(0,0,0,0.65);border:1px solid '+(o.found?'#3ecf7e55':'rgba(255,255,255,0.1)')+';color:'+(o.found?'#7fe3a8':'#888')+';pointer-events:none;">'+(o.found?'найден':'в поиске')+'</span>'
+                        + '</div>'
+                        + '<div style="padding:8px 10px 10px;">'
+                            + (o.style ? '<div style="font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:'+accent+';margin-bottom:2px;">'+o.style+'</div>' : '')
+                            + '<div style="font-size:11px;font-weight:700;color:#eee;line-height:1.3;margin-bottom:4px;">'+(o.title||'')+'</div>'
+                            + (o.found && (o.finder || o.coords) ? '<div style="border-top:1px dashed #242424;padding-top:5px;margin-top:2px;">'
+                                + (o.finder ? '<div style="font-size:9px;color:#888;">Нашёл: <b style="color:'+accent+';">'+o.finder+'</b></div>' : '')
+                                + (o.coords ? '<div style="font-size:9px;color:#4ade80;font-family:monospace;font-weight:700;">'+o.coords+'</div>' : '')
+                            + '</div>' : '')
+                        + '</div>'
+                    + '</div>';
+                }).join('')
+                + '</div>'
+            + '</div>';
+        } else if (e.tasks && e.tasks.length) {
+            objectsHtml = '<div style="margin-top:20px;">'
+                + '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:'+accent+';margin-bottom:8px;">📋 Задания</div>'
+                + '<ul style="margin:0;padding:0;list-style:none;">'
+                + e.tasks.map(function(t,i){ return '<li style="display:flex;gap:8px;font-size:12px;color:#ccc;line-height:1.6;margin-bottom:6px;"><span style="color:'+accent+';font-weight:900;flex-shrink:0;">'+(i+1)+'.</span><span>'+t+'</span></li>'; }).join('')
+                + '</ul>'
+            + '</div>';
+        }
+
+        
+        var prizeHtml = '';
+        if (e.prize && (e.prize.winner || e.prize.desc || e.prize.amount)) {
+            var p = e.prize;
+            prizeHtml = '<div style="margin-top:20px;display:flex;align-items:center;gap:14px;background:linear-gradient(180deg,#161616,#1a1a1a);border:1px solid '+accent+'30;border-radius:12px;padding:14px 16px;">'
+                + (p.icon ? '<img src="'+p.icon+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;">' : '<span style="font-size:28px;flex-shrink:0;">🏆</span>')
+                + '<div style="flex:1;min-width:0;">'
+                    + '<div style="font-size:12px;font-weight:900;color:#fff;margin-bottom:2px;">Приз получен'+(p.winner?': <span style="color:'+accent+';">'+p.winner+'</span>':'')+'</div>'
+                    + (p.desc ? '<div style="font-size:11px;color:#888;line-height:1.4;">'+p.desc+'</div>' : '')
+                + '</div>'
+                + (p.amount ? '<div style="text-align:right;flex-shrink:0;"><div style="font-size:17px;font-weight:900;color:'+accent+';">'+p.amount+'</div>'+(p.currency?'<div style="font-size:9px;color:#666;">'+p.currency+'</div>':'')+'</div>' : '')
+            + '</div>';
+        } else if (e.winners && e.winners.length) {
+            prizeHtml = '<div style="margin-top:20px;">'
+                + '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:#4ade80;margin-bottom:8px;">🏆 Победители</div>'
+                + '<ul style="margin:0;padding:0;list-style:none;">'
+                + e.winners.map(function(w){ return '<li style="display:flex;gap:8px;font-size:12px;color:#ccc;line-height:1.6;margin-bottom:6px;"><span style="color:#4ade80;flex-shrink:0;">▸</span><span>'+w+'</span></li>'; }).join('')
+                + '</ul>'
+            + '</div>';
+        }
+
+        
+        var shotHtml = '';
+        if (e.screenshot && e.screenshot.url) {
+            shotHtml = '<div style="margin-top:20px;">'
+                + '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:#888;margin-bottom:8px;">Скриншот с победителем</div>'
+                + '<div style="border-radius:12px;overflow:hidden;border:1px dashed '+accent+'40;">'
+                    + '<img src="'+e.screenshot.url+'" style="width:100%;display:block;">'
+                + '</div>'
+                + (e.screenshot.caption ? '<div style="font-size:10px;color:#555;margin-top:6px;font-style:italic;">'+e.screenshot.caption+'</div>' : '')
+            + '</div>';
+        }
+
+        
+        var rulesHtml = '';
+        if (e.rules && e.rules.length) {
+            rulesHtml = '<div style="margin-top:22px;">'
+                + '<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:#f59e0b;margin-bottom:10px;">📜 Правила</div>'
+                + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;">'
+                + e.rules.map(function(r,i) {
+                    var n = String(i+1).padStart(2,'0');
+                    return '<div style="border:1px solid #242424;background:rgba(255,255,255,0.02);border-radius:8px;padding:9px 10px;display:flex;gap:6px;font-size:10.5px;line-height:1.4;color:#999;">'
+                        + '<span style="color:#f59e0b;font-weight:900;flex-shrink:0;">'+n+'</span><span>'+r+'</span>'
+                    + '</div>';
+                }).join('')
+                + '</div>'
+            + '</div>';
+        }
+
+        var coverHtml = e.cover
+            ? '<div style="height:150px;background:url(\''+e.cover+'\') center/cover;"></div>'
+            : '<div style="height:90px;background:linear-gradient(135deg,'+accent+'22,'+accent+'05);display:flex;align-items:center;justify-content:center;font-size:40px;">'+(e.iconUrl?'<img src="'+e.iconUrl+'" style="width:52px;height:52px;object-fit:cover;border-radius:10px;">':(e.emoji||'📅'))+'</div>';
+
+        var old = document.getElementById('event-detail-modal'); if (old) old.remove();
+        var modal = document.createElement('div'); modal.id = 'event-detail-modal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:16px;';
+        modal.onclick = function(ev) { if (ev.target === modal) modal.remove(); };
+        modal.innerHTML = '<div onclick="event.stopPropagation()" class="custom-scrollbar" style="background:#111;border:1px solid '+accent+'30;border-radius:20px;width:100%;max-width:640px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,0.9);scrollbar-width:thin;scrollbar-color:#D4AF37 rgba(255,255,255,0.05);">'
+            + coverHtml
+            + '<div style="padding:22px 24px 28px;position:relative;">'
+                + '<button onclick="document.getElementById(\'event-detail-modal\').remove()" style="position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;background:#1a1a1a;border:1px solid #2a2a2a;color:#888;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;">✕</button>'
+                + '<div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;padding:4px 12px;border-radius:20px;background:'+meta.dot+'18;border:1px solid '+meta.dot+'44;">'
+                    + '<span style="width:6px;height:6px;border-radius:50%;background:'+meta.dot+';box-shadow:0 0 6px '+meta.dot+'88;"></span>'
+                    + '<span style="font-size:9.5px;font-weight:800;letter-spacing:.06em;color:'+meta.dot+';">'+caseTag+'</span>'
+                + '</div>'
+                + '<h2 style="font-size:21px;font-weight:900;color:#fff;margin-bottom:10px;line-height:1.2;text-transform:uppercase;letter-spacing:-0.01em;display:flex;align-items:center;gap:8px;">'+(e.iconUrl?'<img src="'+e.iconUrl+'" style="width:24px;height:24px;object-fit:cover;border-radius:5px;flex-shrink:0;">':(e.emoji?'<span>'+e.emoji+'</span>':''))+'<span>'+e.title+'</span></h2>'
+                + leadHtml
+                + objectsHtml
+                + prizeHtml
+                + shotHtml
+                + rulesHtml
+            + '</div>'
+        + '</div>';
+        document.body.appendChild(modal);
+    });
+}
+
+function _eventImgLightbox(url, title) {
+    if (!url) return;
+    var old = document.getElementById('event-img-lightbox'); if (old) old.remove();
+    var box = document.createElement('div');
+    box.id = 'event-img-lightbox';
+    box.style.cssText = 'position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.92);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;';
+    box.onclick = function() { box.remove(); };
+    box.innerHTML = '<div onclick="event.stopPropagation()" style="position:relative;max-width:90vw;max-height:88vh;">'
+        + '<button onclick="document.getElementById(\'event-img-lightbox\').remove()" style="position:absolute;top:-14px;right:-14px;width:32px;height:32px;border-radius:50%;background:#1a1a1a;border:1px solid #333;color:#eee;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.5);">✕</button>'
+        + '<img src="'+url+'" style="max-width:90vw;max-height:82vh;border-radius:12px;display:block;box-shadow:0 20px 60px rgba(0,0,0,0.8);">'
+        + (title ? '<div style="text-align:center;color:#aaa;font-size:12px;margin-top:10px;font-weight:700;letter-spacing:.02em;">'+title+'</div>' : '')
+    + '</div>';
+    document.body.appendChild(box);
 }
 
 </script>
