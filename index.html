@@ -1271,6 +1271,36 @@ Development by slowdown
 <script>
 
 let builds = [];
+  
+  const CH_FORM_SECRET = 'Y[l):rf21f(N[5fU';
+
+const CH_WORKER_URL = 'https://d1-template.herotorch.workers.dev/sendMessage';
+
+async function _chSign(text, ts) {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+        'raw',
+        enc.encode(CH_FORM_SECRET),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+    );
+    const sig = await crypto.subtle.sign('HMAC', key, enc.encode(text + '\n' + ts));
+    return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function chSendMessage(text) {
+    const ts  = Math.floor(Date.now() / 1000);
+    const sig = await _chSign(text, ts);
+
+    const r = await fetch(CH_WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, ts, sig })
+    });
+    return r.json();
+}
+  
 let authorProfiles = {};
 let _dataLoaded = false;
 
@@ -2662,10 +2692,7 @@ function _submitSupportMsg() {
     if (contact) lines.push('💬 <b>Контакт:</b> '+contact);
     lines.push('', msg);
     btn.disabled=true; btn.textContent='Отправляем...';
-    fetch('https://d1-template.herotorch.workers.dev/sendMessage', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({text: lines.join('\n')})
-    }).then(function(r){return r.json();}).then(function(data){
+    chSendMessage(lines.join('\n')).then(function(data){
         if (data.ok) {
             okEl.style.display='';
             btn.textContent='✓ Отправлено!';
@@ -2766,7 +2793,7 @@ function escapeHtml(str) {
 
 function submitToGoogleForm() {
 
-    const WORKER_URL = 'https://d1-template.herotorch.workers.dev/sendMessage';
+    
 
     const required = [
         { id: 'f-title',   label: 'Название постройки' },
@@ -2856,13 +2883,8 @@ function submitToGoogleForm() {
         }).catch(function(err) { console.warn('[cases] read error:', err); });
     }
 
-    fetch(WORKER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-    })
-    .then(r => r.json())
-    .then(data => {
+    chSendMessage(text)
+       .then(data => {
         if (data.ok) {
             
             setTimeout(function() {
@@ -7049,13 +7071,8 @@ function _submitPrimeRequest() {
     btn.disabled = true;
     btn.textContent = 'Отправляем...';
 
-    fetch('https://d1-template.herotorch.workers.dev/sendMessage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-    })
-    .then(r => r.json())
-    .then(data => {
+    chSendMessage(text)
+       .then(data => {
         if (data.ok) {
             btn.textContent = '✓ Заявка отправлена!';
             btn.style.background = '#16a34a';
